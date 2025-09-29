@@ -1,0 +1,502 @@
+/* Logo positioned in upper left corner */
+.logo {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+.logo img {
+    height: 45px;
+    width: auto;
+}* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-image: url('bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 5vh;
+    position: relative;
+}
+
+.login-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+}
+
+/* ADDED: Wrapper to contain the absolutely positioned card */
+.login-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 36px 32px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 420px; /* ADDED: Fixed width */
+    height: 500px; /* FIXED: Absolute fixed height */
+    box-sizing: border-box; /* ADDED: Ensures padding is included */
+    overflow: hidden; /* ADDED: Prevents content from breaking layout */
+    position: relative; /* ADDED: For absolute positioning of children */
+}
+
+/* FIXED: Header section with fixed positioning */
+.login-card h1,
+.forgot-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    letter-spacing: -0.5px;
+    margin-bottom: 28px; /* FIXED: Exact same spacing for both */
+    height: 35px; /* ADDED: Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* FIXED: Subtitle with fixed space allocation */
+.forgot-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    font-weight: 400;
+    font-family: 'Poppins', sans-serif;
+    height: 20px; /* ADDED: Fixed height */
+    margin-bottom: 28px; /* FIXED: Consistent spacing */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* FIXED: Form container - different padding for login vs forgot password */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    height: 350px; /* Even more height to fully show button */
+    overflow: hidden; /* No scrolling allowed */
+}
+
+/* ADDED: Specific spacing for forgot password form */
+.login-card .forgot-title ~ .login-form {
+    padding-top: 60px; /* Push forgot password inputs lower */
+}
+
+/* ADDED: Different spacing for login form to accommodate more fields */
+.login-card h1 ~ .login-form {
+    padding-top: 20px; /* Less padding for login form with more fields */
+}
+
+.input-group {
+    position: relative;
+}
+
+.input-wrapper,
+.select-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 16px;
+    padding: 14px 18px;
+    transition: all 0.3s ease;
+}
+
+.input-wrapper:focus-within,
+.select-wrapper:focus-within {
+    border-color: #1e3c72;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(30, 60, 114, 0.15);
+}
+
+.input-wrapper.focused,
+.select-wrapper.focused {
+    border-color: #1e3c72;
+    background: #ffffff;
+}
+
+.input-wrapper.error {
+    border-color: #dc3545;
+    background: #fff5f5;
+}
+
+.input-icon {
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.input-wrapper:focus-within .input-icon,
+.select-wrapper:focus-within .input-icon {
+    color: #1e3c72;
+}
+
+input[type="tel"],
+input[type="password"],
+input[type="text"],
+select {
+    flex: 1;
+    border: none;
+    outline: none !important;
+    background: transparent;
+    font-size: 16px;
+    color: #1a1a1a;
+    font-weight: 400;
+}
+
+input:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+}
+
+/* Password wrapper specific styles */
+.password-wrapper {
+    padding-right: 10px;
+}
+
+/* Fixed eye icon styles - no rectangles */
+.eye-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    margin: -6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.eye-icon:focus {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+.eye-icon:active {
+    outline: none !important;
+    box-shadow: none !important;
+    border: none !important;
+    transform: none !important;
+}
+
+.eye-icon:hover {
+    background-color: rgba(30, 60, 114, 0.1);
+}
+
+.eye-icon svg {
+    width: 18px;
+    height: 18px;
+    color: #9ca3af;
+}
+
+.eye-icon:hover svg {
+    color: #1e3c72;
+}
+
+/* Select dropdown styles - fixed placeholder issue */
+select {
+    appearance: none;
+    cursor: pointer;
+    color: #1a1a1a;
+    font-size: 16px;
+}
+
+/* Style for when no option is selected */
+select:invalid {
+    color: #9ca3af;
+}
+
+select:focus,
+select:valid {
+    color: #1a1a1a;
+}
+
+.dropdown-arrow {
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    margin-left: 8px;
+    pointer-events: none;
+    flex-shrink: 0;
+}
+
+.select-wrapper:focus-within .dropdown-arrow {
+    color: #1e3c72;
+    transform: rotate(180deg);
+    transition: transform 0.3s ease;
+}
+
+/* Error message */
+.error-message {
+    display: block; /* Changed from display: none */
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    margin-left: 4px;
+    font-weight: 500;
+}
+
+/* Form options */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 8px 0 12px 0;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.remember-me input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d1d5db;
+    border-radius: 4px;
+    margin-right: 8px;
+    display: inline-block;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.remember-me input[type="checkbox"]:checked + .checkmark {
+    background-color: #1e3c72;
+    border-color: #1e3c72;
+}
+
+.remember-me input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.forgot-password {
+    color: #1e3c72;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.forgot-password:hover {
+    color: #2a5298;
+    text-decoration: underline;
+}
+
+/* FIXED: Login button with fixed positioning from bottom */
+.login-btn {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    color: white;
+    border: none;
+    padding: 16px 24px;
+    border-radius: 16px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.5px;
+    position: absolute; /* ADDED: Absolute positioning */
+    bottom: 55px; /* ADDED: Fixed distance from card bottom */
+    left: 32px; /* ADDED: Match card padding */
+    right: 32px; /* ADDED: Match card padding */
+    margin: 0; /* REMOVED: All margins */
+}
+
+.login-btn:hover {
+    background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(30, 60, 114, 0.3);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 8px rgba(30, 60, 114, 0.2);
+}
+
+/* FIXED: Bottom link repositioned above absolutely positioned button */
+.signup-link {
+    text-align: center;
+    font-size: 14px;
+    color: #6b7280;
+    position: absolute; /* ADDED: Absolute positioning */
+    bottom: 15px; /* KEPT: At very bottom */
+    left: 32px; /* ADDED: Match card padding */
+    right: 32px; /* ADDED: Match card padding */
+    height: 20px; /* ADDED: Fixed height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* UPDATE responsive positioning for button */
+@media (max-width: 480px) {
+    .login-btn {
+        left: 24px; /* ADDED: Match mobile padding */
+        right: 24px; /* ADDED: Match mobile padding */
+    }
+}
+
+.signup-link a {
+    color: #1e3c72;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+
+.signup-link a:hover {
+    color: #2a5298;
+    text-decoration: underline;
+}
+
+/* Update existing login-btn to handle disabled state */
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.login-btn:disabled:hover {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    transform: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Update all text elements to use Poppins */
+.login-card h1,
+.forgot-title,
+.login-form,
+.input-wrapper,
+.select-wrapper,
+input,
+select,
+.error-message,
+.form-options,
+.remember-me,
+.forgot-password,
+.login-btn,
+.signup-link {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Make sure placeholders use Poppins */
+input::placeholder {
+    color: #9ca3af;
+    font-weight: 400;
+    font-family: 'Poppins', sans-serif;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 16px;
+    }
+    
+    .login-card {
+        width: 100%; /* FIXED: Responsive width but fixed height */
+        max-width: 380px;
+        height: 500px; /* KEEP: Same height on mobile */
+        padding: 32px 24px;
+    }
+    
+    .signup-link {
+        left: 24px; /* UPDATED: Match mobile padding */
+        right: 24px; /* UPDATED: Match mobile padding */
+    }
+    
+    .login-card h1,
+    .forgot-title {
+        font-size: 28px;
+    }
+    
+    .input-wrapper,
+    .select-wrapper {
+        padding: 14px 16px;
+    }
+    
+    .login-btn {
+        padding: 16px 20px;
+        font-size: 16px;
+    }
+
+    .logo {
+        top: 10px;
+        left: 10px;
+    }
+
+    .logo img {
+        height: 32px;
+    }
+}
+
+@media (max-width: 320px) {
+    .login-card {
+        width: 100%;
+        max-width: 300px;
+        height: 500px; /* KEEP: Same height on very small screens */
+        padding: 24px 16px;
+    }
+    
+    .signup-link {
+        left: 16px; /* UPDATED: Match very small padding */
+        right: 16px; /* UPDATED: Match very small padding */
+    }
+    
+    .login-btn {
+        left: 16px; /* ADDED: Match very small padding */
+        right: 16px; /* ADDED: Match very small padding */
+    }
+    
+    .form-options {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+}

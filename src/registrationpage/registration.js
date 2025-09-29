@@ -441,7 +441,7 @@ const Registration = ({ onBack }) => {
 
                         <div className="form-row">
                             <div className="form-group full-width">
-                                <label className="form-label">Add</label>
+                                <label className="form-label">Address</label>
                                 <input 
                                     type="text" 
                                     name="boardingHouseAddress"

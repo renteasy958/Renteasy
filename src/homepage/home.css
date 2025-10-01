@@ -41,7 +41,7 @@ body {
 
 /* Main Content */
 .main-content {
-  padding: 500px 50px 40px 50px;
+  padding: 350px 50px 40px 50px; /* Reduced top padding from 500px to 350px */
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
@@ -73,7 +73,7 @@ body {
 
 /* Boarding Cards - White background like in the image */
 .boarding-card {
-  background: white;
+  background: rgb(235, 235, 235);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
@@ -146,7 +146,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
-    padding: 300px 16px 24px 16px;
+    padding: 200px 16px 24px 16px; /* Reduced top padding from 300px to 200px */
   }
   
   .section-title {

@@ -1,5 +1,6 @@
 import React from 'react';
 import './home.css';
+import Navbar from '../navbar/navbar'; // Adjust the path based on your file structure
 
 const Home = ({ onLogout }) => {
 
@@ -20,7 +21,6 @@ const Home = ({ onLogout }) => {
     image: '/default.png' // This will now work since it's in public folder
   }));
 
-  // Rest of your code stays the same...
 
   const renderStars = (rating) => {
     return Array(5).fill(null).map((_, index) => (
@@ -62,31 +62,32 @@ const Home = ({ onLogout }) => {
     </div>
   );
 
-  return (
-    <div className="homepage">
-      <div className="background-image"></div>
-      
-      <main className="main-content">
-        <section className="boarding-section">
-          <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Popular</h2>
-          <div className="boarding-grid">
-            {boardingHouses.map((house) => (
-              <BoardingHouseCard key={house.id} house={house} />
-            ))}
-          </div>
-        </section>
+ return (
+  <div className="homepage">
+    <Navbar />
+    <div className="background-image"></div>
+    
+    <main className="main-content">
+      <section className="boarding-section">
+        <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Popular</h2>
+        <div className="boarding-grid">
+          {boardingHouses.map((house) => (
+            <BoardingHouseCard key={house.id} house={house} />
+          ))}
+        </div>
+      </section>
 
-        <section className="boarding-section">
-          <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Nearby</h2>
-          <div className="boarding-grid">
-            {nearbyHouses.map((house) => (
-              <BoardingHouseCard key={house.id} house={house} />
-            ))}
-          </div>
-        </section>
-      </main>
-    </div>
-  );
+      <section className="boarding-section">
+        <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Nearby</h2>
+        <div className="boarding-grid">
+          {nearbyHouses.map((house) => (
+            <BoardingHouseCard key={house.id} house={house} />
+          ))}
+        </div>
+      </section>
+    </main>
+  </div>
+);
 };
 
 export default Home;

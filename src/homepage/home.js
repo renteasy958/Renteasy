@@ -9,7 +9,7 @@ const Home = ({ onLogout }) => {
     name: 'No Available Boarding House',
     address: '.....',
     rating: 0,
-    image: 'defaultimage.png'
+    image: '/default.png' // This will now work since it's in public folder
   }));
 
   const nearbyHouses = Array(10).fill(null).map((_, index) => ({
@@ -17,10 +17,10 @@ const Home = ({ onLogout }) => {
     name: 'No Available Boarding House',
     address: '.....',
     rating: 0,
-    image: 'defaultimage.png'
+    image: '/default.png' // This will now work since it's in public folder
   }));
 
-
+  // Rest of your code stays the same...
 
   const renderStars = (rating) => {
     return Array(5).fill(null).map((_, index) => (
@@ -40,7 +40,16 @@ const Home = ({ onLogout }) => {
   const BoardingHouseCard = ({ house }) => (
     <div className="boarding-card">
       <div className="card-image">
-        <img src={house.image} alt={house.name} />
+        <img 
+          src={house.image || '/default.png'} 
+          alt={house.name}
+          onError={(e) => {
+            console.log('Image failed to load:', e.target.src);
+            // Fallback to a placeholder
+            e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIgc3Ryb2tlPSIjZGRkIiBzdHJva2Utd2lkdGg9IjEiLz48dGV4dCB4PSI1MCUiIHk9IjQ1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE0IiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Tm8gSW1hZ2U8L3RleHQ+PHRleHQgeD0iNTAlIiB5PSI2MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxMiIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkF2YWlsYWJsZTwvdGV4dD48L3N2Zz4=';
+          }}
+          onLoad={() => console.log('Image loaded successfully:', house.image)}
+        />
       </div>
       <div className="card-content">
         <h3>{house.name}</h3>
@@ -52,8 +61,6 @@ const Home = ({ onLogout }) => {
       </div>
     </div>
   );
-
-
 
   return (
     <div className="homepage">

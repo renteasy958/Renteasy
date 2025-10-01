@@ -257,7 +257,7 @@ const Registration = ({ onBack }) => {
                             </div>
                         </div>
 
-                        <div className="section-title">Person to be contacted in case of emergency:</div>
+                        <div className="person">Person to be contacted in case of emergency:</div>
 
                         <div className="form-row">
                             <div className="form-group">

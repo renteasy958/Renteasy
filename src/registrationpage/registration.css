@@ -347,11 +347,11 @@
     font-family: 'Poppins', sans-serif;
 }
 
-.section-title {
-    font-size: 10px !important;
+.person {
+    font-size: 16px !important;
     color: #333; 
     margin: 10px 0 6px 0;
-    font-weight: 200; 
+    font-weight: 500; 
     font-family: 'Poppins', sans-serif;
 }
 
@@ -360,15 +360,18 @@
     background: #1e3a8a;
     color: white;
     border: none;
-    padding: 10px; /* REDUCED */
+    padding: 10px;
     border-radius: 14px;
-    font-size: 13px; /* REDUCED */
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease;
     font-family: 'Poppins', sans-serif;
     flex-shrink: 0;
-    margin-top: 8px; /* REDUCED */
+    margin-top: 8px;
+    transform: translateX();
+    bottom: 20px;
+    position: absolute;
 }
 
 .submit-btn:hover {

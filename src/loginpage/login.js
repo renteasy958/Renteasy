@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './login.css';
 import Registration from '../registrationpage/registration';
+import Home from '../homepage/home'; // Add this import
 
 const Homepage = () => {
     const [mobileNumber, setMobileNumber] = useState('');
@@ -14,6 +15,7 @@ const Homepage = () => {
     const [forgotMobileNumber, setForgotMobileNumber] = useState('');
     const [forgotMobileError, setForgotMobileError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // Add this state
 
     // Mobile number validation (11 digits only)
     const handleMobileChange = (e) => {
@@ -77,7 +79,7 @@ const Homepage = () => {
         setShowPassword(!showPassword);
     };
 
-    // Form submission
+    // Form submission - UPDATED
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -93,16 +95,20 @@ const Homepage = () => {
             return;
         }
 
-        // Here you would typically send the data to your server
-        console.log('Login attempt:', {
-            mobileNumber: mobileNumber,
-            password: password, // In real app, this would be hashed
-            userType: userType,
-            rememberMe: rememberMe
-        });
-
-        // For demo purposes
-        alert(`Login successful as ${userType}!`);
+        // Add your authentication logic here
+        // For demo purposes, let's say any mobile number starting with '09' and password length > 5 is valid
+        if (mobileNumber.startsWith('09') && password.length >= 6) {
+            console.log('Login successful:', {
+                mobileNumber: mobileNumber,
+                userType: userType,
+                rememberMe: rememberMe
+            });
+            
+            // Redirect to home page
+            setIsLoggedIn(true);
+        } else {
+            alert('Invalid credentials. Please check your mobile number and password.');
+        }
     };
 
     // Forgot password form submission
@@ -122,6 +128,20 @@ const Homepage = () => {
             console.log('OTP sent to:', forgotMobileNumber);
         }, 2000);
     };
+
+    // Add this function to handle logout from home page
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        setMobileNumber('');
+        setPassword('');
+        setUserType('');
+        setRememberMe(false);
+    };
+
+    // If user is logged in, show Home component
+    if (isLoggedIn) {
+        return <Home onLogout={handleLogout} />;
+    }
 
     return (
         <div className="container">

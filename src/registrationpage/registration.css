@@ -20,6 +20,19 @@
     overflow: hidden;
 }
 
+.registration-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 1100px !important;
+    height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex-direction: column;
+    overflow: hidden;
+    padding: 10px 0;
+}
+
 .container {
     position: relative;
     width: 100%;
@@ -40,14 +53,14 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     width: 100%;
     position: relative;
-    height: 85vh; /* CHANGED: Fixed height instead of max-height */
-    max-height: none; /* REMOVED: max-height constraint */
+    height: 85vh;
+    max-height: none;
     overflow: hidden;
     display: flex;
     flex-direction: column;
     margin-top: 10px;
     margin-bottom: 5px;
-    box-sizing: border-box; /* ADDED: Ensures padding is included */
+    box-sizing: border-box;
 }
 
 .back-btn {
@@ -58,7 +71,7 @@
     font-size: 13px;
     cursor: pointer;
     padding: 10px 8px 2px 8px;
-    margin-top: 8px; /* RESTORED: Original margin */
+    margin-top: 8px;
     font-family: 'Poppins', sans-serif;
     font-weight: bold;
     text-align: center;
@@ -71,7 +84,7 @@
 
 .tab-container {
     display: flex;
-    margin-bottom: 10px; /* REDUCED: from 16px to 10px */
+    margin-bottom: 8px; /* REDUCED: More space for content */
     border-bottom: 2px solid #e0e0e0;
     position: relative;
     flex-shrink: 0;
@@ -79,9 +92,9 @@
 
 .tab {
     flex: 1;
-    padding: 10px 16px; /* REDUCED: from 12px 18px to 10px 16px */
+    padding: 8px 16px; /* REDUCED: Less padding */
     text-align: center;
-    font-size: 15px; /* KEPT: bigger font */
+    font-size: 15px;
     font-weight: 600;
     cursor: pointer;
     color: #999;
@@ -110,9 +123,9 @@
 .tab-content {
     display: none;
     flex: 1;
-    overflow: hidden;
-    position: relative; /* ADDED: For absolute positioning of children */
-    padding-top: 20px; /* REDUCED: from 60px to 20px - less push down */
+    overflow-y: auto; /* CHANGED: Allow scrolling */
+    position: relative;
+    padding-top: 15px; /* REDUCED: Less padding */
 }
 
 .tab-content.active {
@@ -123,21 +136,21 @@
 .form-content {
     flex: 1;
     overflow: hidden;
-    height: calc(100% - 120px); /* ADDED: Fixed height calculation minus header/button space */
+    height: calc(100% - 120px);
     position: relative;
 }
 
 .form-row {
     display: flex;
-    gap: 12px; /* REDUCED: from 16px to 12px */
-    margin-bottom: 10px; /* REDUCED: from 16px to 10px */
+    gap: 10px; /* REDUCED: Less gap */
+    margin-bottom: 8px; /* REDUCED: Less margin */
 }
 
 .form-group {
     flex: 1;
     position: relative;
-    margin-top: 6px; /* REDUCED: from 10px to 6px */
-    margin-bottom: 6px; /* REDUCED: from 10px to 6px */
+    margin-top: 4px; /* REDUCED: Less margin */
+    margin-bottom: 4px; /* REDUCED: Less margin */
 }
 
 .form-group.full-width {
@@ -145,25 +158,25 @@
 }
 
 .form-label {
-    font-size: 12px; /* INCREASED: from 10px to 12px */
+    font-size: 11px; /* REDUCED: Smaller font */
     color: #666;
     font-family: 'Poppins', sans-serif;
     font-weight: 500;
     margin: 0;
     position: absolute;
-    top: -10px; /* ADJUSTED: from -8px to -10px */
+    top: -8px; /* ADJUSTED */
     left: 8px;
     background: white;
-    padding: 0 6px; /* INCREASED: from 4px to 6px */
+    padding: 0 5px; /* REDUCED */
     z-index: 1;
 }
 
 .form-input {
     width: 100%;
-    padding: 10px 32px 10px 16px; /* REDUCED: from 12px 35px 12px 18px */
+    padding: 8px 30px 8px 14px; /* REDUCED: Less padding */
     border: 2px solid #d1d5db !important;
-    border-radius: 10px !important; /* KEPT: bigger radius */
-    font-size: 12px !important; /* KEPT: bigger font */
+    border-radius: 10px !important;
+    font-size: 11px !important; /* REDUCED: Smaller font */
     background: white !important;
     cursor: pointer;
     outline: none !important;
@@ -184,7 +197,7 @@
 
 .form-input::placeholder {
     color: #999 !important;
-    font-size: 12px !important; /* INCREASED: from 10px to 12px */
+    font-size: 11px !important;
 }
 
 .civil-status-dropdown {
@@ -194,10 +207,10 @@
 .civil-status-dropdown select {
     appearance: none;
     width: 100%;
-    padding: 12px 35px 12px 18px; /* INCREASED: from 8px 30px 8px 15px */
+    padding: 8px 30px 8px 14px; /* REDUCED */
     border: 2px solid #d1d5db;
-    border-radius: 10px; /* INCREASED: from 8px to 10px */
-    font-size: 12px; /* INCREASED: from 10px to 12px */
+    border-radius: 10px;
+    font-size: 11px; /* REDUCED */
     background: white;
     cursor: pointer;
     outline: none;
@@ -227,11 +240,11 @@
 .civil-status-dropdown::after {
     content: '▼';
     position: absolute;
-    right: 15px; /* INCREASED: from 12px to 15px */
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #999;
-    font-size: 12px; /* INCREASED: from 10px to 12px */
+    font-size: 10px;
     pointer-events: none;
 }
 
@@ -242,10 +255,10 @@
 .date-input input {
     appearance: none;
     width: 100%;
-    padding: 10px 32px 10px 16px; /* REDUCED: from 12px 35px 12px 18px */
+    padding: 8px 30px 8px 14px; /* REDUCED */
     border: 2px solid #d1d5db;
-    border-radius: 10px; /* KEPT: bigger radius */
-    font-size: 12px; /* KEPT: bigger font */
+    border-radius: 10px;
+    font-size: 11px; /* REDUCED */
     background: white;
     cursor: pointer;
     outline: none;
@@ -286,22 +299,22 @@
 
 .checkbox-group {
     display: flex;
-    gap: 25px; /* INCREASED: from 20px to 25px */
-    margin: 16px 0; /* INCREASED: from 12px to 16px */
+    gap: 20px; /* REDUCED */
+    margin: 12px 0; /* REDUCED */
     align-items: center;
-    padding-bottom: 12px; /* INCREASED: from 10px to 12px */
+    padding-bottom: 10px; /* REDUCED */
     border-bottom: 1px solid #e0e0e0;
 }
 
 .checkbox-item {
     display: flex;
     align-items: center;
-    gap: 6px; /* INCREASED: from 4px to 6px */
+    gap: 5px;
 }
 
 .checkbox-item input[type="radio"] {
-    width: 16px; /* INCREASED: from 14px to 16px */
-    height: 16px; /* INCREASED: from 14px to 16px */
+    width: 14px; /* REDUCED */
+    height: 14px; /* REDUCED */
     border: 1px solid #e0e0e0;
     border-radius: 50%;
     cursor: pointer;
@@ -321,24 +334,24 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 8px; /* INCREASED: from 6px to 8px */
-    height: 8px; /* INCREASED: from 6px to 8px */
+    width: 6px; /* REDUCED */
+    height: 6px; /* REDUCED */
     border-radius: 50%;
     background: white;
 }
 
 .checkbox-item label {
-    font-size: 13px; /* INCREASED: from 11px to 13px */
+    font-size: 12px; /* REDUCED */
     color: #666;
     cursor: pointer;
     font-family: 'Poppins', sans-serif;
 }
 
 .section-title {
-    font-size: 14px; /* INCREASED: from 12px to 14px */
-    color: #333;
-    margin: 12px 0 8px 0; /* INCREASED: from 10px 0 6px 0 */
-    font-weight: 500;
+    font-size: 10px !important;
+    color: #333; 
+    margin: 10px 0 6px 0;
+    font-weight: 200; 
     font-family: 'Poppins', sans-serif;
 }
 
@@ -347,15 +360,15 @@
     background: #1e3a8a;
     color: white;
     border: none;
-    padding: 12px;
+    padding: 10px; /* REDUCED */
     border-radius: 14px;
-    font-size: 14px;
+    font-size: 13px; /* REDUCED */
     font-weight: 600;
     cursor: pointer;
     transition: background-color 0.3s ease;
     font-family: 'Poppins', sans-serif;
     flex-shrink: 0;
-    margin-top: 6px; /* RESTORED: Original margin */
+    margin-top: 8px; /* REDUCED */
 }
 
 .submit-btn:hover {
@@ -369,10 +382,10 @@
 .gender-dropdown select {
     appearance: none;
     width: 100%;
-    padding: 12px 35px 12px 18px; /* INCREASED: from 8px 30px 8px 15px */
+    padding: 8px 30px 8px 14px; /* REDUCED */
     border: 2px solid #d1d5db;
-    border-radius: 10px; /* INCREASED: from 8px to 10px */
-    font-size: 12px; /* INCREASED: from 10px to 12px */
+    border-radius: 10px;
+    font-size: 11px; /* REDUCED */
     background: white;
     cursor: pointer;
     outline: none;
@@ -404,11 +417,11 @@
 .gender-dropdown::after {
     content: '▼';
     position: absolute;
-    right: 15px; /* INCREASED: from 12px to 15px */
+    right: 12px;
     top: 50%;
     transform: translateY(-50%);
     color: #999;
-    font-size: 12px; /* INCREASED: from 10px to 12px */
+    font-size: 10px;
     pointer-events: none;
 }
 
@@ -420,25 +433,25 @@ hr {
     border: none;
     height: 1px;
     background: #e0e0e0;
-    margin: 8px 0; /* INCREASED: from 6px to 8px */
+    margin: 6px 0;
 }
 
 @media (max-width: 768px) {
     .form-row {
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
     
     .checkbox-group {
         flex-direction: column;
         align-items: flex-start;
-        gap: 10px;
+        gap: 8px;
     }
     
     .form-container {
         padding: 20px;
         margin: 10px 0;
-        height: 80vh; /* KEPT: Fixed height for mobile */
+        height: 80vh;
     }
     
     body {

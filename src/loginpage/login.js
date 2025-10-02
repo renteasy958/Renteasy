@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './login.css';
 import Registration from '../registrationpage/registration';
 import Home from '../homepage/home'; // Add this import
@@ -16,6 +16,16 @@ const Homepage = () => {
     const [forgotMobileError, setForgotMobileError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false); // Add this state
+
+    // Add login-page class to body when component mounts
+    useEffect(() => {
+        document.body.classList.add('login-page');
+        
+        // Cleanup: remove class when component unmounts
+        return () => {
+            document.body.classList.remove('login-page');
+        };
+    }, []);
 
     // Mobile number validation (11 digits only)
     const handleMobileChange = (e) => {
@@ -104,6 +114,9 @@ const Homepage = () => {
                 rememberMe: rememberMe
             });
             
+            // Remove login-page class before redirecting
+            document.body.classList.remove('login-page');
+            
             // Redirect to home page
             setIsLoggedIn(true);
         } else {
@@ -136,6 +149,9 @@ const Homepage = () => {
         setPassword('');
         setUserType('');
         setRememberMe(false);
+        
+        // Add login-page class back when returning to login
+        document.body.classList.add('login-page');
     };
 
     // If user is logged in, show Home component

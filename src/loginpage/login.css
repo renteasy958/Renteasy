@@ -9,10 +9,18 @@
 .logo img {
     height: 45px;
     width: auto;
-}* {
+}
+
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+
+body.login-page {
+    height: 100vh;
+    overflow: hidden;
 }
 
 body {
@@ -23,10 +31,11 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     min-height: 100vh;
+    height: 100vh;
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding-top: 5vh;
+    padding-top: 1vh !important; /* Moved higher */
     position: relative;
 }
 
@@ -36,73 +45,71 @@ body {
     width: 100%;
     max-width: 420px;
     padding: 20px;
+    
 }
 
-/* ADDED: Wrapper to contain the absolutely positioned card */
+/* Card with fixed height and no scrolling */
 .login-card {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 24px;
-    padding: 36px 32px;
+    padding: 70px 30px 70px 30px; /* Reduced padding */
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    width: 420px; /* ADDED: Fixed width */
-    height: 500px; /* FIXED: Absolute fixed height */
-    box-sizing: border-box; /* ADDED: Ensures padding is included */
-    overflow: hidden; /* ADDED: Prevents content from breaking layout */
-    position: relative; /* ADDED: For absolute positioning of children */
+    width: 420px;
+    height: 480px; /* Reduced height */
+    box-sizing: border-box;
+    overflow: hidden; /* No scrolling */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    
 }
 
-/* FIXED: Header section with fixed positioning */
+/* Header section */
 .login-card h1,
 .forgot-title {
-    font-size: 28px;
+    font-size: 26px; /* Slightly smaller */
     font-weight: 700;
     color: #1a1a1a;
     text-align: center;
     letter-spacing: -0.5px;
-    margin-bottom: 28px; /* FIXED: Exact same spacing for both */
-    height: 35px; /* ADDED: Fixed height */
+    margin-bottom: 20px; /* Reduced margin */
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-/* FIXED: Subtitle with fixed space allocation */
+/* Subtitle */
 .forgot-subtitle {
     font-size: 14px;
     color: #6b7280;
     text-align: center;
     font-weight: 400;
     font-family: 'Poppins', sans-serif;
-    height: 20px; /* ADDED: Fixed height */
-    margin-bottom: 28px; /* FIXED: Consistent spacing */
+    height: auto;
+    margin-bottom: 20px; /* Reduced margin */
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-/* FIXED: Form container - different padding for login vs forgot password */
+/* Form container - flexible height */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    height: 350px; /* Even more height to fully show button */
-    overflow: hidden; /* No scrolling allowed */
-}
-
-/* ADDED: Specific spacing for forgot password form */
-.login-card .forgot-title ~ .login-form {
-    padding-top: 60px; /* Push forgot password inputs lower */
-}
-
-/* ADDED: Different spacing for login form to accommodate more fields */
-.login-card h1 ~ .login-form {
-    padding-top: 20px; /* Less padding for login form with more fields */
+    gap: 12px; /* Reduced gap */
+    flex-grow: 1;
+    padding-bottom: 80px; /* Space for button */
+    overflow: hidden;
 }
 
 .input-group {
     position: relative;
+    flex-shrink: 0;
 }
 
 .input-wrapper,
@@ -112,9 +119,10 @@ body {
     align-items: center;
     background: #f8f9fa;
     border: 2px solid #e9ecef;
-    border-radius: 16px;
-    padding: 14px 18px;
+    border-radius: 12px; /* Smaller radius */
+    padding: 12px 16px; /* Reduced padding */
     transition: all 0.3s ease;
+    height: 48px; /* Fixed height */
 }
 
 .input-wrapper:focus-within,
@@ -136,10 +144,10 @@ body {
 }
 
 .input-icon {
-    width: 20px;
-    height: 20px;
+    width: 18px; /* Smaller icon */
+    height: 18px;
     color: #9ca3af;
-    margin-right: 12px;
+    margin-right: 10px; /* Reduced margin */
     flex-shrink: 0;
 }
 
@@ -156,9 +164,10 @@ select {
     border: none;
     outline: none !important;
     background: transparent;
-    font-size: 16px;
+    font-size: 15px; /* Smaller font */
     color: #1a1a1a;
     font-weight: 400;
+    height: 100%;
 }
 
 input:focus {
@@ -173,16 +182,16 @@ input::placeholder {
 
 /* Password wrapper specific styles */
 .password-wrapper {
-    padding-right: 10px;
+    padding-right: 8px; /* Reduced padding */
 }
 
-/* Fixed eye icon styles - no rectangles */
+/* Eye icon styles */
 .eye-icon {
     background: none;
     border: none;
     cursor: pointer;
-    padding: 6px;
-    margin: -6px;
+    padding: 4px; /* Reduced padding */
+    margin: -4px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -213,8 +222,8 @@ input::placeholder {
 }
 
 .eye-icon svg {
-    width: 18px;
-    height: 18px;
+    width: 16px; /* Smaller icon */
+    height: 16px;
     color: #9ca3af;
 }
 
@@ -222,15 +231,14 @@ input::placeholder {
     color: #1e3c72;
 }
 
-/* Select dropdown styles - fixed placeholder issue */
+/* Select dropdown styles */
 select {
     appearance: none;
     cursor: pointer;
     color: #1a1a1a;
-    font-size: 16px;
+    font-size: 15px; /* Smaller font */
 }
 
-/* Style for when no option is selected */
 select:invalid {
     color: #9ca3af;
 }
@@ -241,10 +249,10 @@ select:valid {
 }
 
 .dropdown-arrow {
-    width: 20px;
-    height: 20px;
+    width: 18px; /* Smaller arrow */
+    height: 18px;
     color: #9ca3af;
-    margin-left: 8px;
+    margin-left: 6px; /* Reduced margin */
     pointer-events: none;
     flex-shrink: 0;
 }
@@ -257,12 +265,13 @@ select:valid {
 
 /* Error message */
 .error-message {
-    display: block; /* Changed from display: none */
+    display: block;
     color: #dc3545;
-    font-size: 12px;
-    margin-top: 4px;
+    font-size: 11px; /* Smaller font */
+    margin-top: 2px; /* Reduced margin */
     margin-left: 4px;
     font-weight: 500;
+    line-height: 1.2;
 }
 
 /* Form options */
@@ -270,14 +279,15 @@ select:valid {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 8px 0 12px 0;
+    margin: 6px 0 8px 0; /* Reduced margin */
+    flex-shrink: 0;
 }
 
 .remember-me {
     display: flex;
     align-items: center;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px; /* Smaller font */
     color: #6b7280;
     font-weight: 500;
 }
@@ -287,11 +297,11 @@ select:valid {
 }
 
 .checkmark {
-    width: 18px;
-    height: 18px;
+    width: 16px; /* Smaller checkbox */
+    height: 16px;
     border: 2px solid #d1d5db;
     border-radius: 4px;
-    margin-right: 8px;
+    margin-right: 6px; /* Reduced margin */
     display: inline-block;
     position: relative;
     transition: all 0.3s ease;
@@ -305,10 +315,10 @@ select:valid {
 .remember-me input[type="checkbox"]:checked + .checkmark::after {
     content: '';
     position: absolute;
-    left: 5px;
+    left: 4px; /* Adjusted for smaller checkbox */
     top: 1px;
-    width: 4px;
-    height: 8px;
+    width: 3px; /* Smaller checkmark */
+    height: 6px;
     border: solid white;
     border-width: 0 2px 2px 0;
     transform: rotate(45deg);
@@ -317,7 +327,7 @@ select:valid {
 .forgot-password {
     color: #1e3c72;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 13px; /* Smaller font */
     font-weight: 600;
     transition: color 0.3s ease;
 }
@@ -327,23 +337,24 @@ select:valid {
     text-decoration: underline;
 }
 
-/* FIXED: Login button with fixed positioning from bottom */
+/* Login button - absolutely positioned */
 .login-btn {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     color: white;
     border: none;
-    padding: 16px 24px;
-    border-radius: 16px;
-    font-size: 17px;
+    padding: 14px 20px; /* Reduced padding */
+    border-radius: 12px; /* Smaller radius */
+    font-size: 16px; /* Smaller font */
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     letter-spacing: 0.5px;
-    position: absolute; /* ADDED: Absolute positioning */
-    bottom: 55px; /* ADDED: Fixed distance from card bottom */
-    left: 32px; /* ADDED: Match card padding */
-    right: 32px; /* ADDED: Match card padding */
-    margin: 0; /* REMOVED: All margins */
+    position: absolute;
+    bottom: 45px; /* Adjusted position */
+    left: 28px; /* Match reduced card padding */
+    right: 28px;
+    margin: 0;
+    height: 48px;
 }
 
 .login-btn:hover {
@@ -357,27 +368,19 @@ select:valid {
     box-shadow: 0 3px 8px rgba(30, 60, 114, 0.2);
 }
 
-/* FIXED: Bottom link repositioned above absolutely positioned button */
+/* Bottom link */
 .signup-link {
     text-align: center;
-    font-size: 14px;
+    font-size: 13px; /* Smaller font */
     color: #6b7280;
-    position: absolute; /* ADDED: Absolute positioning */
-    bottom: 15px; /* KEPT: At very bottom */
-    left: 32px; /* ADDED: Match card padding */
-    right: 32px; /* ADDED: Match card padding */
-    height: 20px; /* ADDED: Fixed height */
+    position: absolute;
+    bottom: 12px; /* Adjusted position */
+    left: 28px; /* Match reduced card padding */
+    right: 28px;
+    height: 18px;
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* UPDATE responsive positioning for button */
-@media (max-width: 480px) {
-    .login-btn {
-        left: 24px; /* ADDED: Match mobile padding */
-        right: 24px; /* ADDED: Match mobile padding */
-    }
 }
 
 .signup-link a {
@@ -392,7 +395,7 @@ select:valid {
     text-decoration: underline;
 }
 
-/* Update existing login-btn to handle disabled state */
+/* Disabled button state */
 .login-btn:disabled {
     opacity: 0.7;
     cursor: not-allowed;
@@ -405,7 +408,7 @@ select:valid {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
-/* Update all text elements to use Poppins */
+/* Font family */
 .login-card h1,
 .forgot-title,
 .login-form,
@@ -422,7 +425,6 @@ select,
     font-family: 'Poppins', sans-serif;
 }
 
-/* Make sure placeholders use Poppins */
 input::placeholder {
     color: #9ca3af;
     font-weight: 400;
@@ -435,35 +437,46 @@ input::placeholder {
 
 /* Responsive design */
 @media (max-width: 480px) {
+    body {
+        padding-top: 0.5vh; /* Moved higher on mobile */
+    }
+    
     .login-container {
         padding: 16px;
     }
     
     .login-card {
-        width: 100%; /* FIXED: Responsive width but fixed height */
+        width: 100%;
         max-width: 380px;
-        height: 500px; /* KEEP: Same height on mobile */
-        padding: 32px 24px;
+        height: 460px; /* Smaller height on mobile */
+        padding: 24px 20px; /* Reduced padding */
     }
     
     .signup-link {
-        left: 24px; /* UPDATED: Match mobile padding */
-        right: 24px; /* UPDATED: Match mobile padding */
+        left: 20px; /* Match mobile padding */
+        right: 20px;
+        bottom: 10px;
+    }
+    
+    .login-btn {
+        left: 20px; /* Match mobile padding */
+        right: 20px;
+        bottom: 40px;
+        padding: 12px 18px;
+        font-size: 15px;
+        height: 44px;
     }
     
     .login-card h1,
     .forgot-title {
-        font-size: 28px;
+        font-size: 24px; /* Smaller on mobile */
+        margin-bottom: 16px;
     }
     
     .input-wrapper,
     .select-wrapper {
-        padding: 14px 16px;
-    }
-    
-    .login-btn {
-        padding: 16px 20px;
-        font-size: 16px;
+        padding: 10px 14px;
+        height: 44px;
     }
 
     .logo {
@@ -480,23 +493,25 @@ input::placeholder {
     .login-card {
         width: 100%;
         max-width: 300px;
-        height: 500px; /* KEEP: Same height on very small screens */
-        padding: 24px 16px;
+        height: 440px; /* Even smaller on very small screens */
+        padding: 20px 16px;
     }
     
     .signup-link {
-        left: 16px; /* UPDATED: Match very small padding */
-        right: 16px; /* UPDATED: Match very small padding */
+        left: 16px;
+        right: 16px;
+        bottom: 8px;
     }
     
     .login-btn {
-        left: 16px; /* ADDED: Match very small padding */
-        right: 16px; /* ADDED: Match very small padding */
+        left: 16px;
+        right: 16px;
+        bottom: 35px;
     }
     
     .form-options {
         flex-direction: column;
-        gap: 12px;
+        gap: 8px;
         align-items: flex-start;
     }
 }

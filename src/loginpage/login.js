@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import './login.css';
 import Registration from '../registrationpage/registration';
-import Home from '../homepage/home'; // Add this import
+import Home from '../homepage/home';
 
 const Homepage = () => {
     const [mobileNumber, setMobileNumber] = useState('');
-    const [password, setPassword] = useState('');
+    const [otp, setOtp] = useState('');
     const [userType, setUserType] = useState('');
-    const [rememberMe, setRememberMe] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [mobileError, setMobileError] = useState('');
+    const [otpError, setOtpError] = useState('');
     const [showRegistration, setShowRegistration] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
     const [forgotMobileNumber, setForgotMobileNumber] = useState('');
     const [forgotMobileError, setForgotMobileError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false); // Add this state
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [countdown, setCountdown] = useState(0);
 
     // Add login-page class to body when component mounts
     useEffect(() => {
@@ -26,6 +28,15 @@ const Homepage = () => {
             document.body.classList.remove('login-page');
         };
     }, []);
+
+    // Countdown timer effect
+    useEffect(() => {
+        let timer;
+        if (countdown > 0) {
+            timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        }
+        return () => clearTimeout(timer);
+    }, [countdown]);
 
     // Mobile number validation (11 digits only)
     const handleMobileChange = (e) => {
@@ -45,6 +56,50 @@ const Homepage = () => {
         } else {
             setMobileError('');
         }
+    };
+
+    // OTP input validation (4 digits only)
+    const handleOtpChange = (e) => {
+        // Remove non-numeric characters
+        let value = e.target.value.replace(/[^0-9]/g, '');
+        
+        // Limit to 4 digits
+        if (value.length > 4) {
+            value = value.slice(0, 4);
+        }
+
+        setOtp(value);
+
+        // Validate length
+        if (value.length > 0 && value.length !== 4) {
+            setOtpError('OTP must be exactly 4 digits');
+        } else {
+            setOtpError('');
+        }
+    };
+
+    // Send OTP function
+    const handleSendOtp = () => {
+        // Validate mobile number first
+        if (mobileNumber.length !== 11) {
+            setMobileError('Mobile number must be exactly 11 digits');
+            return;
+        }
+
+        if (!mobileNumber.startsWith('09')) {
+            setMobileError('Please enter a valid mobile number (e.g., 09123456789)');
+            return;
+        }
+
+        setIsLoading(true);
+        
+        // Simulate OTP sending
+        setTimeout(() => {
+            setIsLoading(false);
+            setOtpSent(true);
+            setCountdown(60);
+            console.log('OTP sent to:', mobileNumber);
+        }, 2000);
     };
 
     // Forgot password mobile number validation
@@ -84,12 +139,7 @@ const Homepage = () => {
         return true;
     };
 
-    // Password visibility toggle
-    const togglePassword = () => {
-        setShowPassword(!showPassword);
-    };
-
-    // Form submission - UPDATED
+    // Form submission - UPDATED for OTP
     const handleSubmit = (e) => {
         e.preventDefault();
 
@@ -99,19 +149,31 @@ const Homepage = () => {
             return;
         }
 
+        // Validate OTP
+        if (otp.length !== 4) {
+            setOtpError('OTP must be exactly 4 digits');
+            return;
+        }
+
         // Validate all fields
-        if (!mobileNumber || !password || !userType) {
+        if (!mobileNumber || !otp || !userType) {
             alert('Please fill in all fields');
             return;
         }
 
-        // Add your authentication logic here
-        // For demo purposes, let's say any mobile number starting with '09' and password length > 5 is valid
-        if (mobileNumber.startsWith('09') && password.length >= 6) {
-            console.log('Login successful:', {
+        // Validate that OTP was sent
+        if (!otpSent) {
+            alert('Please send OTP first');
+            return;
+        }
+
+        // Add your OTP verification logic here
+        // For demo purposes, let's say any 4-digit OTP is valid
+        if (mobileNumber.startsWith('09') && otp.length === 4) {
+            console.log('Verification successful:', {
                 mobileNumber: mobileNumber,
-                userType: userType,
-                rememberMe: rememberMe
+                otp: otp,
+                userType: userType
             });
             
             // Remove login-page class before redirecting
@@ -120,7 +182,7 @@ const Homepage = () => {
             // Redirect to home page
             setIsLoggedIn(true);
         } else {
-            alert('Invalid credentials. Please check your mobile number and password.');
+            alert('Invalid OTP or mobile number. Please try again.');
         }
     };
 
@@ -146,9 +208,10 @@ const Homepage = () => {
     const handleLogout = () => {
         setIsLoggedIn(false);
         setMobileNumber('');
-        setPassword('');
+        setOtp('');
         setUserType('');
-        setRememberMe(false);
+        setOtpSent(false);
+        setCountdown(0);
         
         // Add login-page class back when returning to login
         document.body.classList.add('login-page');
@@ -219,33 +282,31 @@ const Homepage = () => {
                             </div>
 
                             <div className="input-group">
-                                <div className="input-wrapper password-wrapper">
+                                <div className={`input-wrapper otp-wrapper ${otpError ? 'error' : ''}`}>
                                     <svg className="input-icon" viewBox="0 0 24 24" fill="none">
                                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
                                         <circle cx="12" cy="16" r="1" fill="currentColor"/>
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                     <input 
-                                        type={showPassword ? "text" : "password"}
-                                        placeholder="Password" 
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        type="text"
+                                        placeholder="4-digit OTP" 
+                                        value={otp}
+                                        onChange={handleOtpChange}
+                                        maxLength="4"
                                         required 
                                     />
-                                    <button type="button" className="eye-icon" onClick={togglePassword} onMouseDown={(e) => e.preventDefault()}>
-                                        {showPassword ? (
-                                            <svg className="eye-closed" viewBox="0 0 24 24" fill="none">
-                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                            </svg>
-                                        ) : (
-                                            <svg className="eye-open" viewBox="0 0 24 24" fill="none">
-                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2"/>
-                                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-                                            </svg>
-                                        )}
+                                    <button 
+                                        type="button" 
+                                        className="send-otp-btn" 
+                                        onClick={handleSendOtp}
+                                        disabled={isLoading || countdown > 0 || mobileNumber.length !== 11}
+                                    >
+                                        {isLoading ? 'Sending...' : 
+                                         countdown > 0 ? `${countdown}s` : 'Send OTP'}
                                     </button>
                                 </div>
+                                {otpError && <div className="error-message">{otpError}</div>}
                             </div>
 
                             <div className="input-group">
@@ -269,20 +330,7 @@ const Homepage = () => {
                                 </div>
                             </div>
 
-                            <div className="form-options">
-                                <label className="remember-me">
-                                    <input 
-                                        type="checkbox" 
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                    />
-                                    <span className="checkmark"></span>
-                                    Remember me
-                                </label>
-                                <a href="#" className="forgot-password" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }}>Forgot Password</a>
-                            </div>
-
-                            <button type="submit" className="login-btn">Log in</button>
+                            <button type="submit" className="login-btn">Verify</button>
                         </form>
 
                         <div className="signup-link">

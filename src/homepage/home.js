@@ -1,26 +1,289 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './home.css';
 import Navbar from '../navbar/navbar'; // Adjust the path based on your file structure
+import BHDetails from '../bhdetails/bhdetails';
 
 const Home = ({ onLogout }) => {
 
+  const [selectedHouse, setSelectedHouse] = useState(null);
+  const [likedHouses, setLikedHouses] = useState(new Set());
+
   // Mock data for boarding houses - 10 for popular, 10 for nearby (total 20)
-  const boardingHouses = Array(10).fill(null).map((_, index) => ({
-    id: index + 1,
-    name: 'No Available Boarding House',
-    address: '.....',
-    rating: 0,
-    image: '/default.png' // This will now work since it's in public folder
-  }));
+  const boardingHouses = [
+    {
+      id: 1,
+      name: 'Tres Marias Boarding House',
+      address: 'Montilla St., Brgy 1, Isabela',
+      rating: 4.9,
+      price: '₱1000 per month',
+      roomType: 'Shared room (2-4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Welcome to Tres Marias Boarding House, your affordable and comfortable home in Montilla St., Brgy 1, Isabela. Ideal for students and working individuals, this modern boarding house offers clean, secure, and spacious shared rooms that can accommodate 2 to 4 persons.',
+      amenities: ['Well-ventilated rooms', 'Private and shared bathrooms', 'Safe surroundings', 'Easy access to nearby stores and transportation', 'Piso wifi'],
+      landlord: { name: 'Edith Yanson', phone: '09092131476', facebook: 'Edith Yanson', address: 'Montilla St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 2,
+      name: 'Sunshine Boarding House',
+      address: 'Main St., Brgy 2, Isabela',
+      rating: 4.5,
+      price: '₱800 per month',
+      roomType: 'Private room (1-2 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Sunshine Boarding House offers bright and comfortable accommodation for students and professionals. Located in the heart of Main Street with easy access to schools and business centers.',
+      amenities: ['Air-conditioned rooms', 'Private bathroom', 'WiFi included', 'Kitchen access', 'Laundry area'],
+      landlord: { name: 'Maria Santos', phone: '09171234567', facebook: 'Maria Santos', address: 'Main St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 3,
+      name: 'Green Valley Boarding House',
+      address: 'Rivera St., Brgy 3, Isabela',
+      rating: 4.7,
+      price: '₱1200 per month',
+      roomType: 'Shared room (2-3 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Green Valley Boarding House provides a peaceful environment surrounded by nature. Perfect for students who want a quiet place to study while being close to the city center.',
+      amenities: ['Garden view', 'Study area', 'WiFi connection', 'Shared kitchen', 'Security camera'],
+      landlord: { name: 'Roberto Cruz', phone: '09281234567', facebook: 'Roberto Cruz', address: 'Rivera St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 4,
+      name: 'City Center Boarding House',
+      address: 'Plaza St., Brgy Centro, Isabela',
+      rating: 4.3,
+      price: '₱1500 per month',
+      roomType: 'Private room (1 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Located in the city center, this boarding house offers convenience and accessibility. Walking distance to shops, restaurants, schools, and government offices.',
+      amenities: ['Prime location', 'Private bathroom', 'Air conditioning', 'WiFi', 'Parking space'],
+      landlord: { name: 'Ana Reyes', phone: '09391234567', facebook: 'Ana Reyes', address: 'Plaza St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 5,
+      name: 'Student Haven Boarding House',
+      address: 'University Ave., Brgy 4, Isabela',
+      rating: 4.6,
+      price: '₱900 per month',
+      roomType: 'Shared room (4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Student Haven is specifically designed for students, located near universities and colleges. Offers affordable rates with complete amenities for student life.',
+      amenities: ['Study tables', 'Free WiFi', 'Common room', 'Kitchen facilities', 'Laundry service'],
+      landlord: { name: 'Teacher Linda', phone: '09451234567', facebook: 'Linda Gonzales', address: 'University Ave., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 6,
+      name: 'Cozy Corner Boarding House',
+      address: 'Peaceful St., Brgy 5, Isabela',
+      rating: 4.4,
+      price: '₱750 per month',
+      roomType: 'Shared room (3 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'A cozy and homely boarding house perfect for those seeking comfort at an affordable price. The peaceful neighborhood provides a relaxing atmosphere.',
+      amenities: ['Homely atmosphere', 'Shared bathroom', 'WiFi access', 'Kitchen use', 'Quiet environment'],
+      landlord: { name: 'Tita Carmen', phone: '09561234567', facebook: 'Carmen Dela Cruz', address: 'Peaceful St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 7,
+      name: 'Modern Living Boarding House',
+      address: 'Tech St., Brgy 6, Isabela',
+      rating: 4.8,
+      price: '₱1300 per month',
+      roomType: 'Private room (1-2 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Modern Living offers contemporary accommodations with modern amenities. Perfect for young professionals and tech-savvy individuals.',
+      amenities: ['Modern facilities', 'High-speed WiFi', 'Air conditioning', 'Smart TV access', 'Gym area'],
+      landlord: { name: 'Mark Johnson', phone: '09671234567', facebook: 'Mark Johnson', address: 'Tech St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 8,
+      name: 'Family-Style Boarding House',
+      address: 'Home St., Brgy 7, Isabela',
+      rating: 4.2,
+      price: '₱850 per month',
+      roomType: 'Shared room (2-4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Experience family-style living in this warm and welcoming boarding house. The owners treat every tenant like family, creating a supportive community.',
+      amenities: ['Family environment', 'Home-cooked meals available', 'WiFi', 'Common areas', 'Friendly community'],
+      landlord: { name: 'Nanay Rosa', phone: '09781234567', facebook: 'Rosa Martinez', address: 'Home St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 9,
+      name: 'Budget-Friendly Boarding House',
+      address: 'Savings St., Brgy 8, Isabela',
+      rating: 4.0,
+      price: '₱600 per month',
+      roomType: 'Shared room (4-6 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Perfect for budget-conscious students and workers. Clean, safe, and affordable accommodation without compromising on basic needs.',
+      amenities: ['Affordable rates', 'Clean facilities', 'Basic WiFi', 'Shared kitchen', 'Security'],
+      landlord: { name: 'Kuya Ben', phone: '09891234567', facebook: 'Ben Ramirez', address: 'Savings St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 10,
+      name: 'Premium Boarding House',
+      address: 'Elite St., Brgy 9, Isabela',
+      rating: 5.0,
+      price: '₱2000 per month',
+      roomType: 'Private room (1 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Experience luxury living in our premium boarding house. High-end amenities and top-notch service for discerning individuals.',
+      amenities: ['Luxury amenities', 'Private bathroom', 'Premium WiFi', 'Housekeeping service', 'Concierge'],
+      landlord: { name: 'Mr. Vicente', phone: '09901234567', facebook: 'Vicente Lopez', address: 'Elite St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    }
+  ];
 
-  const nearbyHouses = Array(10).fill(null).map((_, index) => ({
-    id: index + 11,
-    name: 'No Available Boarding House',
-    address: '.....',
-    rating: 0,
-    image: '/default.png' // This will now work since it's in public folder
-  }));
+  const nearbyHouses = [
+    {
+      id: 11,
+      name: 'Riverside Boarding House',
+      address: 'River St., Brgy 10, Isabela',
+      rating: 4.3,
+      price: '₱950 per month',
+      roomType: 'Shared room (2-3 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Located by the riverside, this boarding house offers a serene environment with the sound of flowing water. Perfect for those who love nature.',
+      amenities: ['Riverside view', 'Natural ventilation', 'WiFi', 'Outdoor seating', 'Peaceful environment'],
+      landlord: { name: 'Ate Melissa', phone: '09011234567', facebook: 'Melissa Rivera', address: 'River St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 12,
+      name: 'Garden View Boarding House',
+      address: 'Garden Ave., Brgy 11, Isabela',
+      rating: 4.5,
+      price: '₱1100 per month',
+      roomType: 'Private room (1-2 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Surrounded by beautiful gardens, this boarding house provides fresh air and a relaxing atmosphere. Great for students and professionals alike.',
+      amenities: ['Garden surroundings', 'Fresh air', 'WiFi connection', 'Parking', 'Garden access'],
+      landlord: { name: 'Mang Pedro', phone: '09121234567', facebook: 'Pedro Flores', address: 'Garden Ave., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 13,
+      name: 'Hillside Boarding House',
+      address: 'Hill St., Brgy 12, Isabela',
+      rating: 4.1,
+      price: '₱800 per month',
+      roomType: 'Shared room (3-4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Located on a gentle hillside with great views of the city. Cool breeze and panoramic views make this a unique boarding house experience.',
+      amenities: ['City view', 'Cool breeze', 'WiFi', 'Viewing deck', 'Quiet location'],
+      landlord: { name: 'Aling Nena', phone: '09231234567', facebook: 'Nena Santos', address: 'Hill St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 14,
+      name: 'Downtown Boarding House',
+      address: 'Central St., Downtown, Isabela',
+      rating: 4.4,
+      price: '₱1250 per month',
+      roomType: 'Private room (1 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Right in the heart of downtown Isabela, this boarding house offers ultimate convenience with everything within walking distance.',
+      amenities: ['Downtown location', 'Walking distance to everything', 'WiFi', 'Security', 'Air conditioning'],
+      landlord: { name: 'Sir Miguel', phone: '09341234567', facebook: 'Miguel Torres', address: 'Central St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 15,
+      name: 'Lakeside Boarding House',
+      address: 'Lake View St., Brgy 13, Isabela',
+      rating: 4.6,
+      price: '₱1050 per month',
+      roomType: 'Shared room (2 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Enjoy beautiful lake views from this peaceful boarding house. Perfect for those who appreciate natural beauty and tranquility.',
+      amenities: ['Lake view', 'Peaceful environment', 'WiFi', 'Balcony access', 'Natural lighting'],
+      landlord: { name: 'Tita Grace', phone: '09451234567', facebook: 'Grace Mendoza', address: 'Lake View St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 16,
+      name: 'Sports Complex Boarding House',
+      address: 'Sports St., Brgy 14, Isabela',
+      rating: 4.2,
+      price: '₱900 per month',
+      roomType: 'Shared room (3 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Located near the sports complex, perfect for athletes and sports enthusiasts. Easy access to training facilities and sports events.',
+      amenities: ['Near sports facilities', 'Gym access nearby', 'WiFi', 'Sports equipment storage', 'Active community'],
+      landlord: { name: 'Coach Tony', phone: '09561234567', facebook: 'Tony Garcia', address: 'Sports St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 17,
+      name: 'Market Area Boarding House',
+      address: 'Market St., Brgy 15, Isabela',
+      rating: 3.9,
+      price: '₱700 per month',
+      roomType: 'Shared room (4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Conveniently located near the public market, perfect for easy shopping and access to fresh produce. Great for budget-conscious individuals.',
+      amenities: ['Near market', 'Easy shopping access', 'WiFi', 'Budget-friendly', 'Local community'],
+      landlord: { name: 'Manang Rita', phone: '09671234567', facebook: 'Rita Villanueva', address: 'Market St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 18,
+      name: 'School District Boarding House',
+      address: 'Education St., Brgy 16, Isabela',
+      rating: 4.3,
+      price: '₱850 per month',
+      roomType: 'Shared room (2-4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Perfect location for students with multiple schools nearby. Educational environment with fellow student residents.',
+      amenities: ['Near schools', 'Study-friendly', 'WiFi', 'Library access nearby', 'Student community'],
+      landlord: { name: 'Mrs. Elena', phone: '09781234567', facebook: 'Elena Castillo', address: 'Education St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 19,
+      name: 'Beachfront Boarding House',
+      address: 'Coastal Rd., Brgy 17, Isabela',
+      rating: 4.7,
+      price: '₱1400 per month',
+      roomType: 'Private room (1-2 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Wake up to ocean views every day! This beachfront boarding house offers a unique coastal living experience with beach access.',
+      amenities: ['Beachfront location', 'Ocean view', 'Beach access', 'WiFi', 'Sunset views'],
+      landlord: { name: 'Captain Juan', phone: '09891234567', facebook: 'Juan Delmar', address: 'Coastal Rd., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    },
+    {
+      id: 20,
+      name: 'Industrial Area Boarding House',
+      address: 'Factory St., Brgy 18, Isabela',
+      rating: 4.0,
+      price: '₱750 per month',
+      roomType: 'Shared room (3-4 pax)',
+      images: ['/default.png', '/default.png', '/default.png'],
+      description: 'Convenient for factory workers and industrial employees. Close to major factories and industrial establishments with easy transportation.',
+      amenities: ['Near factories', 'Worker-friendly', 'WiFi', 'Transportation access', 'Working community'],
+      landlord: { name: 'Foreman Carlos', phone: '09901234567', facebook: 'Carlos Mendez', address: 'Factory St., Isabela, Negros Occidental', profilePicture: '/default.png' },
+      image: '/default.png'
+    }
+  ];
 
+  const toggleLike = (houseId) => {
+    const newLikedHouses = new Set(likedHouses);
+    if (newLikedHouses.has(houseId)) {
+      newLikedHouses.delete(houseId);
+    } else {
+      newLikedHouses.add(houseId);
+    }
+    setLikedHouses(newLikedHouses);
+  };
 
   const renderStars = (rating) => {
     return Array(5).fill(null).map((_, index) => (
@@ -38,7 +301,7 @@ const Home = ({ onLogout }) => {
   };
 
   const BoardingHouseCard = ({ house }) => (
-    <div className="boarding-card">
+    <div className="boarding-card" onClick={() => setSelectedHouse(house)}>
       <div className="card-image">
         <img 
           src={house.image || '/default.png'} 
@@ -50,6 +313,15 @@ const Home = ({ onLogout }) => {
           }}
           onLoad={() => console.log('Image loaded successfully:', house.image)}
         />
+        <button 
+          className={`like-button ${likedHouses.has(house.id) ? 'liked' : ''}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleLike(house.id);
+          }}
+        >
+          
+        </button>
       </div>
       <div className="card-content">
         <h3>{house.name}</h3>
@@ -86,6 +358,14 @@ const Home = ({ onLogout }) => {
         </div>
       </section>
     </main>
+
+    <BHDetails 
+      house={selectedHouse}
+      isOpen={!!selectedHouse}
+      onClose={() => setSelectedHouse(null)}
+      likedHouses={likedHouses}
+      onToggleLike={toggleLike}
+    />
   </div>
 );
 };

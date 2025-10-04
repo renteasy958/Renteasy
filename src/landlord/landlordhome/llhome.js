@@ -16,7 +16,7 @@ const Landlordhome = () => {
     },
     {
       id: 2,
-      name: "Sunshine Dormitory",
+      name: "Tres Marias Boarding House",
       address: "Rodriguez Ave. Brgy 3, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1500",
@@ -24,7 +24,7 @@ const Landlordhome = () => {
     },
     {
       id: 3,
-      name: "Blue Haven Lodge",
+      name: "Tres Marias Boarding House",
       address: "Santos St. Brgy 2, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1200",
@@ -32,18 +32,50 @@ const Landlordhome = () => {
     },
     {
       id: 4,
-      name: "Green Valley Residence",
+      name: "Tres Marias Boarding House",
       address: "Dela Cruz St. Brgy 4, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1800",
       rating: 4.6
+    },
+    {
+      id: 16,
+      name: "Tres Marias Boarding House",
+      address: "University Ave. Brgy 16, Isabela",
+      roomType: "Shared Room (2-4 pax)",
+      price: "₱1050",
+      rating: 4.5
+    },
+    {
+      id: 17,
+      name: "Tres Marias Boarding House",
+      address: "School St. Brgy 17, Isabela",
+      roomType: "Private Room (1 pax)",
+      price: "₱1350",
+      rating: 4.6
+    },
+    {
+      id: 18,
+      name: "Tres Marias Boarding House",
+      address: "Commerce Ave. Brgy 18, Isabela",
+      roomType: "Studio Room (1 pax)",
+      price: "₱1750",
+      rating: 4.7
+    },
+    {
+      id: 19,
+      name: "Tres Marias Boarding House",
+      address: "Riverside St. Brgy 19, Isabela",
+      roomType: "Bed Space (1 pax)",
+      price: "₱900",
+      rating: 4.4
     }
   ];
 
   const pendingData = [
     {
       id: 5,
-      name: "Ocean View Boarding House",
+      name: "Tres Marias Boarding House",
       address: "Coastal Rd. Brgy 5, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1100",
@@ -51,34 +83,19 @@ const Landlordhome = () => {
     },
     {
       id: 6,
-      name: "Mountain Peak Lodge",
+      name: "Tres Marias Boarding House",
       address: "Highland Ave. Brgy 6, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1400",
       rating: 4.3
     },
-    {
-      id: 7,
-      name: "City Center Dorm",
-      address: "Main St. Brgy 7, Isabela",
-      roomType: "Bed Space (1 pax)",
-      price: "₱900",
-      rating: 4.4
-    },
-    {
-      id: 8,
-      name: "Riverside Residence",
-      address: "River Bank St. Brgy 8, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1050",
-      rating: 4.7
-    }
+   
   ];
 
   const occupiedData = [
     {
       id: 9,
-      name: "Golden Gate Lodge",
+      name: "Tres Marias Boarding House",
       address: "Gateway Ave. Brgy 9, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1600",
@@ -86,7 +103,7 @@ const Landlordhome = () => {
     },
     {
       id: 10,
-      name: "Paradise Boarding House",
+      name: "Tres Marias Boarding House",
       address: "Paradise St. Brgy 10, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1300",
@@ -94,7 +111,7 @@ const Landlordhome = () => {
     },
     {
       id: 11,
-      name: "Starlight Dormitory",
+      name: "Tres Marias Boarding House",
       address: "Star Ave. Brgy 11, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1700",
@@ -102,11 +119,35 @@ const Landlordhome = () => {
     },
     {
       id: 12,
-      name: "Peaceful Haven",
+      name: "Tres Marias Boarding House",
       address: "Quiet St. Brgy 12, Isabela",
       roomType: "Bed Space (1 pax)",
       price: "₱850",
       rating: 4.5
+    },
+    {
+      id: 13,
+      name: "Tres Marias Boarding House",
+      address: "Main St. Brgy 13, Isabela",
+      roomType: "Shared Room (2-4 pax)",
+      price: "₱950",
+      rating: 4.4
+    },
+    {
+      id: 14,
+      name: "Tres Marias Boarding House",
+      address: "Central Ave. Brgy 14, Isabela",
+      roomType: "Private Room (1 pax)",
+      price: "₱1450",
+      rating: 4.7
+    },
+    {
+      id: 15,
+      name: "Tres Marias Boarding House",
+      address: "Market St. Brgy 15, Isabela",
+      roomType: "Studio Room (1 pax)",
+      price: "₱1900",
+      rating: 4.8
     }
   ];
 
@@ -127,7 +168,7 @@ const Landlordhome = () => {
           <p className="room-type">{property.roomType}</p>
         </div>
         <div className="property-footer">
-          <span className="price">{property.price} <span className="per-month">per month</span></span>
+          <span className="llprice">{property.price} <span className="per-month">per month</span></span>
           <div className="rating">
             <span>{property.rating}</span>
             <span className="star">⭐</span>
@@ -144,7 +185,7 @@ const Landlordhome = () => {
         {/* Listings Section */}
         <section className="section">
           <div className="section-header">
-            <h2>Listings</h2>
+            <h2>Listings ({listingsData.length})</h2>
             <div className="header-actions">
               <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
                 See all
@@ -162,7 +203,7 @@ const Landlordhome = () => {
         {/* Pending Section */}
         <section className="section">
           <div className="section-header">
-            <h2>Pending</h2>
+            <h2>Pending ({pendingData.length})</h2>
             <div className="header-actions">
               <button className="see-all-btn" onClick={() => handleSeeAll('pending')}>
                 See all
@@ -179,14 +220,14 @@ const Landlordhome = () => {
         {/* Occupied Section */}
         <section className="section">
           <div className="section-header">
-            <h2>Occupied</h2>
+            <h2>Occupied ({occupiedData.length})</h2>
             <div className="header-actions">
-              <button className="see-all-btn">
+              <button className="see-all-btn" onClick={() => handleSeeAll('occupied')}>
                 See all
               </button>
             </div>
           </div>
-          <div className="cards-container">
+          <div className={`cards-container ${expandedSections.occupied ? 'expanded' : ''}`}>
             {occupiedData.map(property => (
               <PropertyCard key={property.id} property={property} />
             ))}

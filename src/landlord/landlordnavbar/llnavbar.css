@@ -1,0 +1,287 @@
+/* Landlord Navbar Styles */
+.ll-navbar {
+    background-color: #012E6A;
+    padding: 0;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.ll-navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin: 0;
+    padding: 0 30px;
+    height: 60px;
+    max-width: none;
+}
+
+/* Logo Styles - Left aligned */
+.ll-navbar-logo {
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.ll-logo-img {
+    height: 45px;
+    width: auto;
+    cursor: pointer;
+    display: block;
+}
+
+/* Navigation Links - Centered */
+.ll-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.ll-nav-item-container {
+    position: relative;
+}
+
+.ll-nav-link {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    padding: 10px 20px;
+    border-radius: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    white-space: nowrap;
+}
+
+.ll-nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.ll-nav-link.active {
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+/* Settings Dropdown */
+.ll-settings-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    min-width: 150px;
+    margin-top: 8px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1003;
+}
+
+.ll-settings-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.ll-settings-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #333;
+    border-radius: 8px;
+}
+
+.ll-settings-option:hover {
+    background-color: #f8f9fa;
+}
+
+.logout-icon {
+    width: 18px;
+    height: 18px;
+    color: #666;
+}
+
+.ll-settings-option:hover .logout-icon {
+    color: #333;
+}
+
+.ll-settings-option span {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Profile Container - Right aligned */
+.ll-profile-container {
+    flex-shrink: 0;
+}
+
+.ll-profile-btn {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ll-profile-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-icon {
+    width: 24px;
+    height: 24px;
+    color: #012E6A;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .ll-navbar-container {
+        padding: 0 20px;
+    }
+    
+    .ll-nav-links {
+        gap: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ll-navbar-container {
+        height: 60px;
+        padding: 0 15px;
+    }
+    
+    .ll-logo-img {
+        height: 40px;
+    }
+    
+    .ll-nav-links {
+        gap: 30px;
+    }
+    
+    .ll-nav-link {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+    
+    .ll-profile-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .profile-icon {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+@media (max-width: 640px) {
+    .ll-nav-links {
+        gap: 20px;
+    }
+    
+    .ll-nav-link {
+        font-size: 13px;
+        padding: 6px 12px;
+    }
+    
+    .ll-logo-img {
+        height: 35px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ll-navbar-container {
+        flex-direction: column;
+        height: auto;
+        padding: 15px;
+        gap: 15px;
+    }
+    
+    /* Top row: Logo and Profile */
+    .ll-navbar-logo {
+        align-self: flex-start;
+    }
+    
+    .ll-profile-container {
+        position: absolute;
+        right: 15px;
+        top: 15px;
+    }
+    
+    /* Bottom row: Navigation */
+    .ll-nav-links {
+        position: static;
+        transform: none;
+        order: 2;
+        margin: 0;
+        justify-content: center;
+        width: 100%;
+        gap: 20px;
+    }
+    
+    .ll-logo-img {
+        height: 35px;
+    }
+    
+    .ll-profile-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .profile-icon {
+        width: 18px;
+        height: 18px;
+    }
+}
+
+/* Body padding to account for fixed navbar */
+body.ll-page {
+    padding-top: 60px;
+}
+
+@media (max-width: 480px) {
+    body.ll-page {
+        padding-top: 100px;
+    }
+}
+
+/* Custom scrollbar for settings dropdown */
+.ll-settings-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ll-settings-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.ll-settings-dropdown::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.ll-settings-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './login.css';
 import Registration from '../registrationpage/registration';
-import Home from '../homepage/home';
+import Home from '../tenant/homepage/home';
+import LandlordHome from '../landlord/landlordhome/llhome'; // Import your dashboard component
 
 const Homepage = () => {
     const [mobileNumber, setMobileNumber] = useState('');
@@ -179,7 +180,7 @@ const Homepage = () => {
             // Remove login-page class before redirecting
             document.body.classList.remove('login-page');
             
-            // Redirect to home page
+            // Redirect based on user type
             setIsLoggedIn(true);
         } else {
             alert('Invalid OTP or mobile number. Please try again.');
@@ -217,9 +218,13 @@ const Homepage = () => {
         document.body.classList.add('login-page');
     };
 
-    // If user is logged in, show Home component
+    // If user is logged in, show appropriate component based on user type
     if (isLoggedIn) {
-        return <Home onLogout={handleLogout} />;
+        if (userType === 'landlord') {
+            return <LandlordHome onLogout={handleLogout} />;
+        } else if (userType === 'tenant') {
+            return <Home onLogout={handleLogout} />;
+        }
     }
 
     return (

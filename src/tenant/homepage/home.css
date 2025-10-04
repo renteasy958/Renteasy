@@ -20,7 +20,7 @@ body {
   overflow-x: hidden;
   background-image: url('bg.jpg');
   background-size: cover;
-  background-position: center top;
+  background-position: center 45px; /* Moved up from 60px to 45px */
   background-repeat: no-repeat;
   background-attachment: scroll;
   width: 100vw;
@@ -41,7 +41,7 @@ body {
 
 /* Main Content */
 .main-content {
-  padding: 350px 50px 40px 50px; /* Reduced top padding from 500px to 350px */
+  padding: 350px 50px 40px 50px; /* Back to original padding */
   max-width: 1400px;
   margin: 0 auto;
   position: relative;
@@ -146,7 +146,7 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-content {
-    padding: 200px 16px 24px 16px; /* Reduced top padding from 300px to 200px */
+    padding: 200px 16px 24px 16px; /* Back to original padding */
   }
   
   .section-title {

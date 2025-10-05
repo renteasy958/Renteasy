@@ -1,0 +1,303 @@
+.reservation-list {
+  padding: 100px 40px 40px 40px;
+  width: 100vw;
+  margin: 0;
+  margin-left: calc(-50vw + 50%);
+  background-color: white;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.reservation-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e5e5e5;
+  border-radius: 12px;
+  padding: 16px 32px;
+  margin-bottom: 20px;
+  gap: 20px;
+  height: 70px;
+}
+
+.reservation-info {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 5px;
+}
+
+.info-item {
+  flex: 0 0 auto;
+  padding: 0 20px;
+  border-right: 2px solid #999;
+}
+
+.info-item:first-child {
+  flex: 0 0 550px;
+  padding-left: 0;
+  padding-right: 20px;
+}
+
+.info-item:nth-child(2),
+.info-item:nth-child(3),
+.info-item:nth-child(4) {
+  padding: 0 20px;
+  min-width: 120px;
+}
+
+.info-item:last-child {
+  border-right: none;
+}
+
+.info-item span {
+  font-size: 20px;
+  font-weight: 700;
+  color: #000;
+}
+
+.view-details-btn {
+  background-color: #003d82;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 40px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.3s;
+}
+
+.view-details-btn:hover {
+  background-color: #002557;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border-radius: 16px;
+  padding: 30px 40px;
+  max-width: 900px;
+  width: 90%;
+  z-index: 1000;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content-wrapper {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+.left-section {
+  flex: 1;
+  min-width: 0;
+}
+
+.vertical-divider {
+  width: 2px;
+  background-color: #ddd;
+  min-height: 300px;
+  flex-shrink: 0;
+}
+
+.right-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.close-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  margin-top: 0;
+}
+
+.details-section {
+  margin-bottom: 14px;
+}
+
+.detail-row {
+  margin-bottom: 6px;
+}
+
+.detail-label {
+  font-size: 14px;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.detail-value {
+  font-size: 14px;
+}
+
+.modal-divider {
+  height: 2px;
+  background-color: #ddd;
+  margin: 14px 0;
+  display: none;
+}
+
+.reserved-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  margin-top: 0;
+}
+
+.boarding-house-name {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 5px;
+  margin-top: 0;
+}
+
+.location {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 3px;
+  margin-top: 0;
+}
+
+.room-type {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 10px;
+  margin-top: 0;
+}
+
+.price {
+  margin-bottom: 14px;
+  margin-top: 0;
+}
+
+.price-amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.price-per-month {
+  font-size: 13px;
+  color: #666;
+}
+
+.gcash-section {
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.gcash-label {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.gcash-ref {
+  font-size: 16px;
+  letter-spacing: 2px;
+  margin-bottom: 3px;
+}
+
+.bottom-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: auto;
+  gap: 30px;
+}
+
+.gcash-section-bottom {
+  margin-top: 0;
+  margin-bottom: 0;
+  flex: 0 0 auto;
+}
+
+.gcash-section-bottom .gcash-label {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.gcash-section-bottom .gcash-ref {
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 3px;
+  font-weight: 600;
+}
+
+.button-group {
+  display: flex;
+  gap: 16px;
+  justify-content: flex-end;
+  flex: 0 0 auto;
+}
+
+.reject-btn {
+  background-color: #e00;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 50px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.reject-btn:hover {
+  background-color: #c00;
+}
+
+.approve-btn {
+  background-color: #0c0;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 14px 50px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.approve-btn:hover {
+  background-color: #0a0;
+}

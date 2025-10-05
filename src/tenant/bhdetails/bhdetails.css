@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background: white;
-  z-index: 1000;
+  z-index: 999; /* CHANGED: Lower than navbar (1000) */
   overflow: hidden;
 }
 
@@ -22,6 +22,7 @@
   display: flex;
   height: 100vh;
   min-height: 100vh;
+  padding-top: 60px; /* Add top padding for navbar clearance */
 }
 
 /* Modal Left Side */
@@ -33,7 +34,7 @@
 
 .back-button {
   position: absolute;
-  top: 20px;
+  top: 20px; /* Move down from navbar */
   left: 20px;
   background: rgba(255, 255, 255, 0.9);
   border: none;
@@ -129,6 +130,7 @@
 
 .modal-details {
   padding: 2rem;
+  padding-top: 1rem; /* Reduce top padding since we have modal-content padding */
 }
 
 .title-section {
@@ -308,8 +310,8 @@
 
 .description-section {
   padding: 2rem;
+  padding-top: 1rem; /* Reduce top padding since we have modal-content padding */
   flex: 1;
-  overflow-y: auto;
 }
 
 .description-section h2 {
@@ -378,7 +380,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2000;
+  z-index: 1001; /* CHANGED: Higher than modal (999) but lower than navbar (1000) is not possible, so set to 1001 for the inner reservation modal */
   backdrop-filter: blur(2px);
 }
 
@@ -391,6 +393,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   position: relative;
   animation: modalSlideIn 0.3s ease-out;
+  z-index: 1002; /* CHANGED: Above reservation overlay */
 }
 
 .close-reservation-btn {
@@ -477,6 +480,7 @@
   .modal-content {
     flex-direction: column;
     height: 100vh;
+    padding-top: 60px; /* Match desktop padding */
   }
   
   .modal-left {
@@ -486,6 +490,10 @@
   .modal-right {
     flex: none;
     min-height: 300px;
+  }
+  
+  .back-button {
+    top: 70px; /* Match desktop position */
   }
   
   .title-section {
@@ -500,6 +508,7 @@
   
   .description-section {
     padding: 1.5rem;
+    padding-top: 1rem;
   }
   
   .reserve-button {
@@ -508,6 +517,7 @@
   
   .modal-details {
     padding: 1.5rem;
+    padding-top: 1rem;
   }
 
   .reservation-modal {

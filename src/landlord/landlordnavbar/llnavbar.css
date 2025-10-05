@@ -87,12 +87,14 @@
     transform: translateY(-10px);
     transition: all 0.3s ease;
     z-index: 1003;
+    pointer-events: none;
 }
 
 .ll-settings-dropdown.show {
     opacity: 1;
     visibility: visible;
     transform: translateY(0);
+    pointer-events: auto;
 }
 
 .ll-settings-option {

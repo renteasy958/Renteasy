@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './login.css';
 import Registration from '../registrationpage/registration';
-import Home from '../tenant/homepage/home';
-import LandlordHome from '../landlord/landlordhome/llhome'; // Import your dashboard component
 
 const Homepage = () => {
+    const navigate = useNavigate();
     const [mobileNumber, setMobileNumber] = useState('');
     const [otp, setOtp] = useState('');
     const [userType, setUserType] = useState('');
@@ -16,7 +16,6 @@ const Homepage = () => {
     const [forgotMobileNumber, setForgotMobileNumber] = useState('');
     const [forgotMobileError, setForgotMobileError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [otpSent, setOtpSent] = useState(false);
     const [countdown, setCountdown] = useState(0);
 
@@ -180,8 +179,12 @@ const Homepage = () => {
             // Remove login-page class before redirecting
             document.body.classList.remove('login-page');
             
-            // Redirect based on user type
-            setIsLoggedIn(true);
+            // Redirect based on user type using React Router
+            if (userType === 'landlord') {
+                navigate('/landlord-home');
+            } else if (userType === 'tenant') {
+                navigate('/tenant-home');
+            }
         } else {
             alert('Invalid OTP or mobile number. Please try again.');
         }
@@ -204,28 +207,6 @@ const Homepage = () => {
             console.log('OTP sent to:', forgotMobileNumber);
         }, 2000);
     };
-
-    // Add this function to handle logout from home page
-    const handleLogout = () => {
-        setIsLoggedIn(false);
-        setMobileNumber('');
-        setOtp('');
-        setUserType('');
-        setOtpSent(false);
-        setCountdown(0);
-        
-        // Add login-page class back when returning to login
-        document.body.classList.add('login-page');
-    };
-
-    // If user is logged in, show appropriate component based on user type
-    if (isLoggedIn) {
-        if (userType === 'landlord') {
-            return <LandlordHome onLogout={handleLogout} />;
-        } else if (userType === 'tenant') {
-            return <Home onLogout={handleLogout} />;
-        }
-    }
 
     return (
         <div className="container">

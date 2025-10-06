@@ -1,4 +1,5 @@
-.reservation-list {
+/* Reservation List Container */
+.rsv-list-container {
   padding: 100px 40px 40px 40px;
   width: 100vw;
   margin: 0;
@@ -8,7 +9,8 @@
   box-sizing: border-box;
 }
 
-.reservation-card {
+/* Reservation Card */
+.rsv-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -20,43 +22,44 @@
   height: 70px;
 }
 
-.reservation-info {
+.rsv-card-info {
   display: flex;
   align-items: center;
   flex: 1;
   gap: 5px;
 }
 
-.info-item {
+.rsv-info-item {
   flex: 0 0 auto;
   padding: 0 20px;
   border-right: 2px solid #999;
 }
 
-.info-item:first-child {
+.rsv-info-item:first-child {
   flex: 0 0 550px;
   padding-left: 0;
   padding-right: 20px;
 }
 
-.info-item:nth-child(2),
-.info-item:nth-child(3),
-.info-item:nth-child(4) {
+.rsv-info-item:nth-child(2),
+.rsv-info-item:nth-child(3),
+.rsv-info-item:nth-child(4) {
   padding: 0 20px;
   min-width: 120px;
 }
 
-.info-item:last-child {
+.rsv-info-item:last-child {
   border-right: none;
 }
 
-.info-item span {
+.rsv-info-item span {
   font-size: 20px;
   font-weight: 700;
   color: #000;
 }
 
-.view-details-btn {
+/* View Details Button */
+.rsv-view-btn {
   background-color: #003d82;
   color: white;
   border: none;
@@ -69,12 +72,12 @@
   transition: background-color 0.3s;
 }
 
-.view-details-btn:hover {
+.rsv-view-btn:hover {
   background-color: #002557;
 }
 
-/* Modal Styles */
-.modal-overlay {
+/* Modal Overlay */
+.rsv-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -85,7 +88,8 @@
   z-index: 999;
 }
 
-.modal {
+/* Modal Container */
+.rsv-modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -99,26 +103,28 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
-.modal-content-wrapper {
+/* Modal Content Wrapper */
+.rsv-modal-wrapper {
   display: flex !important;
   flex-direction: row !important;
   gap: 30px;
   align-items: flex-start;
 }
 
-.left-section {
+/* Modal Sections */
+.rsv-modal-left {
   flex: 1;
   min-width: 0;
 }
 
-.vertical-divider {
+.rsv-modal-divider {
   width: 2px;
   background-color: #ddd;
   min-height: 300px;
   flex-shrink: 0;
 }
 
-.right-section {
+.rsv-modal-right {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -126,7 +132,8 @@
   justify-content: space-between;
 }
 
-.close-btn {
+/* Close Button */
+.rsv-modal-close {
   position: absolute;
   top: 20px;
   right: 20px;
@@ -138,139 +145,112 @@
   align-items: center;
   justify-content: center;
   color: #666;
+  transition: color 0.3s;
 }
 
-.close-btn:hover {
+.rsv-modal-close:hover {
   color: #333;
 }
 
-.modal-title {
+/* Modal Titles */
+.rsv-modal-title {
   font-size: 20px;
   font-weight: bold;
   margin-bottom: 14px;
   margin-top: 0;
 }
 
-.details-section {
+.rsv-reserved-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 14px;
+  margin-top: 0;
+}
+
+/* Details Section */
+.rsv-details-section {
   margin-bottom: 14px;
 }
 
-.detail-row {
+.rsv-detail-row {
   margin-bottom: 6px;
 }
 
-.detail-label {
+.rsv-detail-label {
   font-size: 14px;
   font-weight: bold;
   margin-right: 8px;
 }
 
-.detail-value {
+.rsv-detail-value {
   font-size: 14px;
 }
 
-.modal-divider {
-  height: 2px;
-  background-color: #ddd;
-  margin: 14px 0;
-  display: none;
-}
-
-.reserved-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 14px;
-  margin-top: 0;
-}
-
-.boarding-house-name {
+/* Boarding House Info */
+.rsv-bh-name {
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 5px;
   margin-top: 0;
 }
 
-.location {
+.rsv-bh-location {
   font-size: 13px;
   color: #666;
   margin-bottom: 3px;
   margin-top: 0;
 }
 
-.room-type {
+.rsv-room-type {
   font-size: 13px;
   color: #666;
   margin-bottom: 10px;
   margin-top: 0;
 }
 
-.price {
+/* Price */
+.rsv-price {
   margin-bottom: 14px;
   margin-top: 0;
 }
 
-.price-amount {
+.rsv-price-amount {
   font-size: 18px;
   font-weight: bold;
 }
 
-.price-per-month {
+.rsv-price-label {
   font-size: 13px;
   color: #666;
 }
 
-.gcash-section {
+/* GCash Section */
+.rsv-gcash-section {
   margin-top: 0;
   margin-bottom: 20px;
 }
 
-.gcash-label {
+.rsv-gcash-label {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 8px;
 }
 
-.gcash-ref {
+.rsv-gcash-ref {
   font-size: 16px;
   letter-spacing: 2px;
   margin-bottom: 3px;
 }
 
-.bottom-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-top: auto;
-  gap: 30px;
-}
-
-.gcash-section-bottom {
-  margin-top: 0;
-  margin-bottom: 0;
-  flex: 0 0 auto;
-}
-
-.gcash-section-bottom .gcash-label {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 8px;
-}
-
-.gcash-section-bottom .gcash-ref {
-  font-size: 18px;
-  letter-spacing: 2px;
-  margin-bottom: 3px;
-  font-weight: 600;
-}
-
-.button-group {
+/* Action Buttons */
+.rsv-action-buttons {
   display: flex;
   gap: 16px;
   justify-content: flex-end;
   flex: 0 0 auto;
 }
 
-.reject-btn {
+.rsv-reject-btn {
   background-color: #e00;
   color: white;
   border: none;
@@ -282,11 +262,11 @@
   transition: background-color 0.3s;
 }
 
-.reject-btn:hover {
+.rsv-reject-btn:hover {
   background-color: #c00;
 }
 
-.approve-btn {
+.rsv-approve-btn {
   background-color: #0c0;
   color: white;
   border: none;
@@ -298,6 +278,71 @@
   transition: background-color 0.3s;
 }
 
-.approve-btn:hover {
+.rsv-approve-btn:hover {
   background-color: #0a0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .rsv-list-container {
+    padding: 80px 20px 20px 20px;
+  }
+
+  .rsv-card {
+    flex-direction: column;
+    height: auto;
+    padding: 16px;
+  }
+
+  .rsv-card-info {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .rsv-info-item {
+    border-right: none;
+    border-bottom: 1px solid #999;
+    padding: 8px 0;
+    width: 100%;
+  }
+
+  .rsv-info-item:first-child {
+    flex: unset;
+    padding: 8px 0;
+  }
+
+  .rsv-info-item:last-child {
+    border-bottom: none;
+  }
+
+  .rsv-view-btn {
+    width: 100%;
+  }
+
+  .rsv-modal {
+    padding: 20px;
+    width: 95%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .rsv-modal-wrapper {
+    flex-direction: column;
+  }
+
+  .rsv-modal-divider {
+    width: 100%;
+    height: 2px;
+    min-height: 2px;
+  }
+
+  .rsv-action-buttons {
+    flex-direction: column;
+  }
+
+  .rsv-reject-btn,
+  .rsv-approve-btn {
+    width: 100%;
+  }
 }

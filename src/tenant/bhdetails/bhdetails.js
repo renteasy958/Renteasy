@@ -4,6 +4,10 @@ import './bhdetails.css';
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showReservationNotice, setShowReservationNotice] = useState(false);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [qrCodeImage, setQrCodeImage] = useState(null);
 
   if (!isOpen || !house) return null;
 
@@ -43,9 +47,45 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   };
 
   const handleProceed = () => {
-    // Handle proceed logic here
-    console.log('Proceeding with reservation...');
     setShowReservationNotice(false);
+    setShowPaymentForm(true);
+  };
+
+  const handleClosePaymentForm = () => {
+    setShowPaymentForm(false);
+    setReferenceNumber('');
+    setQrCodeImage(null);
+  };
+
+  const handleQrCodeUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setQrCodeImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmitPayment = () => {
+    if (!referenceNumber.trim()) {
+      alert('Please enter a reference number');
+      return;
+    }
+
+    // Show success animation
+    setShowPaymentForm(false);
+    setShowSuccessAnimation(true);
+
+    // Hide success animation and stay on the same page after 3 seconds
+    setTimeout(() => {
+      setShowSuccessAnimation(false);
+      setReferenceNumber('');
+      setQrCodeImage(null);
+      setShowPaymentForm(false);
+      // Stay on BHDetails page - don't close the modal
+    }, 3000);
   };
 
   return (
@@ -201,6 +241,83 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               <button className="proceed-button" onClick={handleProceed}>
                 Proceed
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Payment Form Modal */}
+        {showPaymentForm && (
+          <div className="reservation-overlay" onClick={handleClosePaymentForm}>
+            <div className="payment-modal" onClick={(e) => e.stopPropagation()}>
+              <button className="close-reservation-btn" onClick={handleClosePaymentForm}>
+                ×
+              </button>
+              <h2>Payment Details</h2>
+              <div className="payment-content">
+                <div className="qr-section">
+                  <div className="qr-upload-container">
+                    {qrCodeImage ? (
+                      <img src={qrCodeImage} alt="QR Code" className="qr-code-image" />
+                    ) : (
+                      <label htmlFor="qr-upload" className="qr-upload-label">
+                        <div className="qr-placeholder">
+                          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                          </svg>
+                          <p>Click to upload QR Code</p>
+                        </div>
+                        <input
+                          id="qr-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleQrCodeUpload}
+                          style={{ display: 'none' }}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  <div className="gcash-details">
+                    <h3 className="payment-method">GCash</h3>
+                    <p className="account-name">Juan Dela Cruz</p>
+                    <p className="mobile-number">09123456789</p>
+                  </div>
+                </div>
+
+                <div className="reference-section">
+                  <label htmlFor="reference-number">Reference Number</label>
+                  <input
+                    id="reference-number"
+                    type="text"
+                    className="reference-input"
+                    placeholder="Enter reference number"
+                    value={referenceNumber}
+                    onChange={(e) => setReferenceNumber(e.target.value)}
+                  />
+                </div>
+
+                <button className="submit-button" onClick={handleSubmitPayment}>
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Success Animation */}
+        {showSuccessAnimation && (
+          <div className="success-overlay">
+            <div className="success-animation">
+              <div className="checkmark-circle">
+                <svg className="checkmark" viewBox="0 0 52 52">
+                  <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+                  <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                </svg>
+              </div>
+              <h2>Payment Submitted!</h2>
+              <p>Your reservation is being processed.</p>
             </div>
           </div>
         )}

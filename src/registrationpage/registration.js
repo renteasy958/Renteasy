@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './registration.css';
 
 const Registration = ({ onBack }) => {
+    const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('tenant');
+    const [showCheckmark, setShowCheckmark] = useState(false);
     
     // Separate form data for tenant and landlord
     const [tenantFormData, setTenantFormData] = useState({
@@ -84,12 +87,20 @@ const Registration = ({ onBack }) => {
 
     const handleTenantSubmit = () => {
         console.log('Tenant form submitted:', tenantFormData);
-        alert('Tenant registration submitted successfully!');
+        setShowCheckmark(true);
+        
+        setTimeout(() => {
+            navigate('/tenant-home');
+        }, 1500);
     };
 
     const handleLandlordSubmit = () => {
         console.log('Landlord form submitted:', landlordFormData);
-        alert('Landlord registration submitted successfully!');
+        setShowCheckmark(true);
+        
+        setTimeout(() => {
+            navigate('/landlord-home');
+        }, 1500);
     };
 
     const handleTabSwitch = (tabName) => {
@@ -98,6 +109,17 @@ const Registration = ({ onBack }) => {
 
     return (
         <div className="registration-wrapper">
+            {showCheckmark && (
+                <div className="checkmark-overlay">
+                    <div className="checkmark-container">
+                        <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                            <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+                            <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                        </svg>
+                    </div>
+                </div>
+            )}
+            
             <div className="form-container">
                 <div className="tab-container">
                     <button 

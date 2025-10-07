@@ -6,7 +6,7 @@
   right: 0;
   bottom: 0;
   background: white;
-  z-index: 999; /* CHANGED: Lower than navbar (1000) */
+  z-index: 999;
   overflow: hidden;
 }
 
@@ -22,7 +22,7 @@
   display: flex;
   height: 100vh;
   min-height: 100vh;
-  padding-top: 60px; /* Add top padding for navbar clearance */
+  padding-top: 60px;
 }
 
 /* Modal Left Side */
@@ -34,7 +34,7 @@
 
 .back-button {
   position: absolute;
-  top: 20px; /* Move down from navbar */
+  top: 20px;
   left: 20px;
   background: rgba(255, 255, 255, 0.9);
   border: none;
@@ -130,7 +130,7 @@
 
 .modal-details {
   padding: 2rem;
-  padding-top: 1rem; /* Reduce top padding since we have modal-content padding */
+  padding-top: 1rem;
 }
 
 .title-section {
@@ -310,7 +310,7 @@
 
 .description-section {
   padding: 2rem;
-  padding-top: 1rem; /* Reduce top padding since we have modal-content padding */
+  padding-top: 1rem;
   flex: 1;
 }
 
@@ -380,11 +380,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1001; /* CHANGED: Higher than modal (999) but lower than navbar (1000) is not possible, so set to 1001 for the inner reservation modal */
+  z-index: 1001;
   backdrop-filter: blur(2px);
 }
 
-.reservation-modal {
+.reservation-modal,
+.payment-modal {
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
@@ -393,7 +394,9 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   position: relative;
   animation: modalSlideIn 0.3s ease-out;
-  z-index: 1002; /* CHANGED: Above reservation overlay */
+  z-index: 1002;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .close-reservation-btn {
@@ -430,7 +433,8 @@
   }
 }
 
-.reservation-modal h2 {
+.reservation-modal h2,
+.payment-modal h2 {
   margin: 0 0 1.5rem 0;
   color: #333;
   font-size: 1.8rem;
@@ -454,7 +458,8 @@
   font-weight: 700;
 }
 
-.proceed-button {
+.proceed-button,
+.submit-button {
   width: 100%;
   padding: 1rem 2rem;
   background: #19398a;
@@ -469,10 +474,264 @@
   letter-spacing: 0.5px;
 }
 
-.proceed-button:hover {
+.proceed-button:hover,
+.submit-button:hover {
   background: #162d6b;
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(25, 57, 138, 0.4);
+}
+
+/* Payment Modal Styles */
+.payment-content {
+  margin-top: 0;
+}
+
+.qr-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 1.5rem;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.qr-upload-container {
+  flex-shrink: 0;
+}
+
+.qr-code-image {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  background: white;
+}
+
+.qr-upload-label {
+  cursor: pointer;
+  display: block;
+}
+
+.qr-placeholder {
+  width: 150px;
+  height: 150px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.qr-placeholder:hover {
+  border-color: #19398a;
+  background: #f0f4ff;
+}
+
+.qr-placeholder svg {
+  color: #999;
+  margin-bottom: 10px;
+}
+
+.qr-placeholder p {
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+  margin: 0;
+  padding: 0 10px;
+}
+
+.gcash-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.payment-method {
+  font-size: 24px;
+  font-weight: bold;
+  color: #007bff;
+  margin: 0 0 10px 0;
+}
+
+.account-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 5px 0;
+}
+
+.mobile-number {
+  font-size: 16px;
+  color: #666;
+  margin: 5px 0;
+}
+
+.reference-section {
+  margin-bottom: 1.5rem;
+}
+
+.reference-section label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.reference-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.reference-input:focus {
+  outline: none;
+  border-color: #19398a;
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem 2rem;
+  background: #19398a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.submit-button:hover {
+  background: #162d6b;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(25, 57, 138, 0.3);
+}
+
+/* Success Animation Styles */
+.success-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-animation {
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  text-align: center;
+  max-width: 400px;
+  animation: scaleIn 0.5s ease;
+}
+
+.checkmark-circle {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 20px;
+  position: relative;
+}
+
+.checkmark {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: block;
+  stroke-width: 3;
+  stroke: #4CAF50;
+  stroke-miterlimit: 10;
+  box-shadow: inset 0 0 0 #4CAF50;
+  animation: fill 0.4s ease-in-out 0.4s forwards, scale 0.3s ease-in-out 0.9s both;
+}
+
+.checkmark-circle-bg {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  stroke-width: 3;
+  stroke-miterlimit: 10;
+  stroke: #4CAF50;
+  animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.checkmark-check {
+  transform-origin: 50% 50%;
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  stroke: #fff;
+  stroke-width: 3;
+  animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.8s forwards;
+}
+
+.success-animation h2 {
+  color: #4CAF50;
+  font-size: 28px;
+  margin: 10px 0;
+}
+
+.success-animation p {
+  color: #666;
+  font-size: 16px;
+  margin: 10px 0 0;
+}
+
+@keyframes stroke {
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes scale {
+  0%, 100% {
+    transform: none;
+  }
+  50% {
+    transform: scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes fill {
+  100% {
+    box-shadow: inset 0 0 0 60px #4CAF50;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* Responsive Design */
@@ -480,7 +739,7 @@
   .modal-content {
     flex-direction: column;
     height: 100vh;
-    padding-top: 60px; /* Match desktop padding */
+    padding-top: 60px;
   }
   
   .modal-left {
@@ -493,7 +752,7 @@
   }
   
   .back-button {
-    top: 70px; /* Match desktop position */
+    top: 70px;
   }
   
   .title-section {
@@ -520,13 +779,13 @@
     padding-top: 1rem;
   }
 
-  .reservation-modal {
+  .reservation-modal, .payment-modal {
     padding: 2rem;
     margin: 1rem;
     max-width: none;
   }
 
-  .reservation-modal h2 {
+  .reservation-modal h2, .payment-modal h2 {
     font-size: 1.5rem;
   }
 
@@ -544,5 +803,53 @@
 
   .room-type-text {
     font-size: 1.4rem;
+  }
+
+  /* Payment Modal Responsive */
+  .qr-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .qr-code-image,
+  .qr-placeholder {
+    width: 120px;
+    height: 120px;
+  }
+
+  .payment-method {
+    font-size: 20px;
+  }
+
+  .account-name {
+    font-size: 16px;
+  }
+
+  .mobile-number {
+    font-size: 14px;
+  }
+
+  .success-animation {
+    padding: 30px;
+    margin: 1rem;
+  }
+
+  .checkmark-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .checkmark {
+    width: 80px;
+    height: 80px;
+  }
+
+  .success-animation h2 {
+    font-size: 24px;
+  }
+
+  .success-animation p {
+    font-size: 14px;
   }
 }

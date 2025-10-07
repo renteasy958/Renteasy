@@ -18,10 +18,10 @@ function App() {
           <Route path="/" element={<Homepage />} />
           <Route path="/login" element={<Homepage />} />
           
-          {/* Tenant route - Add your tenant navbar here if you have one */}
+          {/* Tenant route with navbar */}
           <Route path="/tenant-home" element={
             <>
-              {/* <TenantNavbar /> - Uncomment when you have a tenant navbar */}
+              <Navbar />
               <Home />
             </>
           } />

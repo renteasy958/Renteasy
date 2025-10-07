@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
 import './llhome.css';
 
 const Landlordhome = () => {
+  const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState({});
 
   const listingsData = [
@@ -158,6 +160,10 @@ const Landlordhome = () => {
     }));
   };
 
+  const handleAddBoardingHouse = () => {
+    navigate('/add-boarding-house');
+  };
+
   const PropertyCard = ({ property }) => (
     <div className="property-card">
       <div className="property-image"></div>
@@ -190,7 +196,9 @@ const Landlordhome = () => {
               <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
                 See all
               </button>
-              <button className="add-boarding-btn">Add Boarding House</button>
+              <button className="add-boarding-btn" onClick={handleAddBoardingHouse}>
+                Add Boarding House
+              </button>
             </div>
           </div>
           <div className={`cards-container ${expandedSections.listings ? 'expanded' : ''}`}>

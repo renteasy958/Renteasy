@@ -7,6 +7,8 @@ import ReservationList from './landlord/reserve/reserve';
 import Landlordhome from './landlord/landlordhome/llhome';
 import Home from './tenant/homepage/home';
 import Navbar from './tenant/navbar/navbar';
+import AddBoardingHouse from './landlord/addbh/addbh';
+
 
 function App() {
   return (
@@ -43,6 +45,7 @@ function App() {
               <div>Landlord Profile Page</div>
             </>
           } />
+          <Route path="/add-boarding-house" element={<AddBoardingHouse />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './navbar.css';
 
 const Navbar = () => {
-  const [currentPage, setCurrentPage] = useState('home');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -11,17 +13,17 @@ const Navbar = () => {
     location: null,
     priceRange: null
   });
-  // Props to control navbar visibility
-  const [isHomepage, setIsHomepage] = useState(true); // Always show in this component
   const filterDropdownRef = useRef(null);
   const settingsDropdownRef = useRef(null);
 
-  // Simplified - navbar shows when this component is used
-  useEffect(() => {
-    // Since this navbar component is specifically for homepage,
-    // we'll always show it when the component is rendered
-    setIsHomepage(true);
-  }, []);
+  // Determine current page based on location
+  const getCurrentPage = () => {
+    if (location.pathname === '/liked') return 'liked';
+    if (location.pathname === '/tenant-home' || location.pathname === '/') return 'home';
+    return 'home';
+  };
+
+  const currentPage = getCurrentPage();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -91,11 +93,16 @@ const Navbar = () => {
       return;
     }
     
-    setCurrentPage(pageId);
     setShowSettingsDropdown(false);
+    
+    // Navigate to the appropriate page using React Router
+    if (pageId === 'liked') {
+      navigate('/liked');
+    } else if (pageId === 'home') {
+      navigate('/tenant-home');
+    }
+    
     console.log(`Navigating to: ${pageId}`);
-    // Add your navigation logic here
-    // For example: navigate(`/${pageId}`);
   };
 
   // Handle filter selection
@@ -136,10 +143,7 @@ const Navbar = () => {
   // Handle profile click
   const handleProfileClick = () => {
     console.log('Redirecting to user profile...');
-    // Add your profile navigation logic here
-    // For React Router: navigate('/user-profile');
-    // For now, using window.location
-    window.location.href = '/user-profile';
+    navigate('/user-profile');
   };
 
   // Handle logout
@@ -148,8 +152,7 @@ const Navbar = () => {
     setShowSettingsDropdown(false);
     // Add your logout logic here
     // Clear user session, tokens, etc.
-    // For now, redirect to login page
-    window.location.href = '/login';
+    navigate('/login');
   };
 
   // Filter Icon SVG
@@ -180,11 +183,6 @@ const Navbar = () => {
       <path d="M15 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
     </svg>
   );
-
-  // Don't render navbar if not needed (this will always render now)
-  if (!isHomepage) {
-    return null;
-  }
 
   // Count selected filters
   const selectedFiltersCount = Object.values(selectedFilters).filter(Boolean).length;

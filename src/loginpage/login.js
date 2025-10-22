@@ -5,89 +5,147 @@ import Registration from '../registrationpage/registration';
 
 const Homepage = () => {
     const navigate = useNavigate();
-    const [mobileNumber, setMobileNumber] = useState('');
-    const [otp, setOtp] = useState('');
-    const [userType, setUserType] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
-    const [mobileError, setMobileError] = useState('');
-    const [otpError, setOtpError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [passwordError, setPasswordError] = useState('');
     const [showRegistration, setShowRegistration] = useState(false);
     const [showForgotPassword, setShowForgotPassword] = useState(false);
-    const [forgotMobileNumber, setForgotMobileNumber] = useState('');
-    const [forgotMobileError, setForgotMobileError] = useState('');
+    
+    // Forgot password states
+    const [forgotEmail, setForgotEmail] = useState('');
+    const [forgotEmailError, setForgotEmailError] = useState('');
+    const [forgotOtp, setForgotOtp] = useState('');
+    const [forgotOtpError, setForgotOtpError] = useState('');
+    const [isOtpVerified, setIsOtpVerified] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [newPasswordError, setNewPasswordError] = useState('');
+    const [confirmPasswordError, setConfirmPasswordError] = useState('');
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [otpSent, setOtpSent] = useState(false);
-    const [countdown, setCountdown] = useState(0);
 
     // Add login-page class to body when component mounts
     useEffect(() => {
         document.body.classList.add('login-page');
         
-        // Cleanup: remove class when component unmounts
         return () => {
             document.body.classList.remove('login-page');
         };
     }, []);
 
-    // Countdown timer effect
-    useEffect(() => {
-        let timer;
-        if (countdown > 0) {
-            timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-        }
-        return () => clearTimeout(timer);
-    }, [countdown]);
+    // Email validation
+    const handleEmailChange = (e) => {
+        const value = e.target.value;
+        setEmail(value);
 
-    // Mobile number validation (11 digits only)
-    const handleMobileChange = (e) => {
-        // Remove non-numeric characters
-        let value = e.target.value.replace(/[^0-9]/g, '');
-        
-        // Limit to 11 digits
-        if (value.length > 11) {
-            value = value.slice(0, 11);
-        }
-
-        setMobileNumber(value);
-
-        // Validate length
-        if (value.length > 0 && value.length !== 11) {
-            setMobileError('Mobile number must be exactly 11 digits');
+        // Basic email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (value && !emailRegex.test(value)) {
+            setEmailError('Please enter a valid email address');
         } else {
-            setMobileError('');
+            setEmailError('');
         }
     };
 
-    // OTP input validation (4 digits only)
-    const handleOtpChange = (e) => {
-        // Remove non-numeric characters
+    // Password validation
+    const handlePasswordChange = (e) => {
+        const value = e.target.value;
+        setPassword(value);
+
+        if (value && value.length < 6) {
+            setPasswordError('Password must be at least 6 characters');
+        } else {
+            setPasswordError('');
+        }
+    };
+
+    // Forgot email validation
+    const handleForgotEmailChange = (e) => {
+        const value = e.target.value;
+        setForgotEmail(value);
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (value && !emailRegex.test(value)) {
+            setForgotEmailError('Please enter a valid email address');
+        } else {
+            setForgotEmailError('');
+        }
+    };
+
+    // OTP validation and verification
+    const handleForgotOtpChange = (e) => {
         let value = e.target.value.replace(/[^0-9]/g, '');
         
-        // Limit to 4 digits
         if (value.length > 4) {
             value = value.slice(0, 4);
         }
 
-        setOtp(value);
+        setForgotOtp(value);
 
-        // Validate length
-        if (value.length > 0 && value.length !== 4) {
-            setOtpError('OTP must be exactly 4 digits');
+        // Verify OTP when 4 digits are entered
+        if (value.length === 4) {
+            // Simulate OTP verification - for demo, correct OTP is "1234"
+            if (value === '1234') {
+                setForgotOtpError('');
+                setIsOtpVerified(true);
+            } else {
+                setForgotOtpError('Invalid OTP');
+                setIsOtpVerified(false);
+            }
         } else {
-            setOtpError('');
+            setForgotOtpError('');
+            setIsOtpVerified(false);
         }
     };
 
-    // Send OTP function
-    const handleSendOtp = () => {
-        // Validate mobile number first
-        if (mobileNumber.length !== 11) {
-            setMobileError('Mobile number must be exactly 11 digits');
-            return;
+    // New password validation
+    const handleNewPasswordChange = (e) => {
+        const value = e.target.value;
+        setNewPassword(value);
+
+        if (value && value.length < 6) {
+            setNewPasswordError('Password must be at least 6 characters');
+        } else {
+            setNewPasswordError('');
         }
 
-        if (!mobileNumber.startsWith('09')) {
-            setMobileError('Please enter a valid mobile number (e.g., 09123456789)');
+        // Check if it matches confirm password
+        if (confirmPassword && value !== confirmPassword) {
+            setConfirmPasswordError('Passwords do not match');
+        } else if (confirmPassword) {
+            setConfirmPasswordError('');
+        }
+    };
+
+    // Confirm password validation
+    const handleConfirmPasswordChange = (e) => {
+        const value = e.target.value;
+        setConfirmPassword(value);
+
+        if (value && value !== newPassword) {
+            setConfirmPasswordError('Passwords do not match');
+        } else {
+            setConfirmPasswordError('');
+        }
+    };
+
+    // Check if passwords match for submit button
+    const isPasswordMatch = () => {
+        return newPassword && 
+               confirmPassword && 
+               newPassword === confirmPassword && 
+               newPassword.length >= 6 &&
+               isOtpVerified;
+    };
+
+    // Send OTP to email
+    const handleSendOtp = () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!forgotEmail || !emailRegex.test(forgotEmail)) {
+            setForgotEmailError('Please enter a valid email address');
             return;
         }
 
@@ -96,97 +154,45 @@ const Homepage = () => {
         // Simulate OTP sending
         setTimeout(() => {
             setIsLoading(false);
-            setOtpSent(true);
-            setCountdown(60);
-            console.log('OTP sent to:', mobileNumber);
-        }, 2000);
+            alert('OTP sent to your email! (Demo OTP: 1234)');
+            console.log('OTP sent to:', forgotEmail);
+        }, 1500);
     };
 
-    // Forgot password mobile number validation
-    const handleForgotMobileChange = (e) => {
-        let value = e.target.value.replace(/[^0-9]/g, '');
-        
-        if (value.length > 11) {
-            value = value.slice(0, 11);
-        }
-
-        setForgotMobileNumber(value);
-
-        // Clear error if user is typing
-        if (forgotMobileError && value.length > 0) {
-            setForgotMobileError('');
-        }
-    };
-
-    // Validate forgot password mobile number
-    const validateForgotMobile = () => {
-        if (!forgotMobileNumber) {
-            setForgotMobileError('Mobile number is required');
-            return false;
-        }
-
-        if (forgotMobileNumber.length !== 11) {
-            setForgotMobileError('Mobile number must be exactly 11 digits');
-            return false;
-        }
-
-        if (!forgotMobileNumber.startsWith('09')) {
-            setForgotMobileError('Please enter a valid mobile number (e.g., 09123456789)');
-            return false;
-        }
-
-        setForgotMobileError('');
-        return true;
-    };
-
-    // Form submission - UPDATED for OTP
+    // Form submission for login
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Validate mobile number
-        if (mobileNumber.length !== 11) {
-            setMobileError('Mobile number must be exactly 11 digits');
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setEmailError('Please enter a valid email address');
             return;
         }
 
-        // Validate OTP
-        if (otp.length !== 4) {
-            setOtpError('OTP must be exactly 4 digits');
+        if (password.length < 6) {
+            setPasswordError('Password must be at least 6 characters');
             return;
         }
 
-        // Validate all fields
-        if (!mobileNumber || !otp || !userType) {
+        if (!email || !password) {
             alert('Please fill in all fields');
             return;
         }
 
-        // Validate that OTP was sent
-        if (!otpSent) {
-            alert('Please send OTP first');
-            return;
-        }
-
-        // Add your OTP verification logic here
-        // For demo purposes, let's say any 4-digit OTP is valid
-        if (mobileNumber.startsWith('09') && otp.length === 4) {
-            console.log('Verification successful:', {
-                mobileNumber: mobileNumber,
-                otp: otp,
-                userType: userType
-            });
-            
-            // Remove login-page class before redirecting
-            document.body.classList.remove('login-page');
-            
-            // Redirect based on user type using React Router
-            if (userType === 'landlord') {
-                navigate('/landlord-home');
-            } else if (userType === 'tenant') {
-                navigate('/tenant-home');
-            }
+        console.log('Login attempt:', {
+            email: email,
+            password: password
+        });
+        
+        // Remove login-page class before redirecting
+        document.body.classList.remove('login-page');
+        
+        // For demo purposes - redirect based on email domain or any logic
+        // You can modify this logic as needed
+        if (email.includes('landlord')) {
+            navigate('/landlord-home');
         } else {
-            alert('Invalid OTP or mobile number. Please try again.');
+            navigate('/tenant-home');
         }
     };
 
@@ -194,17 +200,24 @@ const Homepage = () => {
     const handleForgotPasswordSubmit = (e) => {
         e.preventDefault();
 
-        if (!validateForgotMobile()) {
+        if (!isPasswordMatch()) {
             return;
         }
 
         setIsLoading(true);
 
-        // Simulate OTP sending process
+        // Simulate password reset
         setTimeout(() => {
             setIsLoading(false);
-            alert('OTP sent successfully! Please check your messages.');
-            console.log('OTP sent to:', forgotMobileNumber);
+            alert('Password reset successful! Please login with your new password.');
+            // Reset form and go back to login
+            setShowForgotPassword(false);
+            setForgotEmail('');
+            setForgotOtp('');
+            setNewPassword('');
+            setConfirmPassword('');
+            setIsOtpVerified(false);
+            console.log('Password reset for:', forgotEmail);
         }, 2000);
     };
 
@@ -216,28 +229,133 @@ const Homepage = () => {
                     // Forgot Password Form
                     <>
                         <h1 className="forgot-title">FORGOT PASSWORD?</h1>
-                        <p className="forgot-subtitle">No worries, please enter your mobile number</p>
+                        <p className="forgot-subtitle">Enter your email to reset your password</p>
                         
                         <form onSubmit={handleForgotPasswordSubmit} className="login-form">
                             <div className="input-group">
-                                <div className={`input-wrapper ${forgotMobileError ? 'error' : ''}`}>
+                                <div className={`input-wrapper ${forgotEmailError ? 'error' : ''}`}>
                                     <svg className="input-icon" viewBox="0 0 24 24" fill="none">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2"/>
+                                        <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                     <input 
-                                        type="tel" 
-                                        placeholder="Mobile Number" 
-                                        value={forgotMobileNumber}
-                                        onChange={handleForgotMobileChange}
-                                        maxLength="11" 
+                                        type="email" 
+                                        placeholder="Email Address" 
+                                        value={forgotEmail}
+                                        onChange={handleForgotEmailChange}
                                         required 
                                     />
                                 </div>
-                                {forgotMobileError && <div className="error-message">{forgotMobileError}</div>}
+                                {forgotEmailError && <div className="error-message">{forgotEmailError}</div>}
+                            </div>
+
+                            <div className="input-group">
+                                <div className={`input-wrapper otp-wrapper ${forgotOtpError ? 'error' : ''}`}>
+                                    <svg className="input-icon" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                                        <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <input 
+                                        type="text"
+                                        placeholder="4-digit OTP" 
+                                        value={forgotOtp}
+                                        onChange={handleForgotOtpChange}
+                                        maxLength="4"
+                                        required 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="send-otp-btn" 
+                                        onClick={handleSendOtp}
+                                        disabled={isLoading || !forgotEmail}
+                                    >
+                                        {isLoading ? 'Sending...' : 'Send OTP'}
+                                    </button>
+                                </div>
+                                {forgotOtpError && <div className="error-message">{forgotOtpError}</div>}
+                            </div>
+
+                            <div className="input-group">
+                                <div className={`input-wrapper ${newPasswordError ? 'error' : ''}`}>
+                                    <svg className="input-icon" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                                        <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <input 
+                                        type={showNewPassword ? "text" : "password"}
+                                        placeholder="New Password" 
+                                        value={newPassword}
+                                        onChange={handleNewPasswordChange}
+                                        disabled={!isOtpVerified}
+                                        required 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="eye-icon-btn"
+                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        disabled={!isOtpVerified}
+                                    >
+                                        {showNewPassword ? (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                {newPasswordError && <div className="error-message">{newPasswordError}</div>}
+                            </div>
+
+                            <div className="input-group">
+                                <div className={`input-wrapper ${confirmPasswordError ? 'error' : ''}`}>
+                                    <svg className="input-icon" viewBox="0 0 24 24" fill="none">
+                                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
+                                        <circle cx="12" cy="16" r="1" fill="currentColor"/>
+                                        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    </svg>
+                                    <input 
+                                        type={showConfirmPassword ? "text" : "password"}
+                                        placeholder="Confirm Password" 
+                                        value={confirmPassword}
+                                        onChange={handleConfirmPasswordChange}
+                                        disabled={!isOtpVerified}
+                                        required 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        className="eye-icon-btn"
+                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        disabled={!isOtpVerified}
+                                    >
+                                        {showConfirmPassword ? (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                                            </svg>
+                                        )}
+                                    </button>
+                                </div>
+                                {confirmPasswordError && <div className="error-message">{confirmPasswordError}</div>}
                             </div>
                             
-                            <button type="submit" className="login-btn" disabled={isLoading}>
-                                {isLoading ? 'Sending...' : 'Send OTP'}
+                            <button 
+                                type="submit" 
+                                className="login-btn" 
+                                disabled={!isPasswordMatch() || isLoading}
+                            >
+                                {isLoading ? 'Resetting...' : 'Reset Password'}
                             </button>
                         </form>
 
@@ -248,75 +366,66 @@ const Homepage = () => {
                 ) : (
                     // Login Form
                     <>
-                        <h1>Welcome back!</h1>
+                        <h1 className="welcome-title">Welcome back!</h1>
                         <form onSubmit={handleSubmit} className="login-form">
                             <div className="input-group">
-                                <div className={`input-wrapper ${mobileError ? 'error' : ''}`}>
+                                <div className={`input-wrapper ${emailError ? 'error' : ''}`}>
                                     <svg className="input-icon" viewBox="0 0 24 24" fill="none">
-                                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" strokeWidth="2"/>
+                                        <polyline points="22,6 12,13 2,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                     <input 
-                                        type="tel" 
-                                        placeholder="Mobile Number" 
-                                        value={mobileNumber}
-                                        onChange={handleMobileChange}
-                                        maxLength="11" 
+                                        type="email" 
+                                        placeholder="Email Address" 
+                                        value={email}
+                                        onChange={handleEmailChange}
                                         required 
                                     />
                                 </div>
-                                {mobileError && <div className="error-message">{mobileError}</div>}
+                                {emailError && <div className="error-message">{emailError}</div>}
                             </div>
 
                             <div className="input-group">
-                                <div className={`input-wrapper otp-wrapper ${otpError ? 'error' : ''}`}>
+                                <div className={`input-wrapper ${passwordError ? 'error' : ''}`}>
                                     <svg className="input-icon" viewBox="0 0 24 24" fill="none">
                                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" stroke="currentColor" strokeWidth="2"/>
                                         <circle cx="12" cy="16" r="1" fill="currentColor"/>
                                         <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                                     </svg>
                                     <input 
-                                        type="text"
-                                        placeholder="4-digit OTP" 
-                                        value={otp}
-                                        onChange={handleOtpChange}
-                                        maxLength="4"
+                                        type={showPassword ? "text" : "password"}
+                                        placeholder="Password" 
+                                        value={password}
+                                        onChange={handlePasswordChange}
                                         required 
                                     />
                                     <button 
                                         type="button" 
-                                        className="send-otp-btn" 
-                                        onClick={handleSendOtp}
-                                        disabled={isLoading || countdown > 0 || mobileNumber.length !== 11}
+                                        className="eye-icon-btn"
+                                        onClick={() => setShowPassword(!showPassword)}
                                     >
-                                        {isLoading ? 'Sending...' : 
-                                         countdown > 0 ? `${countdown}s` : 'Send OTP'}
+                                        {showPassword ? (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <line x1="1" y1="1" x2="23" y2="23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                            </svg>
+                                        ) : (
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
-                                {otpError && <div className="error-message">{otpError}</div>}
-                            </div>
-
-                            <div className="input-group">
-                                <div className="select-wrapper">
-                                    <svg className="input-icon" viewBox="0 0 24 24" fill="none">
-                                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                        <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                                    </svg>
-                                    <select 
-                                        value={userType}
-                                        onChange={(e) => setUserType(e.target.value)}
-                                        required
-                                    >
-                                        <option value="" disabled>Log in as</option>
-                                        <option value="tenant">Tenant</option>
-                                        <option value="landlord">Landlord</option>
-                                    </select>
-                                    <svg className="dropdown-arrow" viewBox="0 0 24 24" fill="none">
-                                        <polyline points="6,9 12,15 18,9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                                    </svg>
+                                {passwordError && <div className="error-message">{passwordError}</div>}
+                                <div className="forgot-password-link">
+                                    <a href="#" onClick={(e) => { e.preventDefault(); setShowForgotPassword(true); }}>
+                                        Forgot Password?
+                                    </a>
                                 </div>
                             </div>
 
-                            <button type="submit" className="login-btn">Verify</button>
+                            <button type="submit" className="login-btn">Login</button>
                         </form>
 
                         <div className="signup-link">

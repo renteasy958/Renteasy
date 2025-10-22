@@ -72,14 +72,27 @@ body {
     text-align: center;
     letter-spacing: -0.5px;
     margin-bottom: 30px;
-    margin-top: -15px;
+    margin-top: -50px;
     height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
 }
-
+.welcome-title {
+font-size: 32px;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-align: center;
+    letter-spacing: -0.5px;
+    margin-bottom: 60px !important;
+    margin-top: -20px !important;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
 /* Subtitle */
 .forgot-subtitle {
     font-size: 14px;
@@ -88,7 +101,8 @@ body {
     font-weight: 400;
     font-family: 'Poppins', sans-serif;
     height: auto;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    margin-top: -40px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -157,6 +171,7 @@ body {
 input[type="tel"],
 input[type="password"],
 input[type="text"],
+input[type="email"],
 select {
     flex: 1;
     border: none;
@@ -174,8 +189,62 @@ input:focus {
 }
 
 input::placeholder {
-    color: #9ca3af;
+    color: #ffffff;
     font-weight: 400;
+}
+
+/* Eye icon button styles */
+.eye-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.eye-icon-btn svg {
+    width: 20px;
+    height: 20px;
+    color: #9ca3af;
+    transition: color 0.3s ease;
+}
+
+.eye-icon-btn:hover:not(:disabled) svg {
+    color: #1e3c72;
+}
+
+.eye-icon-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+}
+
+.eye-icon-btn:disabled svg {
+    color: #d1d5db;
+}
+
+/* Forgot password link */
+.forgot-password-link {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.forgot-password-link a {
+    color: #1e3c72;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.forgot-password-link a:hover {
+    color: #2a5298;
+    text-decoration: underline;
 }
 
 /* OTP wrapper specific styles */
@@ -290,13 +359,13 @@ select:valid {
     height: 48px;
 }
 
-.login-btn:hover {
+.login-btn:hover:not(:disabled) {
     background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
     transform: translateY(-1px);
     box-shadow: 0 6px 16px rgba(30, 60, 114, 0.3);
 }
 
-.login-btn:active {
+.login-btn:active:not(:disabled) {
     transform: translateY(0);
     box-shadow: 0 3px 8px rgba(30, 60, 114, 0.2);
 }
@@ -330,7 +399,7 @@ select:valid {
 
 /* Disabled button state */
 .login-btn:disabled {
-    opacity: 0.7;
+    opacity: 0.5;
     cursor: not-allowed;
     transform: none;
 }
@@ -338,7 +407,7 @@ select:valid {
 .login-btn:disabled:hover {
     background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
     transform: none;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    box-shadow: none;
 }
 
 /* Font family */
@@ -352,7 +421,9 @@ select,
 .error-message,
 .login-btn,
 .signup-link,
-.send-otp-btn {
+.send-otp-btn,
+.eye-icon-btn,
+.forgot-password-link {
     font-family: 'Poppins', sans-serif;
 }
 
@@ -379,7 +450,7 @@ input::placeholder {
     .login-card {
         width: 100%;
         max-width: 380px;
-        height: 460px;
+        height: 480px;
         padding: 24px 20px;
     }
     
@@ -417,6 +488,11 @@ input::placeholder {
         height: 28px;
     }
 
+    .eye-icon-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
     .logo {
         top: 10px;
         left: 10px;
@@ -431,7 +507,7 @@ input::placeholder {
     .login-card {
         width: 100%;
         max-width: 300px;
-        height: 440px;
+        height: 480px;
         padding: 20px 16px;
     }
     
@@ -452,5 +528,10 @@ input::placeholder {
         font-size: 10px;
         min-width: 50px;
         height: 24px;
+    }
+
+    .eye-icon-btn svg {
+        width: 16px;
+        height: 16px;
     }
 }

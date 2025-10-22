@@ -16,12 +16,12 @@ const TenantProfile = ({ tenantData }) => {
         gender: 'Male',
         dateOfBirth: '2002-05-15',
         mobileNumber: '09123456789',
-        permanentAddress: '123 Main Street, Cebu City, Philippines',
+        permanentAddress: 'Brgy. Kakapoy',
         category: 'student',
         emergencyContact: {
             fullName: 'Maria Dela Cruz',
             contactNo: '09123456789',
-            address: '123 Main Street, Cebu City, Philippines'
+            address: 'Brgy. Hakdog'
         }
     };
 

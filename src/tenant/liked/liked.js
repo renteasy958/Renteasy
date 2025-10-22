@@ -140,7 +140,6 @@ const Liked = () => {
             <div className="like-modal-body">
               <h2 className="like-modal-title">{selectedHouse.name}</h2>
               <p className="like-modal-address">
-                <span className="like-location-icon">📍</span>
                 {selectedHouse.address}
               </p>
               <div className="like-modal-rating">

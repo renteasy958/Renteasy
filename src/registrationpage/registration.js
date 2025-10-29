@@ -6,6 +6,10 @@ const Registration = ({ onBack }) => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('tenant');
     const [showCheckmark, setShowCheckmark] = useState(false);
+    const [showTenantPassword, setShowTenantPassword] = useState(false);
+    const [showTenantConfirmPassword, setShowTenantConfirmPassword] = useState(false);
+    const [showLandlordPassword, setShowLandlordPassword] = useState(false);
+    const [showLandlordConfirmPassword, setShowLandlordConfirmPassword] = useState(false);
     
     // Separate form data for tenant and landlord
     const [tenantFormData, setTenantFormData] = useState({
@@ -17,12 +21,11 @@ const Registration = ({ onBack }) => {
         gender: '',
         dateOfBirth: '',
         permanentAddress: '',
+        mobileNumber: '',
         category: '',
-        emergencyContact: {
-            fullName: '',
-            contactNo: '',
-            address: ''
-        }
+        email: '',
+        password: '',
+        confirmPassword: ''
     });
 
     const [landlordFormData, setLandlordFormData] = useState({
@@ -36,29 +39,20 @@ const Registration = ({ onBack }) => {
         permanentAddress: '',
         contactNumber: '',
         boardingHouseName: '',
-        boardingHouseAddress: ''
+        boardingHouseAddress: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
     });
 
     const handleTenantInputChange = (e) => {
         const { name, value } = e.target;
         
-        if (name === 'emergency-contactNo') {
+        if (name === 'mobileNumber') {
             const digitsOnly = value.replace(/\D/g, '').slice(0, 11);
             setTenantFormData(prev => ({
                 ...prev,
-                emergencyContact: {
-                    ...prev.emergencyContact,
-                    contactNo: digitsOnly
-                }
-            }));
-        } else if (name.startsWith('emergency-')) {
-            const fieldName = name.replace('emergency-', '');
-            setTenantFormData(prev => ({
-                ...prev,
-                emergencyContact: {
-                    ...prev.emergencyContact,
-                    [fieldName]: value
-                }
+                [name]: digitsOnly
             }));
         } else {
             setTenantFormData(prev => ({
@@ -243,6 +237,21 @@ const Registration = ({ onBack }) => {
                             </div>
                         </div>
 
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Mobile Number</label>
+                                <input 
+                                    type="tel" 
+                                    name="mobileNumber"
+                                    className="form-input" 
+                                    placeholder="Enter mobile number"
+                                    value={tenantFormData.mobileNumber}
+                                    onChange={handleTenantInputChange}
+                                    maxLength="11"
+                                />
+                            </div>
+                        </div>
+
                         <div className="checkbox-group">
                             <div className="checkbox-item">
                                 <input 
@@ -279,45 +288,75 @@ const Registration = ({ onBack }) => {
                             </div>
                         </div>
 
-                        <div className="person">Person to be contacted in case of emergency:</div>
-
                         <div className="form-row">
                             <div className="form-group">
-                                <label className="form-label">Full Name</label>
+                                <label className="form-label">Email</label>
                                 <input 
-                                    type="text" 
-                                    name="emergency-fullName"
+                                    type="email" 
+                                    name="email"
                                     className="form-input" 
-                                    placeholder="Enter full name"
-                                    value={tenantFormData.emergencyContact.fullName}
+                                    placeholder="Enter email"
+                                    value={tenantFormData.email}
                                     onChange={handleTenantInputChange}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="form-label">Contact No.</label>
+                            <div className="form-group password-input">
+                                <label className="form-label">Password</label>
                                 <input 
-                                    type="tel" 
-                                    name="emergency-contactNo"
+                                    type={showTenantPassword ? "text" : "password"}
+                                    name="password"
                                     className="form-input" 
-                                    placeholder="Enter contact number"
-                                    value={tenantFormData.emergencyContact.contactNo}
+                                    placeholder="Enter password"
+                                    value={tenantFormData.password}
                                     onChange={handleTenantInputChange}
-                                    maxLength="11"
                                 />
+                                <span 
+                                    className="password-toggle"
+                                    onClick={() => setShowTenantPassword(!showTenantPassword)}
+                                >
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        {showTenantPassword ? (
+                                            <>
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </>
+                                        )}
+                                    </svg>
+                                </span>
                             </div>
-                        </div>
-
-                        <div className="form-row">
-                            <div className="form-group full-width">
-                                <label className="form-label">Address</label>
+                            <div className="form-group password-input">
+                                <label className="form-label">Confirm Password</label>
                                 <input 
-                                    type="text" 
-                                    name="emergency-address"
-                                    className="form-input" 
-                                    placeholder="Enter address"
-                                    value={tenantFormData.emergencyContact.address}
+                                    type={showTenantConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    className={`form-input ${tenantFormData.confirmPassword && tenantFormData.password !== tenantFormData.confirmPassword ? 'password-mismatch' : ''}`}
+                                    placeholder="Confirm password"
+                                    value={tenantFormData.confirmPassword}
                                     onChange={handleTenantInputChange}
                                 />
+                                <span 
+                                    className="password-toggle"
+                                    onClick={() => setShowTenantConfirmPassword(!showTenantConfirmPassword)}
+                                >
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        {showTenantConfirmPassword ? (
+                                            <>
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </>
+                                        )}
+                                    </svg>
+                                </span>
                             </div>
                         </div>
 
@@ -434,6 +473,17 @@ const Registration = ({ onBack }) => {
 
                         <div className="form-row">
                             <div className="form-group">
+                                <label className="form-label">Name of Boarding House</label>
+                                <input 
+                                    type="text" 
+                                    name="boardingHouseName"
+                                    className="form-input" 
+                                    placeholder="Enter boarding house name"
+                                    value={landlordFormData.boardingHouseName}
+                                    onChange={handleLandlordInputChange}
+                                />
+                            </div>
+                            <div className="form-group">
                                 <label className="form-label">Contact Number</label>
                                 <input 
                                     type="tel" 
@@ -449,20 +499,6 @@ const Registration = ({ onBack }) => {
 
                         <div className="form-row">
                             <div className="form-group full-width">
-                                <label className="form-label">Name of Boarding House</label>
-                                <input 
-                                    type="text" 
-                                    name="boardingHouseName"
-                                    className="form-input" 
-                                    placeholder="Enter boarding house name"
-                                    value={landlordFormData.boardingHouseName}
-                                    onChange={handleLandlordInputChange}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="form-row">
-                            <div className="form-group full-width">
                                 <label className="form-label">Address</label>
                                 <input 
                                     type="text" 
@@ -472,6 +508,78 @@ const Registration = ({ onBack }) => {
                                     value={landlordFormData.boardingHouseAddress}
                                     onChange={handleLandlordInputChange}
                                 />
+                            </div>
+                        </div>
+
+                        <div className="form-row">
+                            <div className="form-group">
+                                <label className="form-label">Email</label>
+                                <input 
+                                    type="email" 
+                                    name="email"
+                                    className="form-input" 
+                                    placeholder="Enter email"
+                                    value={landlordFormData.email}
+                                    onChange={handleLandlordInputChange}
+                                />
+                            </div>
+                            <div className="form-group password-input">
+                                <label className="form-label">Password</label>
+                                <input 
+                                    type={showLandlordPassword ? "text" : "password"}
+                                    name="password"
+                                    className="form-input" 
+                                    placeholder="Enter password"
+                                    value={landlordFormData.password}
+                                    onChange={handleLandlordInputChange}
+                                />
+                                <span 
+                                    className="password-toggle"
+                                    onClick={() => setShowLandlordPassword(!showLandlordPassword)}
+                                >
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        {showLandlordPassword ? (
+                                            <>
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </>
+                                        )}
+                                    </svg>
+                                </span>
+                            </div>
+                            <div className="form-group password-input">
+                                <label className="form-label">Confirm Password</label>
+                                <input 
+                                    type={showLandlordConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    className={`form-input ${landlordFormData.confirmPassword && landlordFormData.password !== landlordFormData.confirmPassword ? 'password-mismatch' : ''}`}
+                                    placeholder="Confirm password"
+                                    value={landlordFormData.confirmPassword}
+                                    onChange={handleLandlordInputChange}
+                                />
+                                <span 
+                                    className="password-toggle"
+                                    onClick={() => setShowLandlordConfirmPassword(!showLandlordConfirmPassword)}
+                                >
+                                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        {showLandlordConfirmPassword ? (
+                                            <>
+                                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                                                <circle cx="12" cy="12" r="3"/>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/>
+                                                <line x1="1" y1="1" x2="23" y2="23"/>
+                                            </>
+                                        )}
+                                    </svg>
+                                </span>
                             </div>
                         </div>
 

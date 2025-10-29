@@ -4,7 +4,7 @@
 .like-liked-page {
   min-height: 100vh;
   height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #ecebeb;
   padding-top: 80px;
   overflow-y: auto;
   position: fixed;
@@ -33,13 +33,13 @@
 
 /* Boarding House Card - Matching home.css design */
 .like-boarding-house-card {
-  background: rgb(235, 235, 235);
+  background: rgb(255, 255, 255);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
-  border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #ffffff;
+  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
   padding: 16px;
 }
 
@@ -74,7 +74,7 @@
   border-radius: 50%;
   border: none;
   background-color: white;
-  color: #ddd;
+  color: #ffffff;
   font-size: 20px;
   cursor: pointer;
   display: flex;

@@ -28,21 +28,6 @@ const Home = ({ onLogout }) => {
     setLikedHouses(newLikedHouses);
   };
 
-  const renderStars = (rating) => {
-    return Array(5).fill(null).map((_, index) => (
-      <span
-        key={index}
-        className={index < rating ? 'star-filled' : 'star-empty'}
-        style={{
-          color: index < rating ? '#ffd700' : '#ddd',
-          fontSize: '16px'
-        }}
-      >
-        ★
-      </span>
-    ));
-  };
-
   const BoardingHouseCard = ({ house }) => (
     <div className="boarding-card" onClick={() => setSelectedHouse(house)}>
       <div className="card-image">
@@ -59,10 +44,6 @@ const Home = ({ onLogout }) => {
       <div className="card-content">
         <h3>{house.name}</h3>
         <p className="address">{house.address}</p>
-        <div className="rating">
-          {renderStars(house.rating)}
-          <span className="rating-number">{house.rating}</span>
-        </div>
       </div>
     </div>
   );

@@ -1,13 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
+import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair, MapPin } from 'lucide-react';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../../firebase/firebase';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './addbh.css';
+import 'leaflet-routing-machine';
+
 
 const AddBoardingHouse = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [images, setImages] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -27,12 +34,122 @@ const AddBoardingHouse = () => {
       table: false,
       chair: false
     },
-    gcash: {
-      qrCode: null,
-      accountName: '',
-      mobileNumber: ''
+    location: {
+      latitude: null,
+      longitude: null,
+      markerPlaced: false
     }
   });
+
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+  const markerRef = useRef(null);
+
+  // Cloudinary configuration
+  const CLOUDINARY_CLOUD_NAME = 'ddidkbqcn';
+  const CLOUDINARY_UPLOAD_PRESET = 'renteasy';
+
+  // Initialize map when step 3 is reached
+  useEffect(() => {
+    if (currentStep === 3 && !mapInstanceRef.current) {
+      // Fix for default marker icon
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png ',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png ',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png ',
+      });
+
+      
+      // Initialize map centered on Philippines (Cebu area as default)
+      const map = L.map(mapRef.current).setView([10.3157, 123.8854], 13);
+      
+      // Add OpenStreetMap tiles
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Add click event to place marker
+      map.on('click', (e) => {
+        const { lat, lng } = e.latlng;
+        
+        // Remove existing marker if any
+        if (markerRef.current) {
+          map.removeLayer(markerRef.current);
+        }
+        
+        // Add new marker
+        const marker = L.marker([lat, lng], {
+          draggable: true
+        }).addTo(map);
+        
+        marker.bindPopup(`<b>Boarding House Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}`).openPopup();
+        
+        // Update marker on drag
+        marker.on('dragend', (event) => {
+          const position = event.target.getLatLng();
+          setFormData(prev => ({
+            ...prev,
+            location: {
+              latitude: position.lat,
+              longitude: position.lng,
+              markerPlaced: true
+            }
+          }));
+          marker.setPopupContent(`<b>Boarding House Location</b><br>Lat: ${position.lat.toFixed(6)}<br>Lng: ${position.lng.toFixed(6)}`);
+        });
+        
+        markerRef.current = marker;
+        
+        // Update form data
+        setFormData(prev => ({
+          ...prev,
+          location: {
+            latitude: lat,
+            longitude: lng,
+            markerPlaced: true
+          }
+        }));
+      });
+
+      mapInstanceRef.current = map;
+
+      // Try to get user's current location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const { latitude, longitude } = position.coords;
+            map.setView([latitude, longitude], 15);
+            
+            // Add a temporary marker to show user location
+            L.marker([latitude, longitude], {
+              icon: L.icon({
+                iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png ',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png ',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+              })
+            }).addTo(map).bindPopup('Your current location').openPopup();
+          },
+          (error) => {
+            console.log('Geolocation error:', error);
+          }
+        );
+      }
+    }
+
+    // Cleanup
+    return () => {
+      if (mapInstanceRef.current && currentStep !== 3) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+        markerRef.current = null;
+      }
+    };
+  }, [currentStep]);
 
   const boardingTypes = [
     'Single Room',
@@ -79,19 +196,6 @@ const AddBoardingHouse = () => {
     setImages(newImages);
   };
 
-  const handleQRUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFormData({
-        ...formData,
-        gcash: {
-          ...formData.gcash,
-          qrCode: URL.createObjectURL(file)
-        }
-      });
-    }
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -107,17 +211,6 @@ const AddBoardingHouse = () => {
     });
   };
 
-  const handleGcashChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      gcash: {
-        ...formData.gcash,
-        [name]: value
-      }
-    });
-  };
-
   const handleNext = () => {
     if (currentStep < 3) setCurrentStep(currentStep + 1);
   };
@@ -126,21 +219,153 @@ const AddBoardingHouse = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  const handleSubmit = () => {
-    console.log('Form submitted:', formData);
+  // Upload single image to Cloudinary with timeout
+  const uploadToCloudinary = async (file, folder = 'boarding-houses') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+    formData.append('folder', folder);
+
+    try {
+      console.log(`Uploading to Cloudinary - Cloud: ${CLOUDINARY_CLOUD_NAME}, Preset: ${CLOUDINARY_UPLOAD_PRESET}, Folder: ${folder}`);
+      
+      // Create a timeout promise
+      const timeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout after 30 seconds')), 30000)
+      );
+      
+      // Race between upload and timeout
+      const uploadPromise = fetch(
+        `https://api.cloudinary.com/v1_1/ ${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData
+        }
+      );
+      
+      const response = await Promise.race([uploadPromise, timeout]);
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        console.error('Cloudinary upload failed:', data);
+        throw new Error(data.error?.message || `Upload failed with status ${response.status}`);
+      }
+      
+      console.log('Cloudinary upload successful:', data.secure_url);
+      return data.secure_url;
+    } catch (error) {
+      console.error('Error uploading to Cloudinary:', error);
+      throw new Error(`Cloudinary upload failed: ${error.message}`);
+    }
+  };
+
+  // Upload all images to Cloudinary
+  const uploadImages = async () => {
+    const imageUrls = [];
     
-    // Show success animation
-    setShowSuccess(true);
+    for (let i = 0; i < images.length; i++) {
+      const image = images[i];
+      try {
+        const url = await uploadToCloudinary(image.file, 'boarding-houses');
+        imageUrls.push(url);
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+      }
+    }
     
-    // Hide animation after 3 seconds and redirect to Landlord Home
-    setTimeout(() => {
-      setShowSuccess(false);
-      navigate('/llhome'); // Navigate to Landlord Home page
-    }, 3000);
+    return imageUrls;
+  };
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!formData.name || !formData.address || !formData.type || !formData.price || !formData.description) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (images.length < 3) {
+      alert('Please upload at least 3 images');
+      return;
+    }
+
+    if (!formData.location.markerPlaced) {
+      alert('Please mark your boarding house location on the map');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Upload all images to Cloudinary
+      console.log('Uploading images to Cloudinary...');
+      const imageUrls = await uploadImages();
+      console.log('Images uploaded:', imageUrls);
+
+      // Validate that all uploads succeeded
+      if (!imageUrls || imageUrls.length === 0) {
+        throw new Error('Failed to upload images');
+      }
+
+      // Save data to Firestore with explicit values only
+      console.log('Preparing data for Firestore...');
+      
+      const dataToSubmit = {
+        name: String(formData.name || ''),
+        address: String(formData.address || ''),
+        type: String(formData.type || ''),
+        price: parseFloat(formData.price) || 0,
+        description: String(formData.description || ''),
+        amenities: {
+          wifi: Boolean(formData.amenities.wifi),
+          comfortRoom: Boolean(formData.amenities.comfortRoom),
+          kitchen: Boolean(formData.amenities.kitchen),
+          ac: Boolean(formData.amenities.ac),
+          laundry: Boolean(formData.amenities.laundry),
+          security: Boolean(formData.amenities.security),
+          water: Boolean(formData.amenities.water),
+          electricity: Boolean(formData.amenities.electricity),
+          bed: Boolean(formData.amenities.bed),
+          table: Boolean(formData.amenities.table),
+          chair: Boolean(formData.amenities.chair)
+        },
+        images: imageUrls,
+        location: {
+          latitude: formData.location.latitude,
+          longitude: formData.location.longitude
+        },
+        createdAt: new Date().toISOString(),
+        status: 'active'
+      };
+
+      console.log('Data to submit:', dataToSubmit);
+      console.log('Saving to Firestore...');
+      
+      const docRef = await addDoc(collection(db, 'boardingHouses'), dataToSubmit);
+
+      console.log('Document written with ID:', docRef.id);
+      
+      // Show success animation
+      setShowSuccess(true);
+      
+      // Hide animation after 3 seconds and redirect to Landlord Home
+      setTimeout(() => {
+        setShowSuccess(false);
+        navigate('/llhome');
+      }, 3000);
+
+    } catch (error) {
+      console.error('Error adding boarding house:', error);
+      console.error('Error details:', error);
+      alert('Error submitting form: ' + error.message + '\n\nPlease check:\n1. Your internet connection\n2. Cloudinary settings (Cloud Name and Upload Preset)\n3. Browser console (F12) for details');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCancel = () => {
-      navigate('/llhome'); // Navigate back to Landlord Home
+    navigate('/llhome');
   };
 
   return (
@@ -150,7 +375,7 @@ const AddBoardingHouse = () => {
         <div className="success-overlay">
           <div className="success-animation">
             <div className="checkmark-circle">
-              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg " viewBox="0 0 52 52">
                 <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
                 <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
               </svg>
@@ -178,7 +403,7 @@ const AddBoardingHouse = () => {
           <div className={`add-step-line ${currentStep >= 3 ? 'add-active' : ''}`}></div>
           <div className={`add-step ${currentStep >= 3 ? 'add-active' : ''}`}>
             <div className="add-step-number">3</div>
-            <div className="add-step-label">Payment</div>
+            <div className="add-step-label">Location</div>
           </div>
         </div>
 
@@ -310,78 +535,67 @@ const AddBoardingHouse = () => {
           </div>
         )}
 
-        {/* Step 3: Payment */}
+        {/* Step 3: Location */}
         {currentStep === 3 && (
           <div className="add-step-content">
-            <h3 className="add-payment-title">GCash Payment Information</h3>
-            <div className="add-gcash-section">
-              <div className="add-form-group">
-                <label className="add-label">GCash QR Code *</label>
-                <div className="add-qr-upload">
-                  {formData.gcash.qrCode ? (
-                    <div className="add-qr-preview">
-                      <img src={formData.gcash.qrCode} alt="QR Code" />
-                    </div>
-                  ) : (
-                    <label className="add-qr-upload-box">
-                      <Upload size={28} />
-                      <span>Upload QR Code</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleQRUpload}
-                        style={{ display: 'none' }}
-                      />
-                    </label>
-                  )}
-                </div>
-              </div>
-
-              <div className="add-form-group">
-                <label className="add-label">GCash Account Name *</label>
-                <input
-                  type="text"
-                  name="accountName"
-                  value={formData.gcash.accountName}
-                  onChange={handleGcashChange}
-                  placeholder="Enter account name"
-                  className="add-input"
-                />
-              </div>
-
-              <div className="add-form-group">
-                <label className="add-label">Mobile Number *</label>
-                <input
-                  type="tel"
-                  name="mobileNumber"
-                  value={formData.gcash.mobileNumber}
-                  onChange={handleGcashChange}
-                  placeholder="09XX XXX XXXX"
-                  className="add-input"
-                />
-              </div>
+            <h3 className="add-location-title">
+              <MapPin size={20} style={{ display: 'inline', marginRight: '8px' }} />
+              Mark Your Boarding House Location
+            </h3>
+            <p className="add-location-instruction">
+              Click on the map to place a marker at your boarding house location. You can drag the marker to adjust its position.
+            </p>
+            <div className="add-map-container">
+              <div ref={mapRef} className="add-map"></div>
             </div>
+            {formData.location.markerPlaced && (
+              <div className="add-location-info">
+                <p><strong>Coordinates:</strong></p>
+                <p>Latitude: {formData.location.latitude?.toFixed(6)}</p>
+                <p>Longitude: {formData.location.longitude?.toFixed(6)}</p>
+              </div>
+            )}
           </div>
         )}
 
         {/* Navigation Buttons */}
         <div className="add-form-actions">
-          <button type="button" className="add-btn-cancel" onClick={handleCancel}>
+          <button 
+            type="button" 
+            className="add-btn-cancel" 
+            onClick={handleCancel}
+            disabled={isSubmitting}
+          >
             Cancel
           </button>
           <div className="add-nav-buttons">
             {currentStep > 1 && (
-              <button type="button" className="add-btn-previous" onClick={handlePrevious}>
+              <button 
+                type="button" 
+                className="add-btn-previous" 
+                onClick={handlePrevious}
+                disabled={isSubmitting}
+              >
                 Previous
               </button>
             )}
             {currentStep < 3 ? (
-              <button type="button" className="add-btn-next" onClick={handleNext}>
+              <button 
+                type="button" 
+                className="add-btn-next" 
+                onClick={handleNext}
+                disabled={isSubmitting}
+              >
                 Next
               </button>
             ) : (
-              <button type="button" className="add-btn-submit" onClick={handleSubmit}>
-                Submit
+              <button 
+                type="button" 
+                className="add-btn-submit" 
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
             )}
           </div>

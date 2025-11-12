@@ -4,7 +4,7 @@
   width: 100vw;
   margin: 0;
   margin-left: calc(-50vw + 50%);
-  background-color: white;
+  background-color: #f2f3f4;
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #e5e5e5;
+  background-color: #ffffff;
   border-radius: 12px;
   padding: 16px 32px;
   margin-bottom: 20px;
@@ -32,7 +32,7 @@
 .rsv-info-item {
   flex: 0 0 auto;
   padding: 0 20px;
-  border-right: 2px solid #999;
+  border-right: 2px solid #ffffff;
 }
 
 .rsv-info-item:first-child {
@@ -302,7 +302,7 @@
 
   .rsv-info-item {
     border-right: none;
-    border-bottom: 1px solid #999;
+    border-bottom: 1px solid #ffffff;
     padding: 8px 0;
     width: 100%;
   }

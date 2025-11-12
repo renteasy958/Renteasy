@@ -25,13 +25,13 @@
 .like-page-title {
   font-size: 2rem !important;
   font-weight: 800;
-  color: #1f2937;
+  color: #012E6A;
   margin-bottom: 40px;
   text-align: left;
   margin-left: 0;
 }
 
-/* Boarding House Card - Matching home.css design */
+/* Boarding House Card - Copied from home.css */
 .like-boarding-house-card {
   background: rgb(255, 255, 255);
   border-radius: 16px;
@@ -39,7 +39,7 @@
   transition: all 0.3s ease;
   cursor: pointer;
   border: 1px solid #ffffff;
-  box-shadow: 0 4px 20px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   padding: 16px;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .like-button.like-liked {
-  color: #e74c3c;
+  color: #012E6A;
 }
 
 .like-button:hover {
@@ -273,7 +273,7 @@
 }
 
 .like-modal-action-button.like-unliked {
-  background-color: #e74c3c;
+  background-color: #1e3a8a;
 }
 
 .like-modal-action-button.like-liked {

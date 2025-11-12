@@ -5,6 +5,7 @@ import './llnavbar.css';
 const LLNavbar = () => {
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [isHomepage, setIsHomepage] = useState(true);
+  const [isNavigatingToProfile, setIsNavigatingToProfile] = useState(false);
   const settingsDropdownRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -20,6 +21,15 @@ const LLNavbar = () => {
   useEffect(() => {
     setIsHomepage(true);
   }, []);
+
+  // Add this useEffect to reset the state when location changes
+  useEffect(() => {
+    if (location.pathname === '/llprofile') {
+      setIsNavigatingToProfile(true);
+    } else {
+      setIsNavigatingToProfile(false);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -58,7 +68,7 @@ const LLNavbar = () => {
     // Redirect to landlord home page (FIXED)
     if (pageId === 'home') {
       console.log('Navigating to landlord home...');
-      navigate('/landlord-home');
+      navigate('/llhome');
       return;
     }
     
@@ -67,7 +77,8 @@ const LLNavbar = () => {
 
   const handleProfileClick = () => {
     console.log('Redirecting to landlord profile...');
-    navigate('/landlord-profile');
+    setIsNavigatingToProfile(true);
+    navigate('/llprofile');
   };
 
   const handleLogout = (e) => {
@@ -99,7 +110,7 @@ const LLNavbar = () => {
   const currentPage = getCurrentPage();
 
   return (
-    <nav className="ll-navbar">
+    <nav className={`ll-navbar ${isNavigatingToProfile ? 'navigating-to-profile' : ''}`}>
       <div className="ll-navbar-container">
         <div className="ll-navbar-logo">
           <img src="/logo.png" alt="RentEasy Logo" className="ll-logo-img" />

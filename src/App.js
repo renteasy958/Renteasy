@@ -9,7 +9,8 @@ import Home from './tenant/homepage/home';
 import Navbar from './tenant/navbar/navbar';
 import Liked from './tenant/liked/liked';
 import AddBoardingHouse from './landlord/addbh/addbh';
-import TenantProfile from './tenant/profile/profile'; // Import the profile component
+import TenantProfile from './tenant/profile/profile';
+import LLProfile from './landlord/llprofile/llprofile'; // Add this import
 
 
 function App() {
@@ -64,7 +65,7 @@ function App() {
           } />
           
           {/* Landlord routes */}
-          <Route path="/landlord-home" element={
+          <Route path="/llhome" element={
             <>
               <LLNavbar />
               <Landlordhome />
@@ -74,12 +75,13 @@ function App() {
             <>
               <LLNavbar />
               <ReservationList />
+              <Landlordhome />
             </>
           } />
-          <Route path="/landlord-profile" element={
+          <Route path="/llprofile" element={
             <>
               <LLNavbar />
-              <div>Landlord Profile Page</div>
+              <LLProfile />
             </>
           } />
           <Route path="/add-boarding-house" element={<AddBoardingHouse />} />

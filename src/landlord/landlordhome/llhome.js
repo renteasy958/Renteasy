@@ -14,7 +14,7 @@ const Landlordhome = () => {
       address: "Montilla St. Brgy 1, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1000",
-      rating: 4.9
+     
     },
     {
       id: 2,
@@ -22,7 +22,7 @@ const Landlordhome = () => {
       address: "Rodriguez Ave. Brgy 3, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1500",
-      rating: 4.7
+     
     },
     {
       id: 3,
@@ -30,7 +30,7 @@ const Landlordhome = () => {
       address: "Santos St. Brgy 2, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1200",
-      rating: 4.8
+     
     },
     {
       id: 4,
@@ -38,7 +38,7 @@ const Landlordhome = () => {
       address: "Dela Cruz St. Brgy 4, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1800",
-      rating: 4.6
+      
     },
     {
       id: 16,
@@ -46,7 +46,7 @@ const Landlordhome = () => {
       address: "University Ave. Brgy 16, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1050",
-      rating: 4.5
+      
     },
     {
       id: 17,
@@ -54,7 +54,7 @@ const Landlordhome = () => {
       address: "School St. Brgy 17, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1350",
-      rating: 4.6
+      
     },
     {
       id: 18,
@@ -62,7 +62,7 @@ const Landlordhome = () => {
       address: "Commerce Ave. Brgy 18, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1750",
-      rating: 4.7
+      
     },
     {
       id: 19,
@@ -70,7 +70,7 @@ const Landlordhome = () => {
       address: "Riverside St. Brgy 19, Isabela",
       roomType: "Bed Space (1 pax)",
       price: "₱900",
-      rating: 4.4
+      
     }
   ];
 
@@ -81,7 +81,7 @@ const Landlordhome = () => {
       address: "Coastal Rd. Brgy 5, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1100",
-      rating: 4.5
+      
     },
     {
       id: 6,
@@ -89,7 +89,7 @@ const Landlordhome = () => {
       address: "Highland Ave. Brgy 6, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1400",
-      rating: 4.3
+     
     },
    
   ];
@@ -101,7 +101,7 @@ const Landlordhome = () => {
       address: "Gateway Ave. Brgy 9, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1600",
-      rating: 4.8
+      
     },
     {
       id: 10,
@@ -109,7 +109,7 @@ const Landlordhome = () => {
       address: "Paradise St. Brgy 10, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱1300",
-      rating: 4.9
+      
     },
     {
       id: 11,
@@ -117,7 +117,7 @@ const Landlordhome = () => {
       address: "Star Ave. Brgy 11, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1700",
-      rating: 4.6
+   
     },
     {
       id: 12,
@@ -125,7 +125,7 @@ const Landlordhome = () => {
       address: "Quiet St. Brgy 12, Isabela",
       roomType: "Bed Space (1 pax)",
       price: "₱850",
-      rating: 4.5
+     
     },
     {
       id: 13,
@@ -133,7 +133,7 @@ const Landlordhome = () => {
       address: "Main St. Brgy 13, Isabela",
       roomType: "Shared Room (2-4 pax)",
       price: "₱950",
-      rating: 4.4
+     
     },
     {
       id: 14,
@@ -141,7 +141,7 @@ const Landlordhome = () => {
       address: "Central Ave. Brgy 14, Isabela",
       roomType: "Private Room (1 pax)",
       price: "₱1450",
-      rating: 4.7
+    
     },
     {
       id: 15,
@@ -149,7 +149,7 @@ const Landlordhome = () => {
       address: "Market St. Brgy 15, Isabela",
       roomType: "Studio Room (1 pax)",
       price: "₱1900",
-      rating: 4.8
+      
     }
   ];
 
@@ -176,8 +176,7 @@ const Landlordhome = () => {
         <div className="property-footer">
           <span className="llprice">{property.price} <span className="per-month">per month</span></span>
           <div className="rating">
-            <span>{property.rating}</span>
-            <span className="star">⭐</span>
+           
           </div>
         </div>
       </div>
@@ -208,22 +207,7 @@ const Landlordhome = () => {
           </div>
         </section>
 
-        {/* Pending Section */}
-        <section className="section">
-          <div className="section-header">
-            <h2>Pending ({pendingData.length})</h2>
-            <div className="header-actions">
-              <button className="see-all-btn" onClick={() => handleSeeAll('pending')}>
-                See all
-              </button>
-            </div>
-          </div>
-          <div className={`cards-container ${expandedSections.pending ? 'expanded' : ''}`}>
-            {pendingData.map(property => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
-        </section>
+        
 
         {/* Occupied Section */}
         <section className="section">

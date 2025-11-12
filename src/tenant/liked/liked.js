@@ -73,7 +73,6 @@ const Liked = () => {
       <div className="like-card-content">
         <h3 className="like-card-title">{house.name}</h3>
         <p className="like-card-address">
-          <span className="like-location-icon">📍</span>
           {house.address}
         </p>
         <div className="like-card-rating">
@@ -102,7 +101,7 @@ const Liked = () => {
     <div className="like-liked-page">
       <main className="like-liked-main">
         <section>
-          <h2 className="like-page-title">Liked Boarding Houses</h2>
+          <h2 className="like-page-title">LIKED BOARDING HOUSE </h2>
           
           {likedBoardingHouses.length === 0 ? (
             <div className="like-empty-state">

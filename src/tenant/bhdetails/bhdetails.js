@@ -1,5 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams } from 'react-router-dom';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import 'leaflet-routing-machine';
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 import './bhdetails.css';
+
+// Fix Leaflet default icon
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Custom icon for user location
+let UserIcon = L.icon({
+  iconUrl: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSIjNDA5NmZmIj48Y2lyY2xlIGN4PSIxMiIgY3k9IjEyIiByPSI4IiBmaWxsPSIjNDA5NmZmIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiLz48L3N2Zz4=',
+  iconSize: [20, 20],
+  iconAnchor: [10, 10]
+});
 
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -8,6 +29,56 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [referenceNumber, setReferenceNumber] = useState('');
   const [qrCodeImage, setQrCodeImage] = useState(null);
+  const mapRef = useRef(null);
+
+  // Initialize map when component mounts
+  useEffect(() => {
+    if (isOpen && house) {
+      // Wait for DOM to be ready
+      const timer = setTimeout(() => {
+        const mapContainer = document.getElementById('map');
+        if (mapContainer && !mapRef.current) {
+          try {
+            // Use house coordinates if available, otherwise default to Isabela, Negros Occidental
+            const lat = house.latitude || 10.2167;
+            const lng = house.longitude || 122.9833;
+            
+            // Initialize map
+            mapRef.current = L.map('map').setView([lat, lng], 15);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+              attribution: '© OpenStreetMap contributors',
+              maxZoom: 19
+            }).addTo(mapRef.current);
+
+            // Add a marker
+            L.marker([lat, lng])
+              .addTo(mapRef.current)
+              .bindPopup(house.name)
+              .openPopup();
+              
+            // Force map to resize after initialization
+            setTimeout(() => {
+              if (mapRef.current) {
+                mapRef.current.invalidateSize();
+              }
+            }, 100);
+          } catch (error) {
+            console.error('Map initialization error:', error);
+          }
+        }
+      }, 200);
+
+      // Cleanup function
+      return () => {
+        clearTimeout(timer);
+        if (mapRef.current) {
+          mapRef.current.remove();
+          mapRef.current = null;
+        }
+      };
+    }
+  }, [isOpen, house]);
 
   if (!isOpen || !house) return null;
 
@@ -78,13 +149,11 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
     setShowPaymentForm(false);
     setShowSuccessAnimation(true);
 
-    // Hide success animation and stay on the same page after 3 seconds
+    // Hide success animation after 3 seconds
     setTimeout(() => {
       setShowSuccessAnimation(false);
       setReferenceNumber('');
       setQrCodeImage(null);
-      setShowPaymentForm(false);
-      // Stay on BHDetails page - don't close the modal
     }, 3000);
   };
 
@@ -154,9 +223,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               </div>
 
               <div className="map-placeholder">
-                <div className="map-coming-soon">
-                  <p>Map Coming Soon</p>
-                </div>
+                <div id="map" style={{ height: '300px', width: '100%' }}></div>
               </div>
 
               <div className="contact-section">

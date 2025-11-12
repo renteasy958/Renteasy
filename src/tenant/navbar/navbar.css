@@ -275,10 +275,12 @@
     align-items: center;
     gap: 30px;
     margin-right: 30px;
+    flex-shrink: 0;
 }
 
 .nav-item-container {
     position: relative;
+    flex-shrink: 0;
 }
 
 .nav-link {
@@ -287,21 +289,26 @@
     font-size: 18px;
     font-weight: 500;
     padding: 10px 20px;
-    border-radius: 25px;
-    transition: all 0.3s ease;
+    transition: none;
     position: relative;
     white-space: nowrap;
+    display: inline-block;
 }
 
-.nav-link:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background-color: white;
+    transition: width 0.3s ease;
 }
 
-.nav-link.active {
-    font-weight: 600;
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
+.nav-link.active::after {
+    width: 60%;
 }
 
 /* Settings Dropdown */
@@ -517,6 +524,7 @@
 /* Body padding to account for fixed navbar */
 body {
     padding-top: 60px;
+    overflow-y: scroll;
 }
 
 @media (max-width: 480px) {

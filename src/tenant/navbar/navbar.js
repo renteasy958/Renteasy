@@ -13,6 +13,7 @@ const Navbar = () => {
     location: null,
     priceRange: null
   });
+  const [activeNav, setActiveNav] = useState('home'); // Track active nav separately
   const filterDropdownRef = useRef(null);
   const settingsDropdownRef = useRef(null);
 
@@ -23,7 +24,10 @@ const Navbar = () => {
     return 'home';
   };
 
-  const currentPage = getCurrentPage();
+  // Update activeNav when location changes
+  useEffect(() => {
+    setActiveNav(getCurrentPage());
+  }, [location.pathname]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -140,9 +144,10 @@ const Navbar = () => {
     }
   };
 
-  // Handle profile click
+  // Handle profile click - removes active state from nav
   const handleProfileClick = () => {
     console.log('Redirecting to user profile...');
+    setActiveNav(null); // Remove active state from all nav items
     navigate('/user-profile');
   };
 
@@ -270,7 +275,7 @@ const Navbar = () => {
             <div key={item.id} className="nav-item-container">
               <a
                 href="#"
-                className={`nav-link ${currentPage === item.id ? 'active' : ''}`}
+                className={`nav-link ${activeNav === item.id ? 'active' : ''}`}
                 onClick={(e) => {
                   e.preventDefault();
                   handleNavigation(item.id);

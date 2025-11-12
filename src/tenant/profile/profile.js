@@ -1,28 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './profile.css';
 
 const TenantProfile = ({ tenantData }) => {
     const navigate = useNavigate();
+    const [imgError, setImgError] = useState(false);
 
-    // Default data if no props are passed (for development/testing)
+    // Default data matching the registration form structure
     const defaultData = {
         profileImage: 'https://via.placeholder.com/150',
-        firstName: 'Juan',
-        middleName: 'Santos',
-        lastName: 'Dela Cruz',
-        civilStatus: 'Single',
-        age: '22',
-        gender: 'Male',
-        dateOfBirth: '2002-05-15',
-        mobileNumber: '09123456789',
-        permanentAddress: 'Brgy. Kakapoy',
-        category: 'student',
-        emergencyContact: {
-            fullName: 'Maria Dela Cruz',
-            contactNo: '09123456789',
-            address: 'Brgy. Hakdog'
-        }
+        firstName: '',
+        middleName: '',
+        lastName: '',
+        civilStatus: '',
+        age: '',
+        gender: '',
+        dateOfBirth: '',
+        permanentAddress: '',
+        mobileNumber: '',
+        category: '',
+        email: ''
     };
 
     // Use provided data or fall back to default
@@ -31,18 +28,27 @@ const TenantProfile = ({ tenantData }) => {
     // Helper function to format date
     const formatDate = (dateString) => {
         if (!dateString) return 'N/A';
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        return new Date(dateString).toLocaleDateString('en-US', options);
+        try {
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString('en-US', options);
+        } catch (error) {
+            return 'Invalid Date';
+        }
+    };
+
+    // Helper function to capitalize category
+    const formatCategory = (category) => {
+        if (!category) return 'Not specified';
+        return category.charAt(0).toUpperCase() + category.slice(1);
     };
 
     // Edit profile handler
     const handleEditProfile = () => {
-        // Navigate to edit profile page or show edit modal
         console.log('Edit profile clicked');
         // navigate('/edit-profile');
     };
 
-    const fullName = `${userData.firstName} ${userData.middleName} ${userData.lastName}`;
+    const fullName = `${userData.firstName || ''} ${userData.middleName || ''} ${userData.lastName || ''}`.trim() || 'No Name';
 
     return (
         <div className="prof-container">
@@ -50,49 +56,48 @@ const TenantProfile = ({ tenantData }) => {
             <div className="prof-sidebar">
                 <div className="prof-sidebar-content">
                     <div className="prof-image-container">
-                        <img src={userData.profileImage} alt="Profile" className="prof-image" />
+                        <img 
+                            src={imgError ? 'https://via.placeholder.com/150' : (userData.profileImage || 'https://via.placeholder.com/150')} 
+                            alt="Profile" 
+                            className="prof-image"
+                            onError={() => setImgError(true)}
+                        />
                     </div>
                     <div className="prof-name">{fullName}</div>
-                    <div className="prof-category">{userData.category}</div>
-                </div>
-                <div className="prof-sidebar-bottom">
-                    <button className="prof-edit-btn" onClick={handleEditProfile}>
-                        Edit Profile
-                    </button>
+                    <div className="prof-category">{formatCategory(userData.category)}</div>
                 </div>
             </div>
 
             {/* Main content area */}
             <div className="prof-body">
                 <div className="prof-section-title">
-                    <span className="prof-section-icon">👤</span>
-                    Personal Information
+                    PERSONAL INFORMATION
                 </div>
                 
                 <div className="prof-info-grid">
                     <div className="prof-info-item">
                         <div className="prof-info-label">First Name</div>
-                        <div className="prof-info-value">{userData.firstName}</div>
+                        <div className="prof-info-value">{userData.firstName || 'N/A'}</div>
                     </div>
                     <div className="prof-info-item">
                         <div className="prof-info-label">Middle Name</div>
-                        <div className="prof-info-value">{userData.middleName}</div>
+                        <div className="prof-info-value">{userData.middleName || 'N/A'}</div>
                     </div>
                     <div className="prof-info-item">
                         <div className="prof-info-label">Last Name</div>
-                        <div className="prof-info-value">{userData.lastName}</div>
-                    </div>
-                    <div className="prof-info-item">
-                        <div className="prof-info-label">Age</div>
-                        <div className="prof-info-value">{userData.age} years old</div>
-                    </div>
-                    <div className="prof-info-item">
-                        <div className="prof-info-label">Gender</div>
-                        <div className="prof-info-value">{userData.gender}</div>
+                        <div className="prof-info-value">{userData.lastName || 'N/A'}</div>
                     </div>
                     <div className="prof-info-item">
                         <div className="prof-info-label">Civil Status</div>
-                        <div className="prof-info-value">{userData.civilStatus}</div>
+                        <div className="prof-info-value">{userData.civilStatus || 'N/A'}</div>
+                    </div>
+                    <div className="prof-info-item">
+                        <div className="prof-info-label">Age</div>
+                        <div className="prof-info-value">{userData.age ? `${userData.age} years old` : 'N/A'}</div>
+                    </div>
+                    <div className="prof-info-item">
+                        <div className="prof-info-label">Gender</div>
+                        <div className="prof-info-value">{userData.gender || 'N/A'}</div>
                     </div>
                     <div className="prof-info-item">
                         <div className="prof-info-label">Date of Birth</div>
@@ -100,33 +105,15 @@ const TenantProfile = ({ tenantData }) => {
                     </div>
                     <div className="prof-info-item">
                         <div className="prof-info-label">Mobile Number</div>
-                        <div className="prof-info-value">{userData.mobileNumber}</div>
+                        <div className="prof-info-value">{userData.mobileNumber || 'N/A'}</div>
+                    </div>
+                    <div className="prof-info-item">
+                        <div className="prof-info-label">Email</div>
+                        <div className="prof-info-value">{userData.email || 'N/A'}</div>
                     </div>
                     <div className="prof-info-item prof-address-value">
                         <div className="prof-info-label">Permanent Address</div>
-                        <div className="prof-info-value">{userData.permanentAddress}</div>
-                    </div>
-                </div>
-
-                <div className="prof-emergency-section">
-                    <div className="prof-section-title">
-                        <span className="prof-section-icon">🚨</span>
-                        Emergency Contact
-                    </div>
-                    
-                    <div className="prof-info-grid">
-                        <div className="prof-info-item">
-                            <div className="prof-info-label">Full Name</div>
-                            <div className="prof-info-value">{userData.emergencyContact.fullName}</div>
-                        </div>
-                        <div className="prof-info-item">
-                            <div className="prof-info-label">Contact Number</div>
-                            <div className="prof-info-value">{userData.emergencyContact.contactNo}</div>
-                        </div>
-                        <div className="prof-info-item prof-address-value">
-                            <div className="prof-info-label">Address</div>
-                            <div className="prof-info-value">{userData.emergencyContact.address}</div>
-                        </div>
+                        <div className="prof-info-value">{userData.permanentAddress || 'N/A'}</div>
                     </div>
                 </div>
             </div>

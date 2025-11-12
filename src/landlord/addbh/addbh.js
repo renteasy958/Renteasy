@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
 import './addbh.css';
 
 const AddBoardingHouse = () => {
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [images, setImages] = useState([]);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -125,17 +128,39 @@ const AddBoardingHouse = () => {
 
   const handleSubmit = () => {
     console.log('Form submitted:', formData);
-    alert('Boarding house added successfully!');
+    
+    // Show success animation
+    setShowSuccess(true);
+    
+    // Hide animation after 3 seconds and redirect to Landlord Home
+    setTimeout(() => {
+      setShowSuccess(false);
+      navigate('/llhome'); // Navigate to Landlord Home page
+    }, 3000);
   };
 
   const handleCancel = () => {
-    if (window.confirm('Are you sure you want to cancel? All data will be lost.')) {
-      window.history.back();
-    }
+      navigate('/llhome'); // Navigate back to Landlord Home
   };
 
   return (
     <div className="add-boarding-container">
+      {/* Success Animation Overlay */}
+      {showSuccess && (
+        <div className="success-overlay">
+          <div className="success-animation">
+            <div className="checkmark-circle">
+              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
+                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+              </svg>
+            </div>
+            <h2>Success!</h2>
+            <p>Your boarding house has been added successfully.</p>
+          </div>
+        </div>
+      )}
+
       <div className="add-boarding-form">
         <h1 className="add-form-title">Add Boarding House</h1>
 

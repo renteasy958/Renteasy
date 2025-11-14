@@ -38,7 +38,6 @@ const AddBoardingHouse = () => {
     }
   });
 
-  const CLOUDINARY_CLOUD_NAME = 'ddidkbqcn';
   const boardingTypes = [
     'Single Room',
     'Bed Spacer',

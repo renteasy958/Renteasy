@@ -8,6 +8,7 @@ import Landlordhome from './landlord/landlordhome/llhome';
 import Home from './tenant/homepage/home';
 import Navbar from './tenant/navbar/navbar';
 import Liked from './tenant/liked/liked';
+import SearchResults from './tenant/search/SearchResults';
 import AddBoardingHouse from './landlord/addbh/addbh';
 import TenantProfile from './tenant/profile/profile';
 import LLProfile from './landlord/llprofile/llprofile'; // Add this import
@@ -53,6 +54,12 @@ function App() {
             <>
               <Navbar />
               <Liked />
+            </>
+          } />
+          <Route path="/search" element={
+            <>
+              <Navbar />
+              <SearchResults />
             </>
           } />
           

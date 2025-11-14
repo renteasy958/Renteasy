@@ -1,7 +1,10 @@
-// Shared boarding house data for the entire application
+// DEPRECATED: This file is no longer used.
+// All boarding house data is now fetched from Firestore in real-time.
+// See src/services/bhservice.js - getAllBoardingHouses()
 
-export const popularBoardingHouses = [
-  {
+export const allBoardingHouses = [];
+export const popularBoardingHouses = [];
+export const nearbyBoardingHouses = [];
     id: 1,
     name: 'Tres Marias Boarding House',
     address: 'Montilla St., Brgy 1, Isabela',

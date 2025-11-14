@@ -13,6 +13,30 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [qrCodeImage, setQrCodeImage] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  
+  // Normalize images into an array and reset index when house changes
+  const images = (house && house.images && Array.isArray(house.images))
+    ? house.images
+    : (house && house.images ? [house.images] : []);
+  
+  // Detailed logging to diagnose image issues
+  console.log('[BHDetails] Image normalization debug:', {
+    houseId: house?.id,
+    houseName: house?.name,
+    rawImages: house?.images,
+    rawImagesType: typeof house?.images,
+    isArray: Array.isArray(house?.images),
+    normalizedImages: images,
+    normalizedLength: images.length,
+    firstImage: images[0],
+    allImages: JSON.stringify(images)
+  });
+  
+  useEffect(() => {
+    // Reset to first image when the house changes
+    setCurrentImageIndex(0);
+    console.log('[BHDetails] Reset carousel to index 0, available images:', images.length);
+  }, [house?.id]);
 
   // Amenities configuration
   const amenityConfig = {
@@ -85,6 +109,15 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
   if (!isOpen || !house) return null;
 
+  console.log('BHDetails - house object:', {
+    id: house.id,
+    name: house.name,
+    imagesType: typeof house.images,
+    imagesLength: house.images?.length,
+    images: house.images,
+    hasImages: house.images && Array.isArray(house.images) && house.images.length > 0
+  });
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -92,15 +125,15 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === house.images.length - 1 ? 0 : prev + 1
-    );
+    const imageCount = images.length;
+    if (imageCount === 0) return;
+    setCurrentImageIndex((prev) => (prev === imageCount - 1 ? 0 : prev + 1));
   };
 
   const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? house.images.length - 1 : prev - 1
-    );
+    const imageCount = images.length;
+    if (imageCount === 0) return;
+    setCurrentImageIndex((prev) => (prev === 0 ? imageCount - 1 : prev - 1));
   };
 
   const handleDotClick = (index) => {
@@ -170,14 +203,24 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
             </button>
             
             <div className="image-carousel">
-              <img 
-                src={house.images[currentImageIndex] || '/default.png'} 
+              <img
+                key={`img-${currentImageIndex}`}
+                src={images[currentImageIndex] || '/default.png'}
                 alt={house.name}
+                onLoad={() => {
+                  console.log(`[BHDetails] Image loaded at index ${currentImageIndex}:`, images[currentImageIndex]);
+                }}
                 onError={(e) => {
+                  console.error(`[BHDetails] Image failed to load at index ${currentImageIndex}:`, {
+                    attemptedUrl: e.target.src,
+                    currentIndex: currentImageIndex,
+                    totalImages: images.length,
+                    allImages: images
+                  });
                   e.target.src = '/default.png';
                 }}
               />
-              {house.images.length > 1 && (
+              {images.length > 1 && (
                 <>
                   <button className="carousel-nav prev" onClick={prevImage}>
                     &lt;
@@ -188,11 +231,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                 </>
               )}
               <div className="carousel-dots">
-                {house.images.map((_, index) => (
+                {images.map((imgUrl, index) => (
                   <span 
                     key={index}
                     className={`dot ${index === currentImageIndex ? 'active' : ''}`}
                     onClick={() => handleDotClick(index)}
+                    title={`Image ${index + 1}: ${imgUrl ? imgUrl.substring(0, 40) : 'empty'}`}
                   />
                 ))}
               </div>

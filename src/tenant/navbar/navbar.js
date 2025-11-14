@@ -139,8 +139,11 @@ const Navbar = () => {
   // Handle search
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
-      console.log(`Searching for: ${searchQuery}`);
-      // Add your search logic here
+      console.log(`[NAVBAR] Searching for: "${searchQuery}"`);
+      console.log(`[NAVBAR] Navigating to: /search?q=${encodeURIComponent(searchQuery)}`);
+      // Navigate to dedicated search results page with query param
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      setSearchQuery(''); // Clear search box after search
     }
   };
 

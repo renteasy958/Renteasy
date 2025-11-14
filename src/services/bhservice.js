@@ -22,12 +22,37 @@ export const getAllBoardingHouses = async () => {
     const boardingHouses = [];
     
     querySnapshot.forEach((doc) => {
-      boardingHouses.push({
+      const docData = {
         id: doc.id,
         ...doc.data()
+      };
+      
+      // Ensure images field exists and is an array
+      if (!docData.images) {
+        docData.images = [];
+        console.warn(`Document ${doc.id} missing images field - initialized to empty array`);
+      } else if (!Array.isArray(docData.images)) {
+        // Convert single string to array, or initialize as empty
+        console.warn(`Document ${doc.id} images field is not an array:`, typeof docData.images, docData.images);
+        docData.images = typeof docData.images === 'string' && docData.images.trim() 
+          ? [docData.images] 
+          : [];
+      }
+      
+      // Log the images for debugging
+      console.log(`Document ${doc.id} (${docData.name}) - images array:`, {
+        count: docData.images.length,
+        urls: docData.images,
+        firstUrl: docData.images[0]
       });
+      
+      boardingHouses.push(docData);
     });
     
+    console.log(`getAllBoardingHouses - Total docs fetched: ${boardingHouses.length}`);
+    if (boardingHouses.length > 0) {
+      console.log('First boarding house full data:', boardingHouses[0]);
+    }
     return boardingHouses;
   } catch (error) {
     console.error("Error getting boarding houses:", error);
@@ -81,6 +106,13 @@ export const addBoardingHouseWithImages = async (boardingHouseData, images = [])
     const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
 
+    console.log('=== addBoardingHouseWithImages START ===');
+    console.log('Received images parameter:', {
+      type: typeof images,
+      isArray: Array.isArray(images),
+      length: images?.length,
+      value: images
+    });
     console.log('Cloudinary config:', { cloudName, uploadPreset });
 
     if (!cloudName || !uploadPreset) {
@@ -130,7 +162,13 @@ export const addBoardingHouseWithImages = async (boardingHouseData, images = [])
       updatedAt: new Date().toISOString()
     };
 
-    console.log('Firestore payload:', dataToSave);
+    console.log('=== Firestore payload before addDoc ===');
+    console.log('Images array:', {
+      length: imageUrls.length,
+      value: imageUrls,
+      isArray: Array.isArray(imageUrls)
+    });
+    console.log('Full payload:', JSON.stringify(dataToSave, null, 2));
 
     try {
       const addPromise = addDoc(collection(db, COLLECTION_NAME), dataToSave);

@@ -165,12 +165,15 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 8px;
+  gap: 6px;
+  max-width: 90%;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.5);
   cursor: pointer;
@@ -887,6 +890,10 @@
     font-size: 2rem;
   }
 
+  .image-carousel {
+    height: 320px;
+  }
+
   .price {
     font-size: 2.5rem;
   }
@@ -961,5 +968,22 @@
 
   .success-animation p {
     font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .image-carousel {
+    height: 220px;
+  }
+
+  .carousel-nav {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
   }
 }

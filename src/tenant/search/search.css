@@ -1,0 +1,64 @@
+.search-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f7f9fc 0%, #ffffff 40%);
+  color: #222;
+}
+
+.search-hero {
+  background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+  color: white;
+  padding: 36px 24px;
+}
+
+.search-hero-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.search-hero h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.search-query {
+  margin-top: 8px;
+  opacity: 0.95;
+}
+
+.search-main {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 8px 16px 80px 16px;
+}
+
+.search-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.search-card {
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(20,20,30,0.06);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-card-image {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+}
+
+.search-card-body {
+  padding: 12px;
+}
+
+.search-loading, .no-results {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}

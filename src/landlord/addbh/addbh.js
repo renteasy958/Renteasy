@@ -141,6 +141,12 @@ const AddBoardingHouse = () => {
     try {
       // Prepare payload: remove preview objects from images and convert to File[]
       const imageFiles = images.map(img => img.file ? img.file : img);
+      console.log('Images state before submission:', {
+        imagesArrayLength: images.length,
+        imagesArray: images,
+        extractedFilesLength: imageFiles.length,
+        extractedFiles: imageFiles
+      });
 
       const payload = {
         name: formData.name,

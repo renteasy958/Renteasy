@@ -1,78 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
+import { getAllBoardingHouses } from '../../services/bhservice';
 import './llhome.css';
 
 const Landlordhome = () => {
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState({});
+  const [listingsData, setListingsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const listingsData = [
-    {
-      id: 1,
-      name: "Tres Marias Boarding House",
-      address: "Montilla St. Brgy 1, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1000",
-     
-    },
-    {
-      id: 2,
-      name: "Tres Marias Boarding House",
-      address: "Rodriguez Ave. Brgy 3, Isabela",
-      roomType: "Private Room (1 pax)",
-      price: "₱1500",
-     
-    },
-    {
-      id: 3,
-      name: "Tres Marias Boarding House",
-      address: "Santos St. Brgy 2, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1200",
-     
-    },
-    {
-      id: 4,
-      name: "Tres Marias Boarding House",
-      address: "Dela Cruz St. Brgy 4, Isabela",
-      roomType: "Studio Room (1 pax)",
-      price: "₱1800",
-      
-    },
-    {
-      id: 16,
-      name: "Tres Marias Boarding House",
-      address: "University Ave. Brgy 16, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1050",
-      
-    },
-    {
-      id: 17,
-      name: "Tres Marias Boarding House",
-      address: "School St. Brgy 17, Isabela",
-      roomType: "Private Room (1 pax)",
-      price: "₱1350",
-      
-    },
-    {
-      id: 18,
-      name: "Tres Marias Boarding House",
-      address: "Commerce Ave. Brgy 18, Isabela",
-      roomType: "Studio Room (1 pax)",
-      price: "₱1750",
-      
-    },
-    {
-      id: 19,
-      name: "Tres Marias Boarding House",
-      address: "Riverside St. Brgy 19, Isabela",
-      roomType: "Bed Space (1 pax)",
-      price: "₱900",
-      
-    }
-  ];
+  useEffect(() => {
+    const fetchBoardingHouses = async () => {
+      try {
+        setLoading(true);
+        const data = await getAllBoardingHouses();
+        console.log('Fetched boarding houses:', data);
+        setListingsData(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching boarding houses:', err);
+        setError(err.message);
+        setListingsData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoardingHouses();
+  }, []);
 
   const pendingData = [
     {
@@ -164,29 +121,68 @@ const Landlordhome = () => {
     navigate('/add-boarding-house');
   };
 
-  const PropertyCard = ({ property }) => (
-    <div className="property-card">
-      <div className="property-image"></div>
-      <div className="property-details">
-        <div className="property-info">
-          <h3 className="property-name">{property.name}</h3>
-          <p className="property-address">{property.address}</p>
-          <p className="room-type">{property.roomType}</p>
-        </div>
-        <div className="property-footer">
-          <span className="llprice">{property.price} <span className="per-month">per month</span></span>
-          <div className="rating">
-           
+  const PropertyCard = ({ property }) => {
+    // Format price: if it's a string starting with ₱, use it; otherwise format it
+    const formattedPrice = typeof property.price === 'string' && property.price.startsWith('₱') 
+      ? property.price 
+      : `₱${property.price}`;
+    
+    // Get first image from images array
+    const thumbnail = (property.images && Array.isArray(property.images) && property.images.length > 0) 
+      ? property.images[0] 
+      : '/default.png';
+    
+    return (
+      <div className="property-card">
+        <div 
+          className="property-image"
+          style={{
+            backgroundImage: `url('${thumbnail}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
+        />
+        <div className="property-details">
+          <div className="property-info">
+            <h3 className="property-name">{property.name}</h3>
+            <p className="property-address">{property.address}</p>
+            <p className="room-type">{property.type}</p>
+          </div>
+          <div className="property-footer">
+            <span className="llprice">{formattedPrice} <span className="per-month">per month</span></span>
+            <div className="rating">
+             
+            </div>
           </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="app-container">
       <Llnavbar />
       <div className="dashboard-container">
+        {loading && (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            Loading boarding houses...
+          </div>
+        )}
+
+        {error && (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#d32f2f' }}>
+            Error loading boarding houses: {error}
+          </div>
+        )}
+
+        {!loading && !error && listingsData.length === 0 && (
+          <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+            No boarding houses found. <button onClick={handleAddBoardingHouse} style={{ cursor: 'pointer', color: '#1976d2', background: 'none', border: 'none', textDecoration: 'underline' }}>Add one now!</button>
+          </div>
+        )}
+
+        {!loading && !error && listingsData.length > 0 && (
+          <>
         {/* Listings Section */}
         <section className="section">
           <div className="section-header">
@@ -206,25 +202,8 @@ const Landlordhome = () => {
             ))}
           </div>
         </section>
-
-        
-
-        {/* Occupied Section */}
-        <section className="section">
-          <div className="section-header">
-            <h2>Occupied ({occupiedData.length})</h2>
-            <div className="header-actions">
-              <button className="see-all-btn" onClick={() => handleSeeAll('occupied')}>
-                See all
-              </button>
-            </div>
-          </div>
-          <div className={`cards-container ${expandedSections.occupied ? 'expanded' : ''}`}>
-            {occupiedData.map(property => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
-        </section>
+          </>
+        )}
       </div>
     </div>
   );

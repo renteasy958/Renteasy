@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import './bhdetails.css';
 
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
@@ -9,6 +11,77 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [referenceNumber, setReferenceNumber] = useState('');
   const [qrCodeImage, setQrCodeImage] = useState(null);
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+
+  // Amenities configuration
+  const amenityConfig = {
+    wifi: { label: 'WiFi', icon: Wifi },
+    comfortRoom: { label: 'Comfort Room', icon: Home },
+    kitchen: { label: 'Kitchen', icon: UtensilsCrossed },
+    ac: { label: 'Air Conditioning', icon: Wind },
+    laundry: { label: 'Laundry', icon: Shirt },
+    security: { label: 'Security', icon: Shield },
+    water: { label: 'Water', icon: Droplet },
+    electricity: { label: 'Electricity', icon: Zap },
+    bed: { label: 'Bed', icon: BedDouble },
+    table: { label: 'Table', icon: Table2 },
+    chair: { label: 'Chair', icon: Armchair }
+  };
+
+  // Get available amenities from house data
+  const getAvailableAmenities = () => {
+    if (!house.amenities) return [];
+    
+    return Object.entries(house.amenities)
+      .filter(([key, value]) => value === true)
+      .map(([key]) => ({
+        key,
+        label: amenityConfig[key]?.label || key,
+        Icon: amenityConfig[key]?.icon || Home
+      }));
+  };
+
+  // Initialize map when modal opens
+  useEffect(() => {
+    if (isOpen && house.location && mapRef.current && !mapInstanceRef.current) {
+      // Fix for default marker icon
+      delete L.Icon.Default.prototype._getIconUrl;
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+        iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+      });
+
+      // Initialize map
+      const map = L.map(mapRef.current).setView(
+        [house.location.latitude, house.location.longitude],
+        15
+      );
+
+      // Add tile layer
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Add marker
+      L.marker([house.location.latitude, house.location.longitude])
+        .addTo(map)
+        .bindPopup(`<b>${house.name}</b><br>${house.address}`)
+        .openPopup();
+
+      mapInstanceRef.current = map;
+    }
+
+    // Cleanup map when modal closes
+    return () => {
+      if (!isOpen && mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, [isOpen, house]);
 
   if (!isOpen || !house) return null;
 
@@ -75,17 +148,17 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
       return;
     }
 
-    // Show success animation
     setShowPaymentForm(false);
     setShowSuccessAnimation(true);
 
-    // Hide success animation after 3 seconds
     setTimeout(() => {
       setShowSuccessAnimation(false);
       setReferenceNumber('');
       setQrCodeImage(null);
     }, 3000);
   };
+
+  const availableAmenities = getAvailableAmenities();
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
@@ -144,15 +217,17 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               </div>
 
               <div className="room-price-section">
-                <p className="room-type-text">{house.roomType}</p>
-                <p className="price">{house.price}</p>
+                <p className="room-type-text">{house.type}</p>
+                <p className="price">₱{parseFloat(house.price).toLocaleString()}/month</p>
               </div>
 
-              {/* Map Container - Will be populated from landlord's data */}
+              {/* Map Container */}
               <div className="map-placeholder">
-                <div className="map-container" style={{ height: '300px', width: '100%', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '8px', border: '1px solid #ddd' }}>
-                  <p style={{ color: '#666', fontSize: '14px' }}>Map location will be displayed here</p>
-                </div>
+                <div 
+                  ref={mapRef} 
+                  className="map-container" 
+                  style={{ height: '300px', width: '100%', borderRadius: '8px', border: '1px solid #ddd' }}
+                />
               </div>
 
               <div className="contact-section">
@@ -160,26 +235,26 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                 <div className="contact-info">
                   <div className="contact-avatar">
                     <img 
-                      src={house.landlord?.profilePicture || '/default.png'} 
-                      alt={house.landlord?.name || 'Contact'}
+                      src="/default.png"
+                      alt="Contact"
                       onError={(e) => {
                         e.target.src = '/default.png';
                       }}
                     />
                   </div>
                   <div className="contact-details">
-                    <h4>{house.landlord?.name || 'Contact Name'}</h4>
+                    <h4>Landlord</h4>
                     <p>
                       <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
                       </svg>
-                      {house.landlord?.phone || '09000000000'}
+                      Contact via reservation
                     </p>
                     <p>
                       <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      {house.landlord?.address || 'Landlord Address'}
+                      {house.address}
                     </p>
                   </div>
                 </div>
@@ -192,21 +267,20 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               <h2>Description</h2>
               <p>{house.description}</p>
               
-              <p>Enjoy a peaceful environment with essential amenities, including:</p>
-              
-              <ul className="amenities-list">
-                {house.amenities?.map((amenity, index) => (
-                  <li key={index}>{amenity}</li>
-                )) || [
-                  'Well-ventilated rooms',
-                  'Private and shared bathrooms', 
-                  'Safe surroundings',
-                  'Easy access to nearby stores and transportation',
-                  'Piso wifi'
-                ].map((amenity, index) => (
-                  <li key={index}>{amenity}</li>
-                ))}
-              </ul>
+              {/* Available Amenities */}
+              {availableAmenities.length > 0 && (
+                <>
+                  <h3 style={{ marginTop: '24px', marginBottom: '12px' }}>Available Amenities</h3>
+                  <div className="amenities-grid">
+                    {availableAmenities.map(({ key, label, Icon }) => (
+                      <div key={key} className="amenity-item">
+                        <Icon size={20} />
+                        <span>{label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
             
             <button className="reserve-button" onClick={handleReserveClick}>

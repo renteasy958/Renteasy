@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './login.css';
 import Registration from '../registrationpage/registration';
+import { auth, db } from '../firebase/config';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
 
 const Homepage = () => {
     const navigate = useNavigate();
@@ -179,21 +182,45 @@ const Homepage = () => {
             return;
         }
 
-        console.log('Login attempt:', {
-            email: email,
-            password: password
-        });
-        
+        console.log('Login attempt:', { email });
+
         // Remove login-page class before redirecting
         document.body.classList.remove('login-page');
-        
-        // For demo purposes - redirect based on email domain or any logic
-        // You can modify this logic as needed
-        if (email.includes('landlord')) {
-            navigate('/landlord-home');
-        } else {
-            navigate('/tenant-home');
-        }
+
+        (async () => {
+            try {
+                const cred = await signInWithEmailAndPassword(auth, email, password);
+                const uid = cred.user.uid;
+
+                // Check if landlord document exists
+                try {
+                    const llSnap = await getDoc(doc(db, 'landlords', uid));
+                    if (llSnap.exists()) {
+                        navigate('/llhome');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Error checking landlord doc:', err);
+                }
+
+                // Check tenant document
+                try {
+                    const tSnap = await getDoc(doc(db, 'tenants', uid));
+                    if (tSnap.exists()) {
+                        navigate('/tenant-home');
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Error checking tenant doc:', err);
+                }
+
+                // Fallback: go to tenant home
+                navigate('/tenant-home');
+            } catch (err) {
+                console.error('Login failed:', err);
+                alert(err.message || 'Login failed');
+            }
+        })();
     };
 
     // Forgot password form submission

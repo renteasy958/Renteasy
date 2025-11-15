@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './registration.css';
+import { auth, db } from '../firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 const Registration = ({ onBack }) => {
     const navigate = useNavigate();
@@ -17,7 +20,6 @@ const Registration = ({ onBack }) => {
         middleName: '',
         lastName: '',
         civilStatus: '',
-        age: '',
         gender: '',
         dateOfBirth: '',
         permanentAddress: '',
@@ -33,7 +35,6 @@ const Registration = ({ onBack }) => {
         middleName: '',
         lastName: '',
         civilStatus: '',
-        age: '',
         gender: '',
         dateOfBirth: '',
         permanentAddress: '',
@@ -80,21 +81,84 @@ const Registration = ({ onBack }) => {
     };
 
     const handleTenantSubmit = () => {
-        console.log('Tenant form submitted:', tenantFormData);
-        setShowCheckmark(true);
-        
-        setTimeout(() => {
-            navigate('/tenant-home');
-        }, 1500);
+        // Basic validation
+        if (!tenantFormData.email || !tenantFormData.password) {
+            alert('Please provide email and password');
+            return;
+        }
+        if (tenantFormData.password !== tenantFormData.confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        (async () => {
+            try {
+                const userCred = await createUserWithEmailAndPassword(auth, tenantFormData.email, tenantFormData.password);
+                const uid = userCred.user.uid;
+                // Save profile to Firestore under tenants/{uid}
+                await setDoc(doc(db, 'tenants', uid), {
+                    firstName: tenantFormData.firstName,
+                    middleName: tenantFormData.middleName,
+                    lastName: tenantFormData.lastName,
+                    civilStatus: tenantFormData.civilStatus,
+                    gender: tenantFormData.gender,
+                    dateOfBirth: tenantFormData.dateOfBirth,
+                    permanentAddress: tenantFormData.permanentAddress,
+                    mobileNumber: tenantFormData.mobileNumber,
+                    category: tenantFormData.category,
+                    email: tenantFormData.email,
+                    createdAt: new Date().toISOString(),
+                    role: 'tenant'
+                });
+
+                setShowCheckmark(true);
+                setTimeout(() => navigate('/tenant-home'), 1200);
+            } catch (err) {
+                console.error('Registration error (tenant):', err);
+                alert(err.message || 'Registration failed');
+            }
+        })();
     };
 
     const handleLandlordSubmit = () => {
-        console.log('Landlord form submitted:', landlordFormData);
-        setShowCheckmark(true);
-        
-        setTimeout(() => {
-            navigate('/llhome');
-        }, 1500);
+        // Basic validation
+        if (!landlordFormData.email || !landlordFormData.password) {
+            alert('Please provide email and password');
+            return;
+        }
+        if (landlordFormData.password !== landlordFormData.confirmPassword) {
+            alert('Passwords do not match');
+            return;
+        }
+
+        (async () => {
+            try {
+                const userCred = await createUserWithEmailAndPassword(auth, landlordFormData.email, landlordFormData.password);
+                const uid = userCred.user.uid;
+                // Save landlord profile to Firestore under landlords/{uid}
+                await setDoc(doc(db, 'landlords', uid), {
+                    firstName: landlordFormData.firstName,
+                    middleName: landlordFormData.middleName,
+                    lastName: landlordFormData.lastName,
+                    civilStatus: landlordFormData.civilStatus,
+                    gender: landlordFormData.gender,
+                    dateOfBirth: landlordFormData.dateOfBirth,
+                    permanentAddress: landlordFormData.permanentAddress,
+                    contactNumber: landlordFormData.contactNumber,
+                    boardingHouseName: landlordFormData.boardingHouseName,
+                    boardingHouseAddress: landlordFormData.boardingHouseAddress,
+                    email: landlordFormData.email,
+                    createdAt: new Date().toISOString(),
+                    role: 'landlord'
+                });
+
+                setShowCheckmark(true);
+                setTimeout(() => navigate('/llhome'), 1200);
+            } catch (err) {
+                console.error('Registration error (landlord):', err);
+                alert(err.message || 'Registration failed');
+            }
+        })();
     };
 
     const handleTabSwitch = (tabName) => {
@@ -189,18 +253,7 @@ const Registration = ({ onBack }) => {
                                         <option value="Separated">Separated</option>
                                     </select>
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Age</label>
-                                    <input 
-                                        type="number" 
-                                        name="age"
-                                        className="form-input" 
-                                        placeholder="Enter age"
-                                        value={tenantFormData.age}
-                                        onChange={handleTenantInputChange}
-                                        autoComplete="off"
-                                    />
-                                </div>
+                                {/* Age removed per request - do not collect or compute age */}
                                 <div className="form-group gender-dropdown">
                                     <label className="form-label">Gender</label>
                                     <select 
@@ -436,18 +489,7 @@ const Registration = ({ onBack }) => {
                                         <option value="Separated">Separated</option>
                                     </select>
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Age</label>
-                                    <input 
-                                        type="number" 
-                                        name="age"
-                                        className="form-input" 
-                                        placeholder="Enter age"
-                                        value={landlordFormData.age}
-                                        onChange={handleLandlordInputChange}
-                                        autoComplete="off"
-                                    />
-                                </div>
+                                {/* Age removed per request - do not collect or compute age */}
                                 <div className="form-group gender-dropdown">
                                     <label className="form-label">Gender</label>
                                     <select 

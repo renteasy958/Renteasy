@@ -2,6 +2,7 @@
 
 import { initializeApp } from 'firebase/app';
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 // Your Firebase configuration
 const firebaseConfig = {
@@ -47,6 +48,16 @@ try {
   throw error;
 }
 
+// Initialize Auth
+let auth;
+try {
+  auth = getAuth(app);
+  console.log('✅ [Auth] Instance created');
+} catch (error) {
+  console.error('❌ [Auth] Failed to initialize:', error);
+  // don't throw here; allow Firestore-only usage in rare cases
+}
+
 // Try to enable offline persistence (optional but good for debugging)
 enableIndexedDbPersistence(db)
   .then(() => console.log('✅ [Firestore] Offline persistence enabled'))
@@ -60,8 +71,8 @@ enableIndexedDbPersistence(db)
     }
   });
 
-// Export db
-export { db };
+// Export app, db and auth for use throughout the app
+export { app, db, auth };
 
 // Add a test function you can call from console
 window.testFirestoreConnection = async () => {

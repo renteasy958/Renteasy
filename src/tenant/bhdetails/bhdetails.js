@@ -3,6 +3,9 @@ import { Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDoub
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './bhdetails.css';
+import { auth, db } from '../../firebase/config';
+import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
+import { uploadQRCode } from '../../services/cloudinaryService';
 
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -11,8 +14,33 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
   const [referenceNumber, setReferenceNumber] = useState('');
   const [qrCodeImage, setQrCodeImage] = useState(null);
+  const [landlordInfo, setLandlordInfo] = useState(null);
+  const [paymentInfo, setPaymentInfo] = useState(null);
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+
+  // Fetch landlord info and payment info
+  useEffect(() => {
+    const fetchLandlordInfo = async () => {
+      const landlordUid = house?.landlordId || house?.landlordUid;
+      if (landlordUid) {
+        try {
+          const snap = await getDoc(doc(db, 'landlords', landlordUid));
+          if (snap.exists()) {
+            setLandlordInfo(snap.data());
+            // Also try to get payment info
+            const paymentSnap = await getDoc(doc(db, 'landlords', landlordUid, 'payment', 'info'));
+            if (paymentSnap.exists()) {
+              setPaymentInfo(paymentSnap.data());
+            }
+          }
+        } catch (err) {
+          console.warn('Could not fetch landlord info:', err);
+        }
+      }
+    };
+    if (isOpen && house) fetchLandlordInfo();
+  }, [isOpen, house?.landlordId, house?.landlordUid]);
   
   // Normalize images into an array and reset index when house changes
   const images = (house && house.images && Array.isArray(house.images))
@@ -164,14 +192,18 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
     setQrCodeImage(null);
   };
 
-  const handleQrCodeUpload = (e) => {
+  const handleQrCodeUpload = async (e) => {
     const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setQrCodeImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+    
+    try {
+      // Upload to Cloudinary using the landlord's UID if available
+      const landlordUid = house?.landlordId || house?.landlordUid || 'tenant-qr';
+      const qrUrl = await uploadQRCode(file, landlordUid);
+      setQrCodeImage(qrUrl);
+    } catch (err) {
+      console.error('Error uploading QR code:', err);
+      alert('Failed to upload QR code');
     }
   };
 
@@ -181,14 +213,65 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
       return;
     }
 
-    setShowPaymentForm(false);
-    setShowSuccessAnimation(true);
+    (async () => {
+      try {
+        setShowPaymentForm(false);
 
-    setTimeout(() => {
-      setShowSuccessAnimation(false);
-      setReferenceNumber('');
-      setQrCodeImage(null);
-    }, 3000);
+        // Build reservation payload
+        const user = auth.currentUser;
+        const tenantUid = user ? user.uid : null;
+
+        // Try to get tenant details to denormalize name/phone
+        let tenantName = user?.displayName || '';
+        let tenantPhone = '';
+        if (tenantUid) {
+          try {
+            const tenantSnap = await getDoc(doc(db, 'tenants', tenantUid));
+            if (tenantSnap.exists()) {
+              const t = tenantSnap.data();
+              tenantName = `${t.firstName || ''} ${t.middleName || ''} ${t.lastName || ''}`.trim();
+              tenantPhone = t.mobileNumber || '';
+            }
+          } catch (err) {
+            console.warn('Could not fetch tenant doc:', err);
+          }
+        }
+
+        const reservation = {
+          tenantUid: tenantUid,
+          tenantName: tenantName || tenantUid || 'Guest',
+          tenantPhone: tenantPhone || '',
+          boardingHouseId: house.id || null,
+          boardingHouseName: house.name || '',
+          landlordUid: house.landlordId || house.landlordUid || null,
+          roomType: house.type || house.roomType || '',
+          price: house.price || '',
+          gcashRefNumber: referenceNumber.trim(),
+          qrCodeImage: qrCodeImage || null,
+          status: 'pending',
+          createdAt: new Date().toISOString()
+        };
+
+        try {
+          await addDoc(collection(db, 'reservations'), reservation);
+          console.log('Reservation saved:', reservation);
+        } catch (err) {
+          console.error('Failed to save reservation:', err);
+        }
+
+        // Show success animation
+        setShowSuccessAnimation(true);
+
+        setTimeout(() => {
+          setShowSuccessAnimation(false);
+          setReferenceNumber('');
+          setQrCodeImage(null);
+        }, 3000);
+      } catch (err) {
+        console.error('Payment submit error:', err);
+        alert('Failed to submit payment. Please try again.');
+      }
+    })();
   };
 
   const availableAmenities = getAvailableAmenities();
@@ -279,26 +362,26 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                 <div className="contact-info">
                   <div className="contact-avatar">
                     <img 
-                      src="/default.png"
-                      alt="Contact"
+                      src={landlordInfo?.profileImage || '/default.png'}
+                      alt="Landlord"
                       onError={(e) => {
                         e.target.src = '/default.png';
                       }}
                     />
                   </div>
                   <div className="contact-details">
-                    <h4>Landlord</h4>
+                    <h4>{`${landlordInfo?.firstName || ''} ${landlordInfo?.lastName || ''}`.trim() || 'Landlord'}</h4>
                     <p>
                       <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
                       </svg>
-                      Contact via reservation
+                      {landlordInfo?.contactNumber || 'Contact via reservation'}
                     </p>
                     <p>
                       <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      {house.address}
+                      {landlordInfo?.boardingHouseAddress || house.address}
                     </p>
                   </div>
                 </div>
@@ -370,7 +453,9 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               <div className="payment-content">
                 <div className="qr-section">
                   <div className="qr-upload-container">
-                    {qrCodeImage ? (
+                    {paymentInfo?.qrCode ? (
+                      <img src={paymentInfo.qrCode} alt="QR Code" className="qr-code-image" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+                    ) : qrCodeImage ? (
                       <img src={qrCodeImage} alt="QR Code" className="qr-code-image" />
                     ) : (
                       <label htmlFor="qr-upload" className="qr-upload-label">
@@ -395,8 +480,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                   </div>
                   <div className="gcash-details">
                     <h3 className="payment-method">GCash</h3>
-                    <p className="account-name">Juan Dela Cruz</p>
-                    <p className="mobile-number">09123456789</p>
+                    <p className="account-name">{paymentInfo?.gcashName || 'Not provided'}</p>
+                    <p className="mobile-number">{paymentInfo?.gcashNumber || 'Not provided'}</p>
                   </div>
                 </div>
 

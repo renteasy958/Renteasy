@@ -105,6 +105,37 @@
     color: white;
 }
 
+/* Search/magnifier button next to filter */
+.search-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+    margin-left: 6px;
+}
+
+.search-btn:hover {
+    background-color: #f0f0f0;
+}
+
+.search-icon {
+    width: 18px;
+    height: 18px;
+    color: #666;
+}
+
+/* Local simple check indicator for filter options (avoid global animated .checkmark) */
+.filter-check {
+    color: #012E6A;
+    font-weight: bold;
+    font-size: 14px;
+}
+
 .filter-count {
     position: absolute;
     top: -2px;

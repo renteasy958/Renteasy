@@ -1,10 +1,12 @@
 // AddBoardingHouse.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
 import MapSelector from '../../maps/MapSelector';
 import './addbh.css';
 import { addBoardingHouseWithImages } from '../../services/bhservice';
+import { auth } from '../../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const AddBoardingHouse = () => {
   const navigate = useNavigate();
@@ -12,6 +14,7 @@ const AddBoardingHouse = () => {
   const [images, setImages] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [landlordUid, setLandlordUid] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     address: '',
@@ -37,6 +40,15 @@ const AddBoardingHouse = () => {
       markerPlaced: false
     }
   });
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setLandlordUid(user.uid);
+      }
+    });
+    return () => unsub();
+  }, []);
 
   const boardingTypes = [
     'Single Room',
@@ -155,7 +167,9 @@ const AddBoardingHouse = () => {
         price: formData.price,
         description: formData.description,
         amenities: formData.amenities,
-        location: formData.location
+        location: formData.location,
+        landlordId: landlordUid,
+        landlordUid: landlordUid
       };
 
       console.log('Starting boarding house submission...');

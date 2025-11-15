@@ -73,13 +73,13 @@ body {
 
 /* Boarding Cards - White background like in the image */
 .boarding-card {
-  background: rgb(235, 235, 235);
+  background: rgb(255, 255, 255);
   border-radius: 16px;
   overflow: hidden;
   transition: all 0.3s ease;
   cursor: pointer;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 10px 10px 20px rgba(0.1, 0.1, 0.1, 0.2);
   padding: 16px;
 }
 

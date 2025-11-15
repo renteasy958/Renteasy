@@ -132,8 +132,23 @@ const Navbar = () => {
   // Apply filters
   const applyFilters = () => {
     console.log('Applying filters:', selectedFilters);
+    // Build URL params. For type and location we pass readable labels; for priceRange pass value (range code)
+    const params = new URLSearchParams();
+    if (searchQuery && searchQuery.trim()) params.set('q', searchQuery.trim());
+    Object.entries(selectedFilters).forEach(([category, value]) => {
+      if (!value) return;
+      if (category === 'priceRange') {
+        params.set(category, value); // e.g. '500-2000'
+      } else {
+        // find label for value if available
+        const cat = filterCategories[category];
+        const opt = cat && cat.options.find(o => o.value === value);
+        params.set(category, opt ? opt.label : value);
+      }
+    });
     setShowFilterDropdown(false);
-    // Add your apply filter logic here
+    // Navigate to search with params
+    navigate(`/search?${params.toString()}`);
   };
 
   // Handle search
@@ -143,9 +158,17 @@ const Navbar = () => {
       console.log(`[NAVBAR] Navigating to: /search?q=${encodeURIComponent(searchQuery)}`);
       // Navigate to dedicated search results page with query param
       navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery(''); // Clear search box after search
     }
   };
+
+  // Keep the search input populated when on the search results page
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const q = (params.get('q') || '').trim();
+    if (location.pathname === '/search') {
+      setSearchQuery(q);
+    }
+  }, [location.pathname, location.search]);
 
   // Handle profile click - removes active state from nav
   const handleProfileClick = () => {
@@ -172,6 +195,13 @@ const Navbar = () => {
       <circle cx="4" cy="9" r="3"></circle>
       <circle cx="12" cy="15" r="3"></circle>
       <circle cx="20" cy="12" r="3"></circle>
+    </svg>
+  );
+
+  const SearchIcon = () => (
+    <svg className="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
   );
 
@@ -226,6 +256,18 @@ const Navbar = () => {
                 <span className="filter-count">{selectedFiltersCount}</span>
               )}
             </button>
+            {/* Magnifying/search button next to filter */}
+            <button
+              className="search-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (searchQuery && searchQuery.trim()) {
+                  navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                }
+              }}
+            >
+              <SearchIcon />
+            </button>
           </div>
           
           {/* Enhanced Filter Dropdown */}
@@ -242,8 +284,8 @@ const Navbar = () => {
                 <div className="filter-category-header">
                   <h4>{category.label}</h4>
                   {selectedFilters[categoryKey] && (
-                    <span className="selected-indicator">✓</span>
-                  )}
+                      <span className="selected-indicator">✓</span>
+                    )}
                 </div>
                 <div className="filter-options">
                   {category.options.map((option) => (
@@ -255,9 +297,9 @@ const Navbar = () => {
                       onClick={() => handleFilterSelect(categoryKey, option.value)}
                     >
                       <span className="filter-option-text">{option.label}</span>
-                      {selectedFilters[categoryKey] === option.value && (
-                        <span className="checkmark">✓</span>
-                      )}
+                        {selectedFilters[categoryKey] === option.value && (
+                          <span className="filter-check">✓</span>
+                        )}
                     </div>
                   ))}
                 </div>

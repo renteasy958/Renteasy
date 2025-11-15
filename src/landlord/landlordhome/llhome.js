@@ -1,22 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
-import { getAllBoardingHouses } from '../../services/bhservice';
+import { getBoardingHousesByLandlord } from '../../services/bhservice';
+import { auth, db } from '../../firebase/config';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
 import './llhome.css';
 
 const Landlordhome = () => {
   const navigate = useNavigate();
   const [expandedSections, setExpandedSections] = useState({});
   const [listingsData, setListingsData] = useState([]);
+  const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchBoardingHouses = async () => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setListingsData([]);
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const data = await getAllBoardingHouses();
-        console.log('Fetched boarding houses:', data);
+        const data = await getBoardingHousesByLandlord(user.uid);
+        console.log('Fetched boarding houses for landlord:', data);
         setListingsData(data);
         setError(null);
       } catch (err) {
@@ -26,9 +36,9 @@ const Landlordhome = () => {
       } finally {
         setLoading(false);
       }
-    };
+    });
 
-    fetchBoardingHouses();
+    return () => unsub();
   }, []);
 
   const pendingData = [
@@ -121,7 +131,23 @@ const Landlordhome = () => {
     navigate('/add-boarding-house');
   };
 
-  const PropertyCard = ({ property }) => {
+  const handleDeleteBoardingHouse = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this boarding house listing?')) {
+      return;
+    }
+
+    try {
+      await deleteDoc(doc(db, 'Boardinghouse', id));
+      // Remove from local state
+      setListingsData(prev => prev.filter(h => h.id !== id));
+      alert('Boarding house deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting boarding house:', err);
+      alert('Failed to delete boarding house');
+    }
+  };
+
+  const PropertyCard = ({ property, editMode }) => {
     // Format price: if it's a string starting with ₱, use it; otherwise format it
     const formattedPrice = typeof property.price === 'string' && property.price.startsWith('₱') 
       ? property.price 
@@ -133,7 +159,16 @@ const Landlordhome = () => {
       : '/default.png';
     
     return (
-      <div className="property-card">
+      <div className="property-card" style={{ position: 'relative' }}>
+        {editMode && (
+          <button 
+            className="delete-btn small"
+            onClick={() => handleDeleteBoardingHouse(property.id)}
+            style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, padding: '5px 8px', backgroundColor: '#ff5252', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+          >
+            -
+          </button>
+        )}
         <div 
           className="property-image"
           style={{
@@ -149,11 +184,10 @@ const Landlordhome = () => {
             <p className="room-type">{property.type}</p>
           </div>
           <div className="property-footer">
-            <span className="llprice">{formattedPrice} <span className="per-month">per month</span></span>
-            <div className="rating">
-             
+              <span className="llprice">{formattedPrice} <span className="per-month">per month</span></span>
+              <div className="rating">
+              </div>
             </div>
-          </div>
         </div>
       </div>
     );
@@ -175,32 +209,34 @@ const Landlordhome = () => {
           </div>
         )}
 
-        {!loading && !error && listingsData.length === 0 && (
-          <div style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
-            No boarding houses found. <button onClick={handleAddBoardingHouse} style={{ cursor: 'pointer', color: '#1976d2', background: 'none', border: 'none', textDecoration: 'underline' }}>Add one now!</button>
-          </div>
-        )}
-
-        {!loading && !error && listingsData.length > 0 && (
+        {!loading && !error && (
           <>
-        {/* Listings Section */}
+        {/* Listings Section: always render header */}
         <section className="section">
           <div className="section-header">
             <h2>Listings ({listingsData.length})</h2>
             <div className="header-actions">
-              <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
-                See all
-              </button>
               <button className="add-boarding-btn" onClick={handleAddBoardingHouse}>
                 Add Boarding House
               </button>
+              <button className="see-all-btn" onClick={() => setEditMode(!editMode)}>{editMode ? 'Done' : 'Edit'}</button>
+              <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
+                See all
+              </button>
             </div>
           </div>
-          <div className={`cards-container ${expandedSections.listings ? 'expanded' : ''}`}>
-            {listingsData.map(property => (
-              <PropertyCard key={property.id} property={property} />
-            ))}
-          </div>
+
+          {listingsData.length > 0 ? (
+            <div className={`cards-container ${expandedSections.listings ? 'expanded' : ''}`}>
+              {listingsData.map(property => (
+                <PropertyCard key={property.id} property={property} editMode={editMode} />
+              ))}
+            </div>
+          ) : (
+            <div className="empty-state" style={{ padding: '20px', textAlign: 'center', color: '#999' }}>
+              No boarding houses found. Click "Add Boarding House" to create one.
+            </div>
+          )}
         </section>
           </>
         )}

@@ -1,131 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { auth, db } from '../../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import './reserve.css';
 
 const ReservationList = () => {
-  const [reservations] = useState([
-    { 
-      id: 1, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 2, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 3, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 4, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 5, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 6, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 7, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-    { 
-      id: 8, 
-      name: 'Christian Garcia', 
-      gender: 'Male', 
-      age: 23, 
-      phone: '09925829565',
-      birthdate: 'January 15, 2002',
-      status: 'Single',
-      address: '123 Main St, Cebu City',
-      boardingHouse: 'Tres Marias Boarding House',
-      location: 'Montilla St., Brgy 1, Isabela',
-      roomType: 'Shared Room (2-4 pax)',
-      price: '₱1000',
-      gcashRef: '****************'
-    },
-  ]);
-
+  const [reservations, setReservations] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedReservation, setSelectedReservation] = useState(null);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setReservations([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+        // Query reservations where landlordUid matches current user
+        const q = query(collection(db, 'reservations'), where('landlordUid', '==', user.uid));
+        const snap = await getDocs(q);
+        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setReservations(data);
+      } catch (err) {
+        console.error('Error fetching reservations:', err);
+        setReservations([]);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsub();
+  }, []);
 
   const handleViewDetails = (id) => {
     const reservation = reservations.find(r => r.id === id);
@@ -149,30 +56,36 @@ const ReservationList = () => {
   return (
     <>
       <div className="rsv-list-container">
-        {reservations.map((reservation) => (
-          <div key={reservation.id} className="rsv-card">
-            <div className="rsv-card-info">
-              <div className="rsv-info-item">
-                <span>{reservation.name}</span>
+        {loading ? (
+          <div>Loading reservations...</div>
+        ) : reservations.length > 0 ? (
+          reservations.map((reservation) => (
+            <div key={reservation.id} className="rsv-card">
+              <div className="rsv-card-info">
+                <div className="rsv-info-item">
+                  <span>{reservation.tenantName || 'N/A'}</span>
+                </div>
+                <div className="rsv-info-item">
+                  <span>{reservation.tenantGender || 'N/A'}</span>
+                </div>
+                <div className="rsv-info-item">
+                  <span>{reservation.tenantAge || 'N/A'}</span>
+                </div>
+                <div className="rsv-info-item">
+                  <span>{reservation.tenantPhone || 'N/A'}</span>
+                </div>
               </div>
-              <div className="rsv-info-item">
-                <span>{reservation.gender}</span>
-              </div>
-              <div className="rsv-info-item">
-                <span>{reservation.age}</span>
-              </div>
-              <div className="rsv-info-item">
-                <span>{reservation.phone}</span>
-              </div>
+              <button 
+                className="rsv-view-btn"
+                onClick={() => handleViewDetails(reservation.id)}
+              >
+                View details
+              </button>
             </div>
-            <button 
-              className="rsv-view-btn"
-              onClick={() => handleViewDetails(reservation.id)}
-            >
-              View details
-            </button>
-          </div>
-        ))}
+          ))
+        ) : (
+          <div>No reservations found.</div>
+        )}
       </div>
 
       {selectedReservation && (
@@ -193,27 +106,24 @@ const ReservationList = () => {
                 <div className="rsv-details-section">
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Name:</span>
-                    <span className="rsv-detail-value">{selectedReservation.name}</span>
+                    <span className="rsv-detail-value">{selectedReservation.tenantName || 'N/A'}</span>
                   </div>
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Gender:</span>
-                    <span className="rsv-detail-value">{selectedReservation.gender}</span>
+                    <span className="rsv-detail-value">{selectedReservation.tenantGender || 'N/A'}</span>
                   </div>
-                  <div className="rsv-detail-row">
-                    <span className="rsv-detail-label">Age:</span>
-                    <span className="rsv-detail-value">{selectedReservation.age}</span>
-                  </div>
+                  {/* Age removed per request; show birthdate only */}
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Birthdate:</span>
-                    <span className="rsv-detail-value">{selectedReservation.birthdate}</span>
+                    <span className="rsv-detail-value">{selectedReservation.tenantBirthdate || 'N/A'}</span>
                   </div>
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Status:</span>
-                    <span className="rsv-detail-value">{selectedReservation.status}</span>
+                    <span className="rsv-detail-value">{selectedReservation.tenantStatus || 'N/A'}</span>
                   </div>
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Address:</span>
-                    <span className="rsv-detail-value">{selectedReservation.address}</span>
+                    <span className="rsv-detail-value">{selectedReservation.tenantAddress || 'N/A'}</span>
                   </div>
                 </div>
               </div>
@@ -223,17 +133,17 @@ const ReservationList = () => {
               <div className="rsv-modal-right">
                 <div>
                   <h3 className="rsv-reserved-title">RESERVED</h3>
-                  <h4 className="rsv-bh-name">{selectedReservation.boardingHouse}</h4>
-                  <p className="rsv-bh-location">{selectedReservation.location}</p>
-                  <p className="rsv-room-type">{selectedReservation.roomType}</p>
+                  <h4 className="rsv-bh-name">{selectedReservation.boardingHouseName || 'N/A'}</h4>
+                  <p className="rsv-bh-location">{selectedReservation.boardingHouseLocation || 'N/A'}</p>
+                  <p className="rsv-room-type">{selectedReservation.roomType || 'N/A'}</p>
                   <p className="rsv-price">
-                    <span className="rsv-price-amount">{selectedReservation.price}</span>
+                    <span className="rsv-price-amount">{selectedReservation.price || 'N/A'}</span>
                     <span className="rsv-price-label"> per month</span>
                   </p>
 
                   <div className="rsv-gcash-section">
                     <p className="rsv-gcash-label">Gcash reference number</p>
-                    <p className="rsv-gcash-ref">{selectedReservation.gcashRef}</p>
+                    <p className="rsv-gcash-ref">{selectedReservation.gcashRefNumber || 'N/A'}</p>
                   </div>
                 </div>
 

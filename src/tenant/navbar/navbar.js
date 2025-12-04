@@ -21,6 +21,7 @@ const Navbar = () => {
   const getCurrentPage = () => {
     if (location.pathname === '/liked') return 'liked';
     if (location.pathname === '/tenant-home' || location.pathname === '/') return 'home';
+    if (location.pathname === '/user-profile') return null;
     return 'home';
   };
 
@@ -331,10 +332,14 @@ const Navbar = () => {
               
               {/* Settings Dropdown */}
               {item.id === 'settings' && (
-                <div 
+                <div
                   ref={settingsDropdownRef}
                   className={`settings-dropdown ${showSettingsDropdown ? 'show' : ''}`}
                 >
+                  <div className="settings-option" onClick={handleProfileClick}>
+                    <ProfileIcon />
+                    <span>Profile</span>
+                  </div>
                   <div className="settings-option" onClick={handleLogout}>
                     <LogoutIcon />
                     <span>Logout</span>

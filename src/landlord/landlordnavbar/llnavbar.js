@@ -131,10 +131,14 @@ const LLNavbar = () => {
               </a>
               
               {item.id === 'settings' && (
-                <div 
+                <div
                   ref={settingsDropdownRef}
                   className={`ll-settings-dropdown ${showSettingsDropdown ? 'show' : ''}`}
                 >
+                  <div className="ll-settings-option" onClick={handleProfileClick}>
+                    <ProfileIcon />
+                    <span>Profile</span>
+                  </div>
                   <div className="ll-settings-option" onClick={(e) => handleLogout(e)}>
                     <LogoutIcon />
                     <span>Logout</span>

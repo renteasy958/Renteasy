@@ -12,7 +12,7 @@ import SearchResults from './tenant/search/SearchResults';
 import AddBoardingHouse from './landlord/addbh/addbh';
 import TenantProfile from './tenant/profile/profile';
 import LLProfile from './landlord/llprofile/llprofile'; // Add this import
-import PaymentSettings from './landlord/payment-settings/payment-settings';
+
 
 
 function App() {
@@ -92,12 +92,7 @@ function App() {
               <LLProfile />
             </>
           } />
-          <Route path="/payment-settings" element={
-            <>
-              <LLNavbar />
-              <PaymentSettings />
-            </>
-          } />
+
           <Route path="/add-boarding-house" element={<AddBoardingHouse />} />
         </Routes>
       </div>

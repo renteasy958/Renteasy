@@ -185,6 +185,14 @@ const Home = ({ onLogout }) => {
       <div className="background-image"></div>
       
       <main className="main-content">
+        <div className="homepage-text">
+          <div className="text-line">Boarding made</div>
+          <div className="text-line">
+            easy, <span className="blue-text">living</span>
+          </div>
+          <div className="text-line blue-text">made better</div>
+        </div>
+
         {loading && (
           <div style={{ padding: '40px', textAlign: 'center', color: '#666' }}>
             Loading boarding houses...

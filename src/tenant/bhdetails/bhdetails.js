@@ -493,7 +493,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                 <div className="qr-section">
                   <div className="qr-upload-container">
                     {paymentInfo?.qrCode ? (
-                      <img src={paymentInfo.qrCode} alt="QR Code" className="qr-code-image" style={{ maxWidth: '200px', maxHeight: '200px' }} />
+                      <img src={paymentInfo.qrCode} alt="QR Code" className="qr-code-image" />
                     ) : qrCodeImage ? (
                       <img src={qrCodeImage} alt="QR Code" className="qr-code-image" />
                     ) : (

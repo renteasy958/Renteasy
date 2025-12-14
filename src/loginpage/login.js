@@ -29,6 +29,10 @@ const Homepage = () => {
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [otpCountdown, setOtpCountdown] = useState(0);
+    const [isResetting, setIsResetting] = useState(false);
+    const [sendOtpMessage, setSendOtpMessage] = useState('');
+    const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
     // Add login-page class to body when component mounts
     useEffect(() => {
@@ -79,9 +83,9 @@ const Homepage = () => {
     };
 
     // OTP validation and verification
-    const handleForgotOtpChange = (e) => {
+    const handleForgotOtpChange = async (e) => {
         let value = e.target.value.replace(/[^0-9]/g, '');
-        
+
         if (value.length > 4) {
             value = value.slice(0, 4);
         }
@@ -90,13 +94,28 @@ const Homepage = () => {
 
         // Verify OTP when 4 digits are entered
         if (value.length === 4) {
-            // Simulate OTP verification - for demo, correct OTP is "1234"
-            if (value === '1234') {
-                setForgotOtpError('');
-                setIsOtpVerified(true);
-            } else {
-                setForgotOtpError('Invalid OTP');
+            // Call backend verify endpoint
+            setIsVerifyingOtp(true);
+            try {
+                const response = await fetch('/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: forgotEmail, otp: value })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    setForgotOtpError('');
+                    setIsOtpVerified(true);
+                } else {
+                    setForgotOtpError(data.error || 'Invalid OTP');
+                    setIsOtpVerified(false);
+                }
+            } catch (err) {
+                console.error('OTP verify error:', err);
+                setForgotOtpError('Failed to verify OTP. Try again.');
                 setIsOtpVerified(false);
+            } finally {
+                setIsVerifyingOtp(false);
             }
         } else {
             setForgotOtpError('');
@@ -145,7 +164,7 @@ const Homepage = () => {
     };
 
     // Send OTP to email
-    const handleSendOtp = () => {
+    const handleSendOtp = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!forgotEmail || !emailRegex.test(forgotEmail)) {
             setForgotEmailError('Please enter a valid email address');
@@ -153,13 +172,42 @@ const Homepage = () => {
         }
 
         setIsLoading(true);
-        
-        // Simulate OTP sending
-        setTimeout(() => {
+
+        try {
+            const response = await fetch('/send-otp', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email: forgotEmail }),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                setSendOtpMessage('OTP sent to your email');
+                console.log('OTP sent to:', forgotEmail);
+
+                // Start countdown
+                setOtpCountdown(60);
+                const countdownInterval = setInterval(() => {
+                    setOtpCountdown((prev) => {
+                        if (prev <= 1) {
+                            clearInterval(countdownInterval);
+                            return 0;
+                        }
+                        return prev - 1;
+                    });
+                }, 1000);
+            } else {
+                alert(data.error || 'Failed to send OTP');
+            }
+        } catch (error) {
+            console.error('Error sending OTP:', error);
+            setSendOtpMessage('Failed to send OTP. Please try again.');
+        } finally {
             setIsLoading(false);
-            alert('OTP sent to your email! (Demo OTP: 1234)');
-            console.log('OTP sent to:', forgotEmail);
-        }, 1500);
+        }
     };
 
     // Form submission for login
@@ -231,11 +279,11 @@ const Homepage = () => {
             return;
         }
 
-        setIsLoading(true);
+        setIsResetting(true);
 
         // Simulate password reset
         setTimeout(() => {
-            setIsLoading(false);
+            setIsResetting(false);
             alert('Password reset successful! Please login with your new password.');
             // Reset form and go back to login
             setShowForgotPassword(false);
@@ -291,16 +339,18 @@ const Homepage = () => {
                                         maxLength="4"
                                         required 
                                     />
-                                    <button 
-                                        type="button" 
-                                        className="send-otp-btn" 
+                                    <button
+                                        type="button"
+                                        className="send-otp-btn"
                                         onClick={handleSendOtp}
-                                        disabled={isLoading || !forgotEmail}
+                                        disabled={isLoading || !forgotEmail || otpCountdown > 0}
                                     >
-                                        {isLoading ? 'Sending...' : 'Send OTP'}
+                                        {isLoading ? 'Sending...' : otpCountdown > 0 ? `Resend in ${otpCountdown}s` : 'Send OTP'}
                                     </button>
                                 </div>
-                                {forgotOtpError && <div className="error-message">{forgotOtpError}</div>}
+                                    {forgotOtpError && <div className="error-message">{forgotOtpError}</div>}
+                                    {sendOtpMessage && <div className="success-message">{sendOtpMessage}</div>}
+                                    {isVerifyingOtp && <div className="info-message">Verifying OTP...</div>}
                             </div>
 
                             <div className="input-group">
@@ -377,12 +427,12 @@ const Homepage = () => {
                                 {confirmPasswordError && <div className="error-message">{confirmPasswordError}</div>}
                             </div>
                             
-                            <button 
-                                type="submit" 
-                                className="login-btn" 
-                                disabled={!isPasswordMatch() || isLoading}
+                            <button
+                                type="submit"
+                                className="login-btn"
+                                disabled={!isPasswordMatch() || isResetting}
                             >
-                                {isLoading ? 'Resetting...' : 'Reset Password'}
+                                {isResetting ? 'Resetting...' : 'Reset Password'}
                             </button>
                         </form>
 

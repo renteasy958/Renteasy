@@ -28,7 +28,12 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "dev": "concurrently \"npm:start\" \"npm --prefix backend run dev\" --names FRONT,BACK --kill-others-on-fail"
+  },
+  "proxy": "http://localhost:5000",
+  "devDependencies": {
+    "concurrently": "^8.2.0"
   },
   "eslintConfig": {
     "extends": [

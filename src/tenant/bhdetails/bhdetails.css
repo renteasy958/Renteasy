@@ -937,10 +937,11 @@
     text-align: center;
   }
 
+  /* Keep portrait rectangle on smaller screens (not square) */
   .qr-code-image,
   .qr-placeholder {
-    width: 120px;
-    height: 120px;
+    width: 180px;
+    height: 260px;
   }
 
   .payment-method {

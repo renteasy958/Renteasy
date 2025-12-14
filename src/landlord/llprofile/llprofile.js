@@ -10,6 +10,7 @@ const LandlordProfile = () => {
     const navigate = useNavigate();
     const [imgError, setImgError] = useState(false);
     const [llData, setLlData] = useState(null);
+    const [isLandlord, setIsLandlord] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [qrUploading, setQrUploading] = useState(false);
     const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -24,6 +25,7 @@ const LandlordProfile = () => {
                 const snap = await getDoc(doc(db, 'landlords', user.uid));
                 if (snap.exists()) {
                     setLlData(snap.data());
+                    setIsLandlord(true);
                     // Try to fetch payment info
                     try {
                         const paySnap = await getDoc(doc(db, 'landlords', user.uid, 'payment', 'info'));
@@ -35,6 +37,7 @@ const LandlordProfile = () => {
                     }
                 } else {
                     setLlData({ email: user.email });
+                    setIsLandlord(false);
                 }
             } catch (err) {
                 console.error('Error loading landlord profile:', err);
@@ -152,17 +155,30 @@ const LandlordProfile = () => {
                         <div className="ll-prof-info-item ll-prof-address-value"><div className="ll-prof-info-label">Boarding House Address</div><div className="ll-prof-info-value">{llData.boardingHouseAddress || 'N/A'}</div></div>
                     </div>
                 </div>
-                <div className="ll-prof-payment-section" style={{ marginTop: '30px' }}>
-                    <button onClick={() => setShowPaymentForm(!showPaymentForm)} style={{ padding: '10px 20px', backgroundColor: '#001f3f', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>
-                        {showPaymentForm ? 'Cancel' : 'Add/Edit Payment Info'}
-                    </button>
-                    {paymentForm?.gcashName && (
-                        <div style={{ marginTop: '15px', padding: '15px', backgroundColor: '#f0f0f0', borderRadius: '4px' }}>
-                            <p style={{ margin: '5px 0', fontSize: '14px', fontWeight: 'bold' }}>GCash Account: {paymentForm.gcashName}</p>
-                            <p style={{ margin: '5px 0', fontSize: '14px' }}>GCash Number: {paymentForm.gcashNumber}</p>
-                        </div>
-                    )}
-                </div>
+                {isLandlord && (
+                    <div className="ll-prof-payment-section" style={{ marginTop: '30px' }}>
+                        <button className="ll-payment-btn" onClick={() => setShowPaymentForm(!showPaymentForm)}>
+                            <svg className="ll-payment-icon" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M21 7H3a1 1 0 00-1 1v8a3 3 0 003 3h14a3 3 0 003-3V8a1 1 0 00-1-1zM3 9h18v2H3V9zm16 6a1 1 0 110 2 1 1 0 010-2zM5 17a1 1 0 110 2 1 1 0 010-2z" />
+                            </svg>
+                            <span>{showPaymentForm ? 'Cancel' : 'Add/Edit Payment Info'}</span>
+                        </button>
+                        {paymentForm?.gcashName && (
+                            <div className="ll-payment-card">
+                                <div className="ll-payment-card-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 7h18v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" fill="#fff" />
+                                        <path d="M7 3h10v2H7V3z" fill="#fff" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p style={{ margin: '5px 0', fontSize: '14px', fontWeight: 'bold' }}>GCash Account: {paymentForm.gcashName}</p>
+                                    <p style={{ margin: '5px 0', fontSize: '14px' }}>GCash Number: {paymentForm.gcashNumber}</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )}
                 {showPaymentForm && (
                     <div className="ll-payment-form" style={{ marginTop: '20px', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px' }}>
                         <div style={{ marginBottom: '15px' }}>

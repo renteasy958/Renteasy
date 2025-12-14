@@ -26,7 +26,7 @@ export const nearbyBoardingHouses = [];
     roomType: 'Private room (1-2 pax)',
     images: ['/default.png', '/default.png', '/default.png'],
     description: 'Sunshine Boarding House offers bright and comfortable accommodation for students and professionals. Located in the heart of Main Street with easy access to schools and business centers.',
-    amenities: ['Air-conditioned rooms', 'Private bathroom', 'WiFi included', 'Kitchen access', 'Laundry area'],
+    amenities: ['AC', 'Private bathroom', 'WiFi included', 'Kitchen access', 'Laundry area'],
     landlord: { name: 'Maria Santos', phone: '09171234567', facebook: 'Maria Santos', address: 'Main St., Isabela, Negros Occidental', profilePicture: '/default.png' },
     image: '/default.png'
   },
@@ -52,7 +52,7 @@ export const nearbyBoardingHouses = [];
     roomType: 'Private room (1 pax)',
     images: ['/default.png', '/default.png', '/default.png'],
     description: 'Located in the city center, this boarding house offers convenience and accessibility. Walking distance to shops, restaurants, schools, and government offices.',
-    amenities: ['Prime location', 'Private bathroom', 'Air conditioning', 'WiFi', 'Parking space'],
+    amenities: ['Prime location', 'Private bathroom', 'AC', 'WiFi', 'Parking space'],
     landlord: { name: 'Ana Reyes', phone: '09391234567', facebook: 'Ana Reyes', address: 'Plaza St., Isabela, Negros Occidental', profilePicture: '/default.png' },
     image: '/default.png'
   },
@@ -91,7 +91,7 @@ export const nearbyBoardingHouses = [];
     roomType: 'Private room (1-2 pax)',
     images: ['/default.png', '/default.png', '/default.png'],
     description: 'Modern Living offers contemporary accommodations with modern amenities. Perfect for young professionals and tech-savvy individuals.',
-    amenities: ['Modern facilities', 'High-speed WiFi', 'Air conditioning', 'Smart TV access', 'Gym area'],
+    amenities: ['Modern facilities', 'High-speed WiFi', 'AC', 'Smart TV access', 'Gym area'],
     landlord: { name: 'Mark Johnson', phone: '09671234567', facebook: 'Mark Johnson', address: 'Tech St., Isabela, Negros Occidental', profilePicture: '/default.png' },
     image: '/default.png'
   },
@@ -185,7 +185,7 @@ export const nearbyBoardingHouses = [
     roomType: 'Private room (1 pax)',
     images: ['/default.png', '/default.png', '/default.png'],
     description: 'Right in the heart of downtown Isabela, this boarding house offers ultimate convenience with everything within walking distance.',
-    amenities: ['Downtown location', 'Walking distance to everything', 'WiFi', 'Security', 'Air conditioning'],
+    amenities: ['Downtown location', 'Walking distance to everything', 'WiFi', 'Security', 'AC'],
     landlord: { name: 'Sir Miguel', phone: '09341234567', facebook: 'Miguel Torres', address: 'Central St., Isabela, Negros Occidental', profilePicture: '/default.png' },
     image: '/default.png'
   },

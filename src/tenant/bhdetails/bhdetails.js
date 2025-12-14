@@ -71,7 +71,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
     wifi: { label: 'WiFi', icon: Wifi },
     comfortRoom: { label: 'Comfort Room', icon: Home },
     kitchen: { label: 'Kitchen', icon: UtensilsCrossed },
-    ac: { label: 'Air Conditioning', icon: Wind },
+    ac: { label: 'AC', icon: Wind },
     laundry: { label: 'Laundry', icon: Shirt },
     security: { label: 'Security', icon: Shield },
     water: { label: 'Water', icon: Droplet },
@@ -534,12 +534,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                         onChange={(e) => setReferenceNumber(e.target.value)}
                       />
                     </div>
+                    {/* Moved submit button here to provide more space for QR image */}
+                    <button className="submit-button" onClick={handleSubmitPayment}>
+                      Submit
+                    </button>
                   </div>
                 </div>
-
-                <button className="submit-button" onClick={handleSubmitPayment}>
-                  Submit
-                </button>
               </div>
             </div>
           </div>

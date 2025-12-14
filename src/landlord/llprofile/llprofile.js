@@ -191,7 +191,7 @@ const LandlordProfile = () => {
                             <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>QR Code Image</label>
                             <div onClick={() => qrInputRef.current?.click()} style={{ padding: '20px', backgroundColor: 'white', border: '2px dashed #ddd', borderRadius: '4px', cursor: 'pointer', textAlign: 'center' }}>
                                 {paymentForm.qrCode ? (
-                                    <img src={paymentForm.qrCode} alt="QR Code" style={{ maxWidth: '150px', maxHeight: '150px' }} />
+                                    <img src={paymentForm.qrCode} alt="QR Code" style={{ maxWidth: '220px', maxHeight: '300px' }} />
                                 ) : (
                                     <span>{qrUploading ? 'Uploading...' : 'Click to upload QR code'}</span>
                                 )}

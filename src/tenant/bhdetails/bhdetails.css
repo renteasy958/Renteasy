@@ -486,7 +486,8 @@
   background: white;
   padding: 2.5rem;
   border-radius: 16px;
-  max-width: 500px;
+  /* reduced further per request */
+  max-width: 680px;
   width: 90%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   position: relative;
@@ -586,7 +587,7 @@
 .qr-section {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
+  gap: 30px;
   margin-bottom: 1.5rem;
   padding: 20px;
   background: #f8f9fa;
@@ -594,22 +595,24 @@
 }
 
 .qr-upload-container {
-  flex-shrink: 0;  width: 220px;
+  flex-shrink: 0;
+  width: 260px;
 }
 
 .qr-upload-container img {
   width: 100%;
-  height: 320px;
+  height: 350px;
   object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #e0e0;
+  border: 2px solid #e0e0e;
   background: white;
-  display: block;}
+  display: block;
+}
 
 .qr-code-image {
-  /* Bigger, portrait-oriented QR image */
-  width: 220px;
-  height: 320px;
+  /* Reduced portrait-oriented QR image */
+  width: 260px;
+  height: 350px;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #e0e0e;
@@ -711,6 +714,14 @@
 .reference-input:focus {
   outline: none;
   border-color: #19398a;
+}
+
+/* Place the submit button neatly under the reference input and free image space */
+.payment-content .qr-section .gcash-details .submit-button {
+  width: auto;
+  align-self: flex-start;
+  padding: 0.75rem 1.5rem;
+  margin-top: 0.5rem;
 }
 
 .submit-button {
@@ -949,8 +960,8 @@
   /* Keep portrait rectangle on smaller screens (not square) */
   .qr-code-image,
   .qr-placeholder {
-    width: 180px;
-    height: 260px;
+    width: 200px;
+    height: 300px;
   }
 
   .payment-method {
@@ -963,6 +974,13 @@
 
   .mobile-number {
     font-size: 14px;
+  }
+
+  /* Ensure submit button spans full width on small screens for better touch targets */
+  .qr-section .gcash-details .submit-button {
+    width: 100%;
+    margin-top: 1rem;
+    align-self: stretch;
   }
 
   .success-animation {

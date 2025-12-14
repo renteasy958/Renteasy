@@ -5,8 +5,9 @@
   margin: 0;
   margin-left: calc(-50vw + 50%);
   background-color: #f2f3f4;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
+  overflow: auto; /* allow internal scrolling without scrolling the body */
 }
 
 /* Reservation Card */
@@ -20,6 +21,16 @@
   margin-bottom: 20px;
   gap: 20px;
   height: 70px;
+}
+
+.rsv-badge {
+  background: #ffde59;
+  color: #333;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 6px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 .rsv-card-info {
@@ -76,6 +87,22 @@
   background-color: #002557;
 }
 
+.rsv-flag-btn {
+  background-color: #f39c12;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.rsv-flag-btn:hover {
+  background-color: #d98a03;
+}
+
 /* Modal Overlay */
 .rsv-modal-overlay {
   position: fixed;
@@ -101,6 +128,8 @@
   width: 90%;
   z-index: 1000;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  max-height: calc(100vh - 40px);
+  overflow: auto; /* scroll inside modal if content is tall */
 }
 
 /* Modal Content Wrapper */
@@ -222,6 +251,100 @@
 .rsv-price-label {
   font-size: 13px;
   color: #666;
+}
+
+/* Empty state for reservations */
+.rsv-empty {
+  text-align: center;
+  font-size: 20px;
+  color: #666;
+  padding: 40px 0;
+  width: 100%;
+}
+
+.rsv-excluded-panel {
+  background: #fff7e6;
+  border: 1px solid #ffe6a7;
+  padding: 10px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+}
+.rsv-excluded-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.rsv-excluded-toggle {
+  background: none;
+  border: 1px solid #ffd27a;
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.rsv-delete-all-btn {
+  background: #c0392b;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.rsv-delete-all-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.rsv-excluded-list {
+  margin: 8px 0 0 0;
+  padding-left: 18px;
+}
+.rsv-excluded-list li {
+  font-size: 13px;
+  color: #333;
+}
+
+.rsv-excluded-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.rsv-excluded-id {
+  font-weight: 700;
+  color: #222;
+}
+.rsv-excluded-meta {
+  color: #444;
+  flex: 1;
+}
+.rsv-delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.rsv-delete-btn[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.rsv-excluded-id {
+  background: none;
+  border: none;
+  color: #222;
+  font-weight: 700;
+  cursor: pointer;
+}
+.rsv-excluded-json {
+  background: #fff;
+  border: 1px solid #eee;
+  padding: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+  max-height: 180px;
+  overflow: auto;
+  white-space: pre-wrap;
 }
 
 /* GCash Section */

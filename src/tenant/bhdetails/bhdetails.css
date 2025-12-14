@@ -598,12 +598,14 @@
 }
 
 .qr-code-image {
-  width: 150px;
-  height: 150px;
-  object-fit: contain;
+  /* Bigger, portrait-oriented QR image */
+  width: 220px;
+  height: 320px;
+  object-fit: cover;
   border-radius: 8px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e0e0e;
   background: white;
+  display: block;
 }
 
 .qr-upload-label {
@@ -612,8 +614,8 @@
 }
 
 .qr-placeholder {
-  width: 150px;
-  height: 150px;
+  width: 220px;
+  height: 320px;
   border: 2px dashed #ccc;
   border-radius: 8px;
   display: flex;
@@ -632,6 +634,8 @@
 .qr-placeholder svg {
   color: #999;
   margin-bottom: 10px;
+  width: 80px;
+  height: 80px;
 }
 
 .qr-placeholder p {
@@ -647,6 +651,10 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+
+.reference-under-mobile {
+  margin-top: 12px;
 }
 
 .payment-method {

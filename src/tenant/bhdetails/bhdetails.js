@@ -521,19 +521,20 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                     <h3 className="payment-method">GCash</h3>
                     <p className="account-name">{paymentInfo?.gcashName || 'Not provided'}</p>
                     <p className="mobile-number">{paymentInfo?.gcashNumber || 'Not provided'}</p>
-                  </div>
-                </div>
 
-                <div className="reference-section">
-                  <label htmlFor="reference-number">Reference Number</label>
-                  <input
-                    id="reference-number"
-                    type="text"
-                    className="reference-input"
-                    placeholder="Enter reference number"
-                    value={referenceNumber}
-                    onChange={(e) => setReferenceNumber(e.target.value)}
-                  />
+                    {/* Reference number moved under mobile number for clearer layout */}
+                    <div className="reference-section reference-under-mobile">
+                      <label htmlFor="reference-number">Reference Number</label>
+                      <input
+                        id="reference-number"
+                        type="text"
+                        className="reference-input"
+                        placeholder="Enter reference number"
+                        value={referenceNumber}
+                        onChange={(e) => setReferenceNumber(e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <button className="submit-button" onClick={handleSubmitPayment}>

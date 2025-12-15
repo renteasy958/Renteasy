@@ -148,13 +148,26 @@ const AddBoardingHouse = () => {
   const handleSubmit = async () => {
     console.log('Submit button clicked');
 
-    // Check payment info first
+    // Check payment info from localStorage (must match llhome.js logic)
     if (!landlordUid) {
       alert('User not authenticated');
       return;
     }
 
-    const hasPaymentInfo = await checkLandlordPaymentInfo(landlordUid);
+    const saved = localStorage.getItem('renteasy_payment_info');
+    let hasPaymentInfo = false;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (
+          parsed.gcashName && parsed.gcashName.trim() !== '' &&
+          parsed.gcashNumber && parsed.gcashNumber.trim().length === 11 &&
+          parsed.qrCode && parsed.qrCode.trim() !== ''
+        ) {
+          hasPaymentInfo = true;
+        }
+      } catch {}
+    }
     if (!hasPaymentInfo) {
       setShowPaymentModal(true);
       return;

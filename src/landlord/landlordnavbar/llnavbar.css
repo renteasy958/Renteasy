@@ -1,3 +1,259 @@
+.ll-payment-modal-edit-label-disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+.ll-payment-modal-title-wrapper {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.ll-payment-modal-header-flex {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    position: relative;
+    z-index: 10;
+}
+.ll-payment-modal-title {
+    flex: 1;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: 1px;
+}
+/* Reuse modal/blur styles for home modal */
+.ll-blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+}
+
+.ll-payment-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    padding: 32px 28px 24px 28px;
+    z-index: 2100;
+    min-width: 320px;
+    max-width: 90vw;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ll-payment-modal-header-row {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0;
+    position: relative;
+    z-index: 10;
+    pointer-events: auto;
+}
+.ll-payment-modal-edit-label {
+    font-size: 16px;
+    font-weight: normal;
+    color: #888;
+    text-decoration: underline;
+    letter-spacing: 0.5px;
+    margin: 0 0 0 8px;
+    z-index: 11;
+}
+.ll-payment-modal-x-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    margin: 0 8px 0 0;
+    z-index: 11;
+}
+.ll-payment-modal-edit-label {
+    font-size: 16px;
+    font-weight: normal;
+    color: #888;
+    text-decoration: underline;
+    letter-spacing: 0.5px;
+    margin-left: 0;
+    margin-right: auto;
+}
+.ll-payment-modal-x-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    position: static;
+    margin-left: auto;
+}
+
+.ll-payment-modal-edit-label {
+    font-size: 16px;
+    font-weight: normal;
+    color: #888;
+    text-decoration: underline;
+    letter-spacing: 0.5px;
+}
+
+.ll-payment-modal-x-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 4px;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.ll-payment-modal-img-x-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(255,255,255,0.85);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    padding: 2px 4px;
+    z-index: 2;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    transition: background 0.2s;
+}
+.ll-payment-modal-img-x-btn:hover {
+    background: #f8d7da;
+}
+
+.ll-modal-save-btn {
+    margin-top: 18px;
+    padding: 10px 32px;
+    background: #012E6A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+/* Modal and Blur Overlay Styles */
+.ll-blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.3);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+}
+
+.ll-payment-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.28);
+    padding: 56px 56px 40px 56px;
+    z-index: 2100;
+    min-width: 700px;
+    max-width: 99vw;
+    min-height: 380px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: visible;
+}
+
+.ll-payment-modal-content-flex {
+    display: flex;
+    flex-direction: row;
+    gap: 48px;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 18px;
+}
+
+.ll-payment-modal-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 220px;
+    max-width: 260px;
+}
+
+.ll-payment-modal-right {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 260px;
+    max-width: 340px;
+    gap: 18px;
+}
+
+.ll-payment-modal-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    gap: 12px;
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 25px;
+}
+
+.ll-payment-modal-row label {
+    font-weight: bold;
+    min-width: 140px;
+}
+
+.ll-payment-modal-qr {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    margin-top: 6px;
+}
+.ll-payment-modal-qr-large {
+    max-width: 260px;
+    max-height: 260px;
+}
+
+.ll-upload-qr-btn {
+    padding: 6px 16px;
+    background: #012E6A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 6px;
+}
+
+.ll-modal-close-btn {
+    margin-top: 18px;
+    padding: 8px 24px;
+    background: #012E6A;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+}
 /* Landlord Navbar Styles */
 .ll-navbar {
     background-color: #012E6A;
@@ -114,6 +370,15 @@
 
 .ll-settings-option:hover {
     background-color: #f8f9fa;
+}
+
+/* Credit Card Icon */
+.credit-card-icon {
+    width: 18px;
+    height: 18px;
+    color: #012E6A;
+    margin-right: 4px;
+    vertical-align: middle;
 }
 
 .logout-icon {

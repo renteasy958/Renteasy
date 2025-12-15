@@ -23,6 +23,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   useEffect(() => {
     const fetchLandlordInfo = async () => {
       const landlordUid = house?.landlordId || house?.landlordUid;
+      console.log('[BHDetails] Fetching landlord info for house:', house);
+      console.log('[BHDetails] Using landlordUid:', landlordUid);
       if (landlordUid) {
         try {
           const snap = await getDoc(doc(db, 'landlords', landlordUid));
@@ -32,11 +34,18 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
             const paymentSnap = await getDoc(doc(db, 'landlords', landlordUid, 'payment', 'info'));
             if (paymentSnap.exists()) {
               setPaymentInfo(paymentSnap.data());
+              console.log('[BHDetails] Payment info fetched:', paymentSnap.data());
+            } else {
+              console.warn('[BHDetails] No payment info found for landlord:', landlordUid);
             }
+          } else {
+            console.warn('[BHDetails] No landlord doc found for:', landlordUid);
           }
         } catch (err) {
           console.warn('Could not fetch landlord info:', err);
         }
+      } else {
+        console.warn('[BHDetails] No landlordUid found in house:', house);
       }
     };
     if (isOpen && house) fetchLandlordInfo();
@@ -518,10 +527,17 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                     )}
                   </div>
                   <div className="gcash-details">
-                    <h3 className="payment-method">GCash</h3>
-                    <p className="account-name">{paymentInfo?.gcashName || 'Not provided'}</p>
-                    <p className="mobile-number">{paymentInfo?.gcashNumber || 'Not provided'}</p>
-
+                    <div className="payment-method" style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                      <img src="/GCash.png" alt="GCash Logo" style={{ height: 56, marginRight: 12 }} />
+                    </div>
+                    <div style={{ marginBottom: 4 }}>
+                      <label style={{ fontWeight: 'bold', fontSize: 13 }}>Account Name</label>
+                      <p className="account-name" style={{ margin: 0 }}>{paymentInfo?.gcashName || 'Not provided'}</p>
+                    </div>
+                    <div style={{ marginBottom: 8 }}>
+                      <label style={{ fontWeight: 'bold', fontSize: 13 }}>Gcash Number</label>
+                      <p className="mobile-number" style={{ margin: 0 }}>{paymentInfo?.gcashNumber || 'Not provided'}</p>
+                    </div>
                     {/* Reference number moved under mobile number for clearer layout */}
                     <div className="reference-section reference-under-mobile">
                       <label htmlFor="reference-number">Reference Number</label>
@@ -531,7 +547,13 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                         className="reference-input"
                         placeholder="Enter reference number"
                         value={referenceNumber}
-                        onChange={(e) => setReferenceNumber(e.target.value)}
+                        maxLength={15}
+                        style={{ border: 'none', borderBottom: '1px solid #ccc', outline: 'none', background: 'transparent', fontSize: 16, width: '100%', boxShadow: 'none' }}
+                        onChange={(e) => {
+                          // Only allow digits, max 15
+                          const val = e.target.value.replace(/\D/g, '').slice(0, 15);
+                          setReferenceNumber(val);
+                        }}
                       />
                     </div>
                     {/* Moved submit button here to provide more space for QR image */}

@@ -15,6 +15,7 @@ const Landlordhome = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hasPaymentInfo, setHasPaymentInfo] = useState(false);
+  const [showPaymentInfoModal, setShowPaymentInfoModal] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -26,11 +27,24 @@ const Landlordhome = () => {
 
       try {
         setLoading(true);
-        const [data, paymentInfo] = await Promise.all([
-          getBoardingHousesByLandlord(user.uid),
-          checkLandlordPaymentInfo(user.uid)
+        const [data] = await Promise.all([
+          getBoardingHousesByLandlord(user.uid)
         ]);
-        console.log('Fetched boarding houses for landlord:', data);
+        // Check payment info from localStorage
+        const saved = localStorage.getItem('renteasy_payment_info');
+        let paymentInfo = false;
+        if (saved) {
+          try {
+            const parsed = JSON.parse(saved);
+            if (
+              parsed.gcashName && parsed.gcashName.trim() !== '' &&
+              parsed.gcashNumber && parsed.gcashNumber.trim().length === 11 &&
+              parsed.qrCode && parsed.qrCode.trim() !== ''
+            ) {
+              paymentInfo = true;
+            }
+          } catch {}
+        }
         setListingsData(data);
         setHasPaymentInfo(paymentInfo);
         setError(null);
@@ -54,6 +68,10 @@ const Landlordhome = () => {
   };
 
   const handleAddBoardingHouse = () => {
+    if (!hasPaymentInfo) {
+      setShowPaymentInfoModal(true);
+      return;
+    }
     navigate('/add-boarding-house');
   };
 
@@ -242,9 +260,8 @@ const Landlordhome = () => {
             <h2>Listings ({listingsData.filter(h => h.status !== 'occupied').length})</h2>
             <div className="header-actions">
               <button
-                className={`add-boarding-btn ${!hasPaymentInfo ? 'disabled' : ''}`}
+                className={`add-boarding-btn`}
                 onClick={handleAddBoardingHouse}
-                disabled={!hasPaymentInfo}
                 title={!hasPaymentInfo ? 'Please set up your GCash payment information first' : ''}
               >
                 Add Boarding House
@@ -290,7 +307,20 @@ const Landlordhome = () => {
           </>
         )}
       </div>
-    </div>
+    {/* Payment Info Required Modal */}
+    {showPaymentInfoModal && (
+      <>
+        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
+        <div className="ll-payment-modal">
+          <h2>ADD YOUR PAYMENT INFORMATION FIRST</h2>
+          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
+            Go to <b>Settings</b>, click <b>Payment Info</b> and add your <b>GCash account name</b>, <b>GCash number</b> and <b>upload your GCash QR code</b>.
+          </div>
+          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
+        </div>
+      </>
+    )}
+  </div>
   );
 };
 

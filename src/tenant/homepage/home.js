@@ -119,12 +119,26 @@ const Home = ({ onLogout }) => {
   const BoardingHouseCard = ({ house }) => {
     const hasImages = house.images && Array.isArray(house.images) && house.images.length > 0;
     const thumbnail = hasImages ? house.images[0] : (house.image || '/default.png');
-    
+
+    // Determine status color and text
+    const getStatusInfo = (status) => {
+      switch (status) {
+        case 'reserved':
+          return { color: '#ff9800', text: 'Reserved' };
+        case 'occupied':
+          return { color: '#f44336', text: 'Occupied' };
+        default:
+          return { color: '#4caf50', text: '' };
+      }
+    };
+
+    const statusInfo = getStatusInfo(house.status);
+
     return (
       <div className="boarding-card" onClick={() => setSelectedHouse(house)}>
         <div className="card-image">
-          <img 
-            src={thumbnail} 
+          <img
+            src={thumbnail}
             alt={house.name || house['Boarding House Name'] || 'Boarding House'}
             onError={(e) => {
               console.error(`Image failed to load for "${house.name}":`, {
@@ -137,6 +151,23 @@ const Home = ({ onLogout }) => {
             }}
             onLoad={() => console.log(`Image loaded for "${house.name}":`, thumbnail)}
           />
+          <div
+            className="status-badge"
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              backgroundColor: statusInfo.color,
+              color: 'white',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              fontWeight: 'bold',
+              zIndex: 10
+            }}
+          >
+            {statusInfo.text}
+          </div>
         </div>
         <div className="card-content">
           <h3>{house.name || house['Boarding House Name'] || 'Untitled'}</h3>
@@ -175,12 +206,14 @@ const Home = ({ onLogout }) => {
 
         {!loading && !error && boardingHouses.length > 0 && (
           <section className="boarding-section">
-            <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Available Boarding Houses</h2>
+            <h2 className="section-title" style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>Boarding Houses</h2>
             <div className="boarding-grid">
               {filteredHouses.length > 0 ? (
-                filteredHouses.map((house) => (
-                  <BoardingHouseCard key={house.id} house={house} />
-                ))
+                filteredHouses
+                  .filter(house => house.status !== 'occupied')
+                  .map((house) => (
+                    <BoardingHouseCard key={house.id} house={house} />
+                  ))
               ) : (
                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#999' }}>
                   No boarding houses match your search

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
 import { getBoardingHousesByLandlord } from '../../services/bhservice';
 import { auth, db } from '../../firebase/config';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
 import './llhome.css';
 
@@ -41,84 +41,7 @@ const Landlordhome = () => {
     return () => unsub();
   }, []);
 
-  const pendingData = [
-    {
-      id: 5,
-      name: "Tres Marias Boarding House",
-      address: "Coastal Rd. Brgy 5, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1100",
-      
-    },
-    {
-      id: 6,
-      name: "Tres Marias Boarding House",
-      address: "Highland Ave. Brgy 6, Isabela",
-      roomType: "Private Room (1 pax)",
-      price: "₱1400",
-     
-    },
-   
-  ];
 
-  const occupiedData = [
-    {
-      id: 9,
-      name: "Tres Marias Boarding House",
-      address: "Gateway Ave. Brgy 9, Isabela",
-      roomType: "Private Room (1 pax)",
-      price: "₱1600",
-      
-    },
-    {
-      id: 10,
-      name: "Tres Marias Boarding House",
-      address: "Paradise St. Brgy 10, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱1300",
-      
-    },
-    {
-      id: 11,
-      name: "Tres Marias Boarding House",
-      address: "Star Ave. Brgy 11, Isabela",
-      roomType: "Studio Room (1 pax)",
-      price: "₱1700",
-   
-    },
-    {
-      id: 12,
-      name: "Tres Marias Boarding House",
-      address: "Quiet St. Brgy 12, Isabela",
-      roomType: "Bed Space (1 pax)",
-      price: "₱850",
-     
-    },
-    {
-      id: 13,
-      name: "Tres Marias Boarding House",
-      address: "Main St. Brgy 13, Isabela",
-      roomType: "Shared Room (2-4 pax)",
-      price: "₱950",
-     
-    },
-    {
-      id: 14,
-      name: "Tres Marias Boarding House",
-      address: "Central Ave. Brgy 14, Isabela",
-      roomType: "Private Room (1 pax)",
-      price: "₱1450",
-    
-    },
-    {
-      id: 15,
-      name: "Tres Marias Boarding House",
-      address: "Market St. Brgy 15, Isabela",
-      roomType: "Studio Room (1 pax)",
-      price: "₱1900",
-      
-    }
-  ];
 
   const handleSeeAll = (section) => {
     setExpandedSections(prev => ({
@@ -147,29 +70,128 @@ const Landlordhome = () => {
     }
   };
 
-  const PropertyCard = ({ property, editMode }) => {
+  const handleMakeAvailable = async (id) => {
+    try {
+      await updateDoc(doc(db, 'Boardinghouse', id), {
+        status: 'available'
+      });
+      // Update local state
+      setListingsData(prev => prev.map(h => h.id === id ? { ...h, status: 'available' } : h));
+    } catch (err) {
+      console.error('Error updating boarding house status:', err);
+      alert('Failed to make boarding house available');
+    }
+  };
+
+  const PropertyCard = ({ property, editMode, isOccupied }) => {
     // Format price: if it's a string starting with ₱, use it; otherwise format it
-    const formattedPrice = typeof property.price === 'string' && property.price.startsWith('₱') 
-      ? property.price 
+    const formattedPrice = typeof property.price === 'string' && property.price.startsWith('₱')
+      ? property.price
       : `₱${property.price}`;
-    
+
     // Get first image from images array
-    const thumbnail = (property.images && Array.isArray(property.images) && property.images.length > 0) 
-      ? property.images[0] 
+    const thumbnail = (property.images && Array.isArray(property.images) && property.images.length > 0)
+      ? property.images[0]
       : '/default.png';
-    
+
+    const [showMenu, setShowMenu] = useState(false);
+
     return (
       <div className="property-card" style={{ position: 'relative' }}>
-        {editMode && (
-          <button 
-            className="delete-btn small"
-            onClick={() => handleDeleteBoardingHouse(property.id)}
-            style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10, padding: '5px 8px', backgroundColor: '#ff5252', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}
+        {/* Three dots menu button */}
+        <button
+          className="menu-btn"
+          onClick={() => setShowMenu(!showMenu)}
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 10,
+            backgroundColor: 'transparent',
+            color: 'gray',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          ⋮
+        </button>
+
+        {/* Dropdown menu */}
+        {showMenu && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '45px',
+              right: '10px',
+              zIndex: 11,
+              backgroundColor: 'white',
+              border: '1px solid #ddd',
+              borderRadius: '4px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              minWidth: '100px'
+            }}
           >
-            -
-          </button>
+            {isOccupied ? (
+              <button
+                onClick={() => {
+                  handleMakeAvailable(property.id);
+                  setShowMenu(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '14px'
+                }}
+              >
+                Make Available
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  handleDeleteBoardingHouse(property.id);
+                  setShowMenu(false);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: 'none',
+                  backgroundColor: 'transparent',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  fontSize: '14px',
+                  color: '#ff5252'
+                }}
+              >
+                Remove
+              </button>
+            )}
+          </div>
         )}
-        <div 
+
+        {/* Click outside to close menu */}
+        {showMenu && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9
+            }}
+            onClick={() => setShowMenu(false)}
+          />
+        )}
+
+        <div
           className="property-image"
           style={{
             backgroundImage: `url('${thumbnail}')`,
@@ -214,7 +236,7 @@ const Landlordhome = () => {
         {/* Listings Section: always render header */}
         <section className="section">
           <div className="section-header">
-            <h2>Listings ({listingsData.length})</h2>
+            <h2>Listings ({listingsData.filter(h => h.status !== 'occupied').length})</h2>
             <div className="header-actions">
               <button className="add-boarding-btn" onClick={handleAddBoardingHouse}>
                 Add Boarding House
@@ -226,10 +248,10 @@ const Landlordhome = () => {
             </div>
           </div>
 
-          {listingsData.length > 0 ? (
+          {listingsData.filter(h => h.status !== 'occupied').length > 0 ? (
             <div className={`cards-container ${expandedSections.listings ? 'expanded' : ''}`}>
-              {listingsData.map(property => (
-                <PropertyCard key={property.id} property={property} editMode={editMode} />
+              {listingsData.filter(h => h.status !== 'occupied').map(property => (
+                <PropertyCard key={property.id} property={property} editMode={editMode} isOccupied={false} />
               ))}
             </div>
           ) : (
@@ -238,6 +260,26 @@ const Landlordhome = () => {
             </div>
           )}
         </section>
+
+        {/* Occupied Section */}
+        {listingsData.filter(h => h.status === 'occupied').length > 0 && (
+          <section className="section">
+            <div className="section-header">
+              <h2>Occupied ({listingsData.filter(h => h.status === 'occupied').length})</h2>
+              <div className="header-actions">
+                <button className="see-all-btn" onClick={() => handleSeeAll('occupied')}>
+                  See all
+                </button>
+              </div>
+            </div>
+
+            <div className={`cards-container ${expandedSections.occupied ? 'expanded' : ''}`}>
+              {listingsData.filter(h => h.status === 'occupied').map(property => (
+                <PropertyCard key={property.id} property={property} editMode={false} isOccupied={true} />
+              ))}
+            </div>
+          </section>
+        )}
           </>
         )}
       </div>

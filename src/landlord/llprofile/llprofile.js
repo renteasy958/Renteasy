@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import './llprofile.css';
 import { auth, db } from '../../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import { uploadProfilePicture, uploadQRCode } from '../../services/cloudinaryService';
 
 const LandlordProfile = () => {
@@ -99,7 +99,8 @@ const LandlordProfile = () => {
     const handleSavePaymentInfo = async () => {
         if (!auth.currentUser) return;
         try {
-            await updateDoc(doc(db, 'landlords', auth.currentUser.uid, 'payment', 'info'), paymentForm);
+            await setDoc(doc(db, 'landlords', auth.currentUser.uid, 'payment', 'info'), paymentForm);
+            alert('Payment info saved successfully!');
         } catch (err) {
             console.error('Error saving payment info:', err);
             alert('Failed to save payment info');

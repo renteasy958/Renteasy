@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { auth, db } from '../../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import './reserve.css';
 
 const ReservationList = () => {
@@ -43,14 +43,44 @@ const ReservationList = () => {
     setSelectedReservation(null);
   };
 
-  const handleApprove = () => {
-    console.log('Approved reservation:', selectedReservation.id);
-    handleCloseModal();
+  const handleApprove = async () => {
+    try {
+      // Update boarding house status to occupied
+      const houseRef = doc(db, 'Boardinghouse', selectedReservation.boardingHouseId);
+      await updateDoc(houseRef, { status: 'occupied' });
+
+      // Remove reservation from reservations collection
+      await deleteDoc(doc(db, 'reservations', selectedReservation.id));
+
+      // Update local state
+      setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
+
+      console.log('Approved reservation:', selectedReservation.id);
+      handleCloseModal();
+    } catch (err) {
+      console.error('Error approving reservation:', err);
+      alert('Failed to approve reservation');
+    }
   };
 
-  const handleReject = () => {
-    console.log('Rejected reservation:', selectedReservation.id);
-    handleCloseModal();
+  const handleReject = async () => {
+    try {
+      // Update boarding house status back to available
+      const houseRef = doc(db, 'Boardinghouse', selectedReservation.boardingHouseId);
+      await updateDoc(houseRef, { status: 'available' });
+
+      // Remove reservation from reservations collection
+      await deleteDoc(doc(db, 'reservations', selectedReservation.id));
+
+      // Update local state
+      setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
+
+      console.log('Rejected reservation:', selectedReservation.id);
+      handleCloseModal();
+    } catch (err) {
+      console.error('Error rejecting reservation:', err);
+      alert('Failed to reject reservation');
+    }
   };
 
   return (
@@ -134,7 +164,7 @@ const ReservationList = () => {
                 <div>
                   <h3 className="rsv-reserved-title">RESERVED</h3>
                   <h4 className="rsv-bh-name">{selectedReservation.boardingHouseName || 'N/A'}</h4>
-                  <p className="rsv-bh-location">{selectedReservation.boardingHouseLocation || 'N/A'}</p>
+                  <p className="rsv-bh-location">{selectedReservation.boardingHouseAddress || 'N/A'}</p>
                   <p className="rsv-room-type">{selectedReservation.roomType || 'N/A'}</p>
                   <p className="rsv-price">
                     <span className="rsv-price-amount">{selectedReservation.price || 'N/A'}</span>

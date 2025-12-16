@@ -4,7 +4,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './bhdetails.css';
 import { auth, db } from '../../firebase/config';
-import { addDoc, collection, doc, getDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { uploadQRCode } from '../../services/cloudinaryService';
 
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
@@ -174,6 +174,15 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   };
 
   const handleReserveClick = () => {
+    // Check if house is available
+    if (house.status === 'reserved') {
+      alert('This boarding house is currently reserved. Please try again later.');
+      return;
+    }
+    if (house.status === 'occupied') {
+      alert('This boarding house is currently occupied. Please try again later.');
+      return;
+    }
     setShowReservationNotice(true);
   };
 
@@ -221,9 +230,14 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
         const user = auth.currentUser;
         const tenantUid = user ? user.uid : null;
 
-        // Try to get tenant details to denormalize name/phone
+        // Try to get tenant details to denormalize name/phone and other info
         let tenantName = user?.displayName || '';
         let tenantPhone = '';
+        let tenantGender = '';
+        let tenantBirthdate = '';
+        let tenantAge = '';
+        let tenantStatus = '';
+        let tenantAddress = '';
         if (tenantUid) {
           try {
             const tenantSnap = await getDoc(doc(db, 'tenants', tenantUid));
@@ -231,6 +245,21 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               const t = tenantSnap.data();
               tenantName = `${t.firstName || ''} ${t.middleName || ''} ${t.lastName || ''}`.trim();
               tenantPhone = t.mobileNumber || '';
+              tenantGender = t.gender || '';
+              tenantBirthdate = t.dateOfBirth || '';
+              tenantStatus = t.civilStatus || '';
+              tenantAddress = t.permanentAddress || '';
+              // Calculate age from birthdate
+              if (tenantBirthdate) {
+                const birthDate = new Date(tenantBirthdate);
+                const today = new Date();
+                let age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                  age--;
+                }
+                tenantAge = age.toString();
+              }
             }
           } catch (err) {
             console.warn('Could not fetch tenant doc:', err);
@@ -241,8 +270,14 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           tenantUid: tenantUid,
           tenantName: tenantName || tenantUid || 'Guest',
           tenantPhone: tenantPhone || '',
+          tenantGender: tenantGender || '',
+          tenantBirthdate: tenantBirthdate || '',
+          tenantAge: tenantAge || '',
+          tenantStatus: tenantStatus || '',
+          tenantAddress: tenantAddress || '',
           boardingHouseId: house.id || null,
           boardingHouseName: house.name || '',
+          boardingHouseAddress: house.address || '',
           landlordUid: house.landlordId || house.landlordUid || null,
           roomType: house.type || house.roomType || '',
           price: house.price || '',
@@ -253,6 +288,10 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
         };
 
         try {
+          // Update boarding house status to reserved
+          const houseRef = doc(db, 'Boardinghouse', house.id);
+          await updateDoc(houseRef, { status: 'reserved' });
+
           await addDoc(collection(db, 'reservations'), reservation);
           console.log('Reservation saved:', reservation);
         } catch (err) {

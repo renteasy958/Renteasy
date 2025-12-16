@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
-import { getBoardingHousesByLandlord } from '../../services/bhservice';
+import { getBoardingHousesByLandlord, checkLandlordPaymentInfo } from '../../services/bhservice';
 import { auth, db } from '../../firebase/config';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -14,6 +14,7 @@ const Landlordhome = () => {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [hasPaymentInfo, setHasPaymentInfo] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -25,9 +26,13 @@ const Landlordhome = () => {
 
       try {
         setLoading(true);
-        const data = await getBoardingHousesByLandlord(user.uid);
+        const [data, paymentInfo] = await Promise.all([
+          getBoardingHousesByLandlord(user.uid),
+          checkLandlordPaymentInfo(user.uid)
+        ]);
         console.log('Fetched boarding houses for landlord:', data);
         setListingsData(data);
+        setHasPaymentInfo(paymentInfo);
         setError(null);
       } catch (err) {
         console.error('Error fetching boarding houses:', err);
@@ -40,8 +45,6 @@ const Landlordhome = () => {
 
     return () => unsub();
   }, []);
-
-
 
   const handleSeeAll = (section) => {
     setExpandedSections(prev => ({
@@ -238,7 +241,12 @@ const Landlordhome = () => {
           <div className="section-header">
             <h2>Listings ({listingsData.filter(h => h.status !== 'occupied').length})</h2>
             <div className="header-actions">
-              <button className="add-boarding-btn" onClick={handleAddBoardingHouse}>
+              <button
+                className={`add-boarding-btn ${!hasPaymentInfo ? 'disabled' : ''}`}
+                onClick={handleAddBoardingHouse}
+                disabled={!hasPaymentInfo}
+                title={!hasPaymentInfo ? 'Please set up your GCash payment information first' : ''}
+              >
                 Add Boarding House
               </button>
               <button className="see-all-btn" onClick={() => setEditMode(!editMode)}>{editMode ? 'Done' : 'Edit'}</button>

@@ -151,23 +151,25 @@ const Home = ({ onLogout }) => {
             }}
             onLoad={() => console.log(`Image loaded for "${house.name}":`, thumbnail)}
           />
-          <div
-            className="status-badge"
-            style={{
-              position: 'absolute',
-              top: '10px',
-              right: '10px',
-              backgroundColor: statusInfo.color,
-              color: 'white',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontWeight: 'bold',
-              zIndex: 10
-            }}
-          >
-            {statusInfo.text}
-          </div>
+          {statusInfo.text && (
+            <div
+              className="status-badge"
+              style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                backgroundColor: statusInfo.color,
+                color: 'white',
+                padding: '4px 8px',
+                borderRadius: '4px',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                zIndex: 10
+              }}
+            >
+              {statusInfo.text}
+            </div>
+          )}
         </div>
         <div className="card-content">
           <h3>{house.name || house['Boarding House Name'] || 'Untitled'}</h3>
@@ -210,7 +212,7 @@ const Home = ({ onLogout }) => {
             <div className="boarding-grid">
               {filteredHouses.length > 0 ? (
                 filteredHouses
-                  .filter(house => house.status !== 'occupied')
+                  .filter(house => house.status !== 'occupied' && house.status !== 'reserved')
                   .map((house) => (
                     <BoardingHouseCard key={house.id} house={house} />
                   ))

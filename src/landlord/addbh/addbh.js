@@ -1,10 +1,10 @@
 // AddBoardingHouse.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
+import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair, AlertCircle } from 'lucide-react';
 import MapSelector from '../../maps/MapSelector';
 import './addbh.css';
-import { addBoardingHouseWithImages } from '../../services/bhservice';
+import { addBoardingHouseWithImages, checkLandlordPaymentInfo } from '../../services/bhservice';
 import { auth } from '../../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -15,9 +15,15 @@ const AddBoardingHouse = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [landlordUid, setLandlordUid] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    address: '',
+    address: {
+      streetSitio: '',
+      barangay: '',
+      cityMunicipality: 'Isabela',
+      province: 'Negros Occidental'
+    },
     type: '',
     price: '',
     description: '',
@@ -97,7 +103,17 @@ const AddBoardingHouse = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    if (['streetSitio', 'barangay', 'cityMunicipality', 'province'].includes(name)) {
+      setFormData({
+        ...formData,
+        address: {
+          ...formData.address,
+          [name]: value
+        }
+      });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleAmenityToggle = (key) => {
@@ -131,9 +147,21 @@ const AddBoardingHouse = () => {
 
   const handleSubmit = async () => {
     console.log('Submit button clicked');
-    
+
+    // Check payment info first
+    if (!landlordUid) {
+      alert('User not authenticated');
+      return;
+    }
+
+    const hasPaymentInfo = await checkLandlordPaymentInfo(landlordUid);
+    if (!hasPaymentInfo) {
+      setShowPaymentModal(true);
+      return;
+    }
+
     // Frontend validation
-    if (!formData.name || !formData.address || !formData.type || !formData.price || !formData.description) {
+    if (!formData.name || !formData.address.streetSitio || !formData.address.barangay || !formData.type || !formData.price || !formData.description) {
       alert('Please fill in all required fields');
       return;
     }
@@ -160,9 +188,12 @@ const AddBoardingHouse = () => {
         extractedFiles: imageFiles
       });
 
+      // Combine address parts into full address string
+      const fullAddress = `${formData.address.streetSitio}, ${formData.address.barangay}, ${formData.address.cityMunicipality}, ${formData.address.province}`;
+
       const payload = {
         name: formData.name,
-        address: formData.address,
+        address: fullAddress,
         type: formData.type,
         price: formData.price,
         description: formData.description,
@@ -194,6 +225,11 @@ const AddBoardingHouse = () => {
     navigate('/llhome');
   };
 
+  const handleGoToProfile = () => {
+    setShowPaymentModal(false);
+    navigate('/llprofile');
+  };
+
   return (
     <div className="add-boarding-container">
       {showSuccess && (
@@ -207,6 +243,35 @@ const AddBoardingHouse = () => {
             </div>
             <h2>Success!</h2>
             <p>Your boarding house has been added successfully.</p>
+          </div>
+        </div>
+      )}
+
+      {showPaymentModal && (
+        <div className="payment-modal-overlay">
+          <div className="payment-modal">
+            <div className="payment-modal-header">
+              <AlertCircle size={24} color="#ff6b35" />
+              <h3>Payment Information Required</h3>
+            </div>
+            <div className="payment-modal-body">
+              <p>You need to set up your GCash payment information before adding a boarding house.</p>
+              <p>This is required for tenants to make payments for your listings.</p>
+            </div>
+            <div className="payment-modal-actions">
+              <button
+                className="payment-modal-cancel"
+                onClick={() => setShowPaymentModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="payment-modal-confirm"
+                onClick={handleGoToProfile}
+              >
+                Go to Profile
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -278,46 +343,99 @@ const AddBoardingHouse = () => {
                     onChange={handleInputChange}
                     placeholder="Enter boarding house name"
                     className="add-input"
+                    style={{ height: '40px' }}
                   />
                 </div>
 
                 <div className="add-form-group">
-                  <label className="add-label">Complete Address *</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleInputChange}
-                    placeholder="Enter complete address"
-                    className="add-input"
-                  />
+                  <label className="add-label">Address</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="text"
+                          name="streetSitio"
+                          value={formData.address.streetSitio}
+                          onChange={handleInputChange}
+                          placeholder="Street/Sitio *"
+                          className="add-input"
+                          style={{ width: '100%', height: '40px' }}
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <select
+                          name="barangay"
+                          value={formData.address.barangay}
+                          onChange={handleInputChange}
+                          className="add-select"
+                          style={{ width: '100%', height: '40px' }}
+                        >
+                          <option value="">Barangay *</option>
+                          {Array.from({ length: 9 }, (_, i) => (
+                            <option key={i + 1} value={`Barangay ${i + 1}`}>Barangay {i + 1}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="text"
+                          name="cityMunicipality"
+                          value={formData.address.cityMunicipality}
+                          onChange={handleInputChange}
+                          placeholder="City/Municipality"
+                          className="add-input"
+                          style={{ width: '100%', height: '40px' }}
+                          readOnly
+                        />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <input
+                          type="text"
+                          name="province"
+                          value={formData.address.province}
+                          onChange={handleInputChange}
+                          placeholder="Province"
+                          className="add-input"
+                          style={{ width: '100%', height: '40px' }}
+                          readOnly
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="add-form-group">
-                  <label className="add-label">Type of Boarding House *</label>
-                  <select
-                    name="type"
-                    value={formData.type}
-                    onChange={handleInputChange}
-                    className="add-select"
-                  >
-                    <option value="">Select type</option>
-                    {boardingTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="add-form-group">
-                  <label className="add-label">Price per Month *</label>
-                  <input
-                    type="text"
-                    name="price"
-                    value={formData.price}
-                    onChange={handleInputChange}
-                    placeholder="₱0.00"
-                    className="add-input"
-                  />
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="add-label">Type of Boarding House *</label>
+                      <select
+                        name="type"
+                        value={formData.type}
+                        onChange={handleInputChange}
+                        className="add-select"
+                        style={{ width: '100%', height: '40px' }}
+                      >
+                        <option value="">Select type</option>
+                        {boardingTypes.map(type => (
+                          <option key={type} value={type}>{type}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="add-label">Price per Month *</label>
+                      <input
+                        type="text"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleInputChange}
+                        placeholder="₱0.00"
+                        className="add-input"
+                        style={{ width: '100%', height: '40px' }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,6 +449,7 @@ const AddBoardingHouse = () => {
                 placeholder="Describe your boarding house..."
                 rows="2"
                 className="add-textarea"
+                style={{ height: '40px', fontSize: '14px' }}
               />
             </div>
           </div>
@@ -359,7 +478,7 @@ const AddBoardingHouse = () => {
 
         {currentStep === 3 && (
           <div className="add-step-content">
-            <MapSelector 
+            <MapSelector
               onLocationSelect={handleLocationSelect}
               initialLocation={formData.location}
             />
@@ -367,9 +486,9 @@ const AddBoardingHouse = () => {
         )}
 
         <div className="add-form-actions">
-          <button 
-            type="button" 
-            className="add-btn-cancel" 
+          <button
+            type="button"
+            className="add-btn-cancel"
             onClick={handleCancel}
             disabled={isSubmitting}
           >
@@ -377,9 +496,9 @@ const AddBoardingHouse = () => {
           </button>
           <div className="add-nav-buttons">
             {currentStep > 1 && (
-              <button 
-                type="button" 
-                className="add-btn-previous" 
+              <button
+                type="button"
+                className="add-btn-previous"
                 onClick={handlePrevious}
                 disabled={isSubmitting}
               >
@@ -387,18 +506,18 @@ const AddBoardingHouse = () => {
               </button>
             )}
             {currentStep < 3 ? (
-              <button 
-                type="button" 
-                className="add-btn-next" 
+              <button
+                type="button"
+                className="add-btn-next"
                 onClick={handleNext}
                 disabled={isSubmitting}
               >
                 Next
               </button>
             ) : (
-              <button 
-                type="button" 
-                className="add-btn-submit" 
+              <button
+                type="button"
+                className="add-btn-submit"
                 onClick={handleSubmit}
                 disabled={isSubmitting}
               >

@@ -1,17 +1,32 @@
-import { 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
+import {
+  collection,
+  addDoc,
+  getDocs,
+  doc,
   getDoc,
-  updateDoc, 
-  deleteDoc, 
-  query, 
+  updateDoc,
+  deleteDoc,
+  query,
   where,
-  orderBy 
+  orderBy
 } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
+// Check if landlord has payment info set up
+export const checkLandlordPaymentInfo = async (landlordUid) => {
+  try {
+    const paySnap = await getDoc(doc(db, 'landlords', landlordUid, 'payment', 'info'));
+    if (paySnap.exists()) {
+      const data = paySnap.data();
+      // Check if essential fields are present
+      return !!(data.gcashName && data.gcashNumber);
+    }
+    return false;
+  } catch (error) {
+    console.error('Error checking payment info:', error);
+    return false;
+  }
+};
 
 const COLLECTION_NAME = 'Boardinghouse';
 
@@ -20,13 +35,13 @@ export const getAllBoardingHouses = async () => {
   try {
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
     const boardingHouses = [];
-    
+
     querySnapshot.forEach((doc) => {
       const docData = {
         id: doc.id,
         ...doc.data()
       };
-      
+
       // Ensure images field exists and is an array
       if (!docData.images) {
         docData.images = [];
@@ -34,21 +49,21 @@ export const getAllBoardingHouses = async () => {
       } else if (!Array.isArray(docData.images)) {
         // Convert single string to array, or initialize as empty
         console.warn(`Document ${doc.id} images field is not an array:`, typeof docData.images, docData.images);
-        docData.images = typeof docData.images === 'string' && docData.images.trim() 
-          ? [docData.images] 
+        docData.images = typeof docData.images === 'string' && docData.images.trim()
+          ? [docData.images]
           : [];
       }
-      
+
       // Log the images for debugging
       console.log(`Document ${doc.id} (${docData.name}) - images array:`, {
         count: docData.images.length,
         urls: docData.images,
         firstUrl: docData.images[0]
       });
-      
+
       boardingHouses.push(docData);
     });
-    
+
     console.log(`getAllBoardingHouses - Total docs fetched: ${boardingHouses.length}`);
     if (boardingHouses.length > 0) {
       console.log('First boarding house full data:', boardingHouses[0]);
@@ -65,7 +80,7 @@ export const getBoardingHouseById = async (id) => {
   try {
     const docRef = doc(db, COLLECTION_NAME, id);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       return {
         id: docSnap.id,
@@ -88,7 +103,7 @@ export const addBoardingHouse = async (boardingHouseData) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    
+
     console.log("Boarding house added with ID: ", docRef.id);
     return docRef.id;
   } catch (error) {
@@ -125,7 +140,7 @@ export const addBoardingHouseWithImages = async (boardingHouseData, images = [])
     for (let i = 0; i < images.length; i++) {
       const file = images[i];
       console.log(`Uploading image ${i + 1}/${images.length}:`, file.name);
-      
+
       const url = `https://api.cloudinary.com/v1_1/${cloudName}/upload`;
       const formData = new FormData();
       formData.append('file', file);
@@ -207,7 +222,7 @@ export const updateBoardingHouse = async (id, updates) => {
       ...updates,
       updatedAt: new Date().toISOString()
     });
-    
+
     console.log("Boarding house updated successfully");
   } catch (error) {
     console.error("Error updating boarding house:", error);
@@ -230,20 +245,20 @@ export const deleteBoardingHouse = async (id) => {
 export const getBoardingHousesByType = async (type) => {
   try {
     const q = query(
-      collection(db, COLLECTION_NAME), 
+      collection(db, COLLECTION_NAME),
       where("Type of Boarding House", "==", type)
     );
-    
+
     const querySnapshot = await getDocs(q);
     const boardingHouses = [];
-    
+
     querySnapshot.forEach((doc) => {
       boardingHouses.push({
         id: doc.id,
         ...doc.data()
       });
     });
-    
+
     return boardingHouses;
   } catch (error) {
     console.error("Error getting boarding houses by type:", error);
@@ -254,21 +269,20 @@ export const getBoardingHousesByType = async (type) => {
 // Get boarding houses by landlord ID
 export const getBoardingHousesByLandlord = async (landlordId) => {
   try {
-    const q = query(
-      collection(db, COLLECTION_NAME), 
-      where("landlordId", "==", landlordId)
-    );
-    
-    const querySnapshot = await getDocs(q);
+    // Fetch all boarding houses and filter by landlordId in code to ensure proper isolation
+    const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
     const boardingHouses = [];
-    
+
     querySnapshot.forEach((doc) => {
-      boardingHouses.push({
-        id: doc.id,
-        ...doc.data()
-      });
+      const data = doc.data();
+      if (data.landlordId === landlordId) {
+        boardingHouses.push({
+          id: doc.id,
+          ...data
+        });
+      }
     });
-    
+
     return boardingHouses;
   } catch (error) {
     console.error("Error getting boarding houses by landlord:", error);
@@ -283,11 +297,11 @@ export const searchBoardingHouses = async (searchTerm) => {
     // For production, consider using Algolia or similar service
     const querySnapshot = await getDocs(collection(db, COLLECTION_NAME));
     const boardingHouses = [];
-    
+
     querySnapshot.forEach((doc) => {
       const data = doc.data();
       const searchableText = `${data['Boarding House Name']} ${data.Address} ${data.Description}`.toLowerCase();
-      
+
       if (searchableText.includes(searchTerm.toLowerCase())) {
         boardingHouses.push({
           id: doc.id,
@@ -295,7 +309,7 @@ export const searchBoardingHouses = async (searchTerm) => {
         });
       }
     });
-    
+
     return boardingHouses;
   } catch (error) {
     console.error("Error searching boarding houses:", error);

@@ -54,6 +54,9 @@ const SearchResults = () => {
     };
 
     const matches = houses.filter((h) => {
+      // Exclude reserved and occupied houses from search results
+      if (h.status === 'reserved' || h.status === 'occupied') return false;
+
       const name = (h.name || h['Boarding House Name'] || '').toString().toLowerCase();
       const address = (h.address || h.Address || h.location?.address || '').toString().toLowerCase();
       const type = (h.type || h['Type of Boarding House'] || '').toString().toLowerCase();

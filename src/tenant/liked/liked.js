@@ -22,8 +22,12 @@ const Liked = () => {
         // Fetch all boarding houses from Firestore
         const allHouses = await getAllBoardingHouses();
         
-        // Filter to only liked houses
-        const liked = allHouses.filter(house => savedLikes.includes(house.id));
+        // Filter to only liked houses that are not reserved or occupied
+        const liked = allHouses.filter(house =>
+          savedLikes.includes(house.id) &&
+          house.status !== 'reserved' &&
+          house.status !== 'occupied'
+        );
         setBoardingHouses(liked);
         setError(null);
       } catch (err) {

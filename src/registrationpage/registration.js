@@ -22,7 +22,10 @@ const Registration = ({ onBack }) => {
         civilStatus: '',
         gender: '',
         dateOfBirth: '',
-        permanentAddress: '',
+        streetSitio: '',
+        barangay: '',
+        cityMunicipality: '',
+        province: '',
         mobileNumber: '',
         category: '',
         email: '',
@@ -37,10 +40,16 @@ const Registration = ({ onBack }) => {
         civilStatus: '',
         gender: '',
         dateOfBirth: '',
-        permanentAddress: '',
+        streetSitio: '',
+        barangay: '',
+        cityMunicipality: '',
+        province: '',
         contactNumber: '',
         boardingHouseName: '',
-        boardingHouseAddress: '',
+        boardingHouseStreetSitio: '',
+        boardingHouseBarangay: '',
+        boardingHouseCityMunicipality: 'Isabela',
+        boardingHouseProvince: 'Negros Occidental',
         email: '',
         password: '',
         confirmPassword: ''
@@ -91,6 +100,9 @@ const Registration = ({ onBack }) => {
             return;
         }
 
+        // Concatenate address parts
+        const permanentAddress = `${tenantFormData.streetSitio}, ${tenantFormData.barangay}, ${tenantFormData.cityMunicipality}, ${tenantFormData.province}`.trim();
+
         (async () => {
             try {
                 const userCred = await createUserWithEmailAndPassword(auth, tenantFormData.email, tenantFormData.password);
@@ -103,7 +115,7 @@ const Registration = ({ onBack }) => {
                     civilStatus: tenantFormData.civilStatus,
                     gender: tenantFormData.gender,
                     dateOfBirth: tenantFormData.dateOfBirth,
-                    permanentAddress: tenantFormData.permanentAddress,
+                    permanentAddress: permanentAddress,
                     mobileNumber: tenantFormData.mobileNumber,
                     category: tenantFormData.category,
                     email: tenantFormData.email,
@@ -131,6 +143,10 @@ const Registration = ({ onBack }) => {
             return;
         }
 
+        // Concatenate address parts
+        const permanentAddress = `${landlordFormData.streetSitio}, ${landlordFormData.barangay}, ${landlordFormData.cityMunicipality}, ${landlordFormData.province}`.trim();
+        const boardingHouseAddress = `${landlordFormData.boardingHouseStreetSitio}, ${landlordFormData.boardingHouseBarangay}, ${landlordFormData.boardingHouseCityMunicipality}, ${landlordFormData.boardingHouseProvince}`.trim();
+
         (async () => {
             try {
                 const userCred = await createUserWithEmailAndPassword(auth, landlordFormData.email, landlordFormData.password);
@@ -143,10 +159,10 @@ const Registration = ({ onBack }) => {
                     civilStatus: landlordFormData.civilStatus,
                     gender: landlordFormData.gender,
                     dateOfBirth: landlordFormData.dateOfBirth,
-                    permanentAddress: landlordFormData.permanentAddress,
+                    permanentAddress: permanentAddress,
                     contactNumber: landlordFormData.contactNumber,
                     boardingHouseName: landlordFormData.boardingHouseName,
-                    boardingHouseAddress: landlordFormData.boardingHouseAddress,
+                    boardingHouseAddress: boardingHouseAddress,
                     email: landlordFormData.email,
                     createdAt: new Date().toISOString(),
                     role: 'landlord'
@@ -282,14 +298,50 @@ const Registration = ({ onBack }) => {
                             </div>
 
                             <div className="form-row">
-                                <div className="form-group full-width">
-                                    <label className="form-label">Permanent Address</label>
-                                    <input 
-                                        type="text" 
-                                        name="permanentAddress"
-                                        className="form-input" 
-                                        placeholder="Enter permanent address"
-                                        value={tenantFormData.permanentAddress}
+                                <div className="form-group">
+                                    <label className="form-label">Street/Sitio</label>
+                                    <input
+                                        type="text"
+                                        name="streetSitio"
+                                        className="form-input"
+                                        placeholder="Enter street/sitio"
+                                        value={tenantFormData.streetSitio}
+                                        onChange={handleTenantInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Barangay</label>
+                                    <input
+                                        type="text"
+                                        name="barangay"
+                                        className="form-input"
+                                        placeholder="Enter barangay"
+                                        value={tenantFormData.barangay}
+                                        onChange={handleTenantInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">City/Municipality</label>
+                                    <input
+                                        type="text"
+                                        name="cityMunicipality"
+                                        className="form-input"
+                                        placeholder="Enter city/municipality"
+                                        value={tenantFormData.cityMunicipality}
+                                        onChange={handleTenantInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Province</label>
+                                    <input
+                                        type="text"
+                                        name="province"
+                                        className="form-input"
+                                        placeholder="Enter province"
+                                        value={tenantFormData.province}
                                         onChange={handleTenantInputChange}
                                         autoComplete="off"
                                     />
@@ -518,27 +570,65 @@ const Registration = ({ onBack }) => {
                             </div>
 
                             <div className="form-row">
-                                <div className="form-group full-width">
-                                    <label className="form-label">Permanent Address</label>
-                                    <input 
-                                        type="text" 
-                                        name="permanentAddress"
-                                        className="form-input" 
-                                        placeholder="Enter permanent address"
-                                        value={landlordFormData.permanentAddress}
+                                <div className="form-group">
+                                    <label className="form-label">Street/Sitio</label>
+                                    <input
+                                        type="text"
+                                        name="streetSitio"
+                                        className="form-input"
+                                        placeholder="Enter street/sitio"
+                                        value={landlordFormData.streetSitio}
+                                        onChange={handleLandlordInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Barangay</label>
+                                    <input
+                                        type="text"
+                                        name="barangay"
+                                        className="form-input"
+                                        placeholder="Enter barangay"
+                                        value={landlordFormData.barangay}
+                                        onChange={handleLandlordInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">City/Municipality</label>
+                                    <input
+                                        type="text"
+                                        name="cityMunicipality"
+                                        className="form-input"
+                                        placeholder="Enter city/municipality"
+                                        value={landlordFormData.cityMunicipality}
+                                        onChange={handleLandlordInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Province</label>
+                                    <input
+                                        type="text"
+                                        name="province"
+                                        className="form-input"
+                                        placeholder="Enter province"
+                                        value={landlordFormData.province}
                                         onChange={handleLandlordInputChange}
                                         autoComplete="off"
                                     />
                                 </div>
                             </div>
 
+                            <hr className="section-divider" />
+
                             <div className="form-row">
                                 <div className="form-group">
                                     <label className="form-label">Name of Boarding House</label>
-                                    <input 
-                                        type="text" 
+                                    <input
+                                        type="text"
                                         name="boardingHouseName"
-                                        className="form-input" 
+                                        className="form-input"
                                         placeholder="Enter boarding house name"
                                         value={landlordFormData.boardingHouseName}
                                         onChange={handleLandlordInputChange}
@@ -547,10 +637,10 @@ const Registration = ({ onBack }) => {
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Mobile Number</label>
-                                    <input 
-                                        type="tel" 
+                                    <input
+                                        type="tel"
                                         name="contactNumber"
-                                        className="form-input" 
+                                        className="form-input"
                                         placeholder="Enter mobile number"
                                         value={landlordFormData.contactNumber}
                                         onChange={handleLandlordInputChange}
@@ -561,14 +651,58 @@ const Registration = ({ onBack }) => {
                             </div>
 
                             <div className="form-row">
-                                <div className="form-group full-width">
-                                    <label className="form-label">Address</label>
-                                    <input 
-                                        type="text" 
-                                        name="boardingHouseAddress"
-                                        className="form-input" 
-                                        placeholder="Enter boarding house address"
-                                        value={landlordFormData.boardingHouseAddress}
+                                <div className="form-group">
+                                    <label className="form-label">Street/Sitio</label>
+                                    <input
+                                        type="text"
+                                        name="boardingHouseStreetSitio"
+                                        className="form-input"
+                                        placeholder="Enter street/sitio"
+                                        value={landlordFormData.boardingHouseStreetSitio}
+                                        onChange={handleLandlordInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Barangay</label>
+                                    <select
+                                        name="boardingHouseBarangay"
+                                        className="form-input"
+                                        value={landlordFormData.boardingHouseBarangay}
+                                        onChange={handleLandlordInputChange}
+                                    >
+                                        <option value="">Select barangay</option>
+                                        <option value="Barangay 1">Barangay 1</option>
+                                        <option value="Barangay 2">Barangay 2</option>
+                                        <option value="Barangay 3">Barangay 3</option>
+                                        <option value="Barangay 4">Barangay 4</option>
+                                        <option value="Barangay 5">Barangay 5</option>
+                                        <option value="Barangay 6">Barangay 6</option>
+                                        <option value="Barangay 7">Barangay 7</option>
+                                        <option value="Barangay 8">Barangay 8</option>
+                                        <option value="Barangay 9">Barangay 9</option>
+                                    </select>
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">City/Municipality</label>
+                                    <input
+                                        type="text"
+                                        name="boardingHouseCityMunicipality"
+                                        className="form-input"
+                                        placeholder="Enter city/municipality"
+                                        value={landlordFormData.boardingHouseCityMunicipality}
+                                        onChange={handleLandlordInputChange}
+                                        autoComplete="off"
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Province</label>
+                                    <input
+                                        type="text"
+                                        name="boardingHouseProvince"
+                                        className="form-input"
+                                        placeholder="Enter province"
+                                        value={landlordFormData.boardingHouseProvince}
                                         onChange={handleLandlordInputChange}
                                         autoComplete="off"
                                     />

@@ -249,7 +249,6 @@ const Landlordhome = () => {
               >
                 Add Boarding House
               </button>
-              <button className="see-all-btn" onClick={() => setEditMode(!editMode)}>{editMode ? 'Done' : 'Edit'}</button>
               <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
                 See all
               </button>

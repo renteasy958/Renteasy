@@ -96,8 +96,12 @@ const Landlordhome = () => {
       await updateDoc(doc(db, 'Boardinghouse', id), {
         status: 'available'
       });
-      // Update local state
-      setListingsData(prev => prev.map(h => h.id === id ? { ...h, status: 'available' } : h));
+      // Refetch latest listings after update
+      const user = auth.currentUser;
+      if (user) {
+        const updatedListings = await getBoardingHousesByLandlord(user.uid);
+        setListingsData(updatedListings);
+      }
     } catch (err) {
       console.error('Error updating boarding house status:', err);
       alert('Failed to make boarding house available');

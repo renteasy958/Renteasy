@@ -7,6 +7,42 @@ import { auth, db } from '../../firebase/config';
 import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { uploadQRCode } from '../../services/cloudinaryService';
 
+// Helper to send reservation email via backend /reserve endpoint
+async function sendEmailToLandlord(landlordEmail, subject, html, reservationDetails) {
+  try {
+    // Compose payload for /reserve endpoint
+    const payload = {
+      tenant: {
+        name: reservationDetails.tenantName,
+        address: reservationDetails.tenantAddress,
+        contactNumber: reservationDetails.tenantPhone,
+        age: reservationDetails.tenantAge,
+        status: reservationDetails.tenantStatus,
+        birthdate: reservationDetails.tenantBirthdate,
+        email: reservationDetails.tenantEmail || '',
+      },
+      reservedHouses: [
+        {
+          name: reservationDetails.boardingHouseName,
+          address: reservationDetails.boardingHouseAddress,
+        }
+      ],
+      paymentReference: reservationDetails.gcashRefNumber,
+      landlordEmail: landlordEmail
+    };
+    const response = await fetch('http://localhost:5000/reserve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Failed to send reservation email');
+    return data;
+  } catch (err) {
+    console.warn('Reservation email send failed:', err);
+  }
+}
+
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [showReservationNotice, setShowReservationNotice] = useState(false);
@@ -303,6 +339,43 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
           await addDoc(collection(db, 'reservations'), reservation);
           console.log('Reservation saved:', reservation);
+
+          // Send email to landlord if email is available
+          if (landlordInfo && landlordInfo.email) {
+            const subject = 'New Reservation Notification';
+            const html = `
+              <p>Hello,</p>
+              <p>A new reservation has been made for your property: <b>${house.name}</b>.</p>
+              <h3>Tenant Details:</h3>
+              <ul>
+                <li><b>Name:</b> ${tenantName}</li>
+                <li><b>Contact Number:</b> ${tenantPhone}</li>
+                <li><b>Address:</b> ${tenantAddress}</li>
+                <li><b>Email:</b> ${user?.email || ''}</li>
+                <li><b>Age:</b> ${tenantAge}</li>
+                <li><b>Date of Birth:</b> ${tenantBirthdate}</li>
+              </ul>
+              <h3>Reservation Details:</h3>
+              <ul>
+                <li><b>Boarding House:</b> ${house.name}</li>
+                <li><b>Address:</b> ${house.address}</li>
+                <li><b>GCash Reference Number:</b> ${referenceNumber.trim()}</li>
+              </ul>
+              <p>Please check your dashboard for more details.</p>
+            `;
+            sendEmailToLandlord(landlordInfo.email, subject, html, {
+              tenantName,
+              tenantAddress,
+              tenantPhone,
+              tenantAge,
+              tenantStatus,
+              tenantBirthdate,
+              tenantEmail: user?.email || '',
+              boardingHouseName: house.name,
+              boardingHouseAddress: house.address,
+              gcashRefNumber: referenceNumber.trim(),
+            });
+          }
         } catch (err) {
           console.error('Failed to save reservation:', err);
         }

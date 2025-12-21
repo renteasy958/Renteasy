@@ -154,8 +154,10 @@ const AddBoardingHouse = () => {
       return;
     }
 
-    const saved = localStorage.getItem('renteasy_payment_info');
+    // Check both localStorage and Firestore for payment info
     let hasPaymentInfo = false;
+    // 1. Check localStorage
+    const saved = localStorage.getItem('renteasy_payment_info');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -164,6 +166,15 @@ const AddBoardingHouse = () => {
           parsed.gcashNumber && parsed.gcashNumber.trim().length === 11 &&
           parsed.qrCode && parsed.qrCode.trim() !== ''
         ) {
+          hasPaymentInfo = true;
+        }
+      } catch {}
+    }
+    // 2. If not found in localStorage, check Firestore
+    if (!hasPaymentInfo && landlordUid) {
+      try {
+        const paySnap = await checkLandlordPaymentInfo(landlordUid);
+        if (paySnap) {
           hasPaymentInfo = true;
         }
       } catch {}

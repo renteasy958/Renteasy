@@ -213,13 +213,18 @@ const ReservationList = () => {
 
   const handleApprove = async () => {
     try {
-      // Approve reservation (boarding house status is managed in Home)
+      // Set the related boarding house status to 'occupied'
+      if (selectedReservation && selectedReservation.boardingHouseId) {
+        const bhRef = doc(db, 'Boardinghouse', selectedReservation.boardingHouseId);
+        await updateDoc(bhRef, { status: 'occupied' });
+      }
+      // Remove the reservation document
       await deleteDoc(doc(db, 'reservations', selectedReservation.id));
 
       // Update local state
       setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
 
-      console.log('Approved reservation:', selectedReservation.id);
+      console.log('Approved reservation and set property to occupied:', selectedReservation.id);
       handleCloseModal();
     } catch (err) {
       console.error('Error approving reservation:', err);
@@ -229,13 +234,18 @@ const ReservationList = () => {
 
   const handleReject = async () => {
     try {
-      // Reject reservation (boarding house status is managed in Home)
+      // Set the related boarding house status to 'available' if reservation has a boardingHouseId
+      if (selectedReservation && selectedReservation.boardingHouseId) {
+        const bhRef = doc(db, 'Boardinghouse', selectedReservation.boardingHouseId);
+        await updateDoc(bhRef, { status: 'available' });
+      }
+      // Remove the reservation document
       await deleteDoc(doc(db, 'reservations', selectedReservation.id));
 
       // Update local state
       setReservations(prev => prev.filter(r => r.id !== selectedReservation.id));
 
-      console.log('Rejected reservation:', selectedReservation.id);
+      console.log('Rejected reservation and set property to available:', selectedReservation.id);
       handleCloseModal();
     } catch (err) {
       console.error('Error rejecting reservation:', err);
@@ -286,7 +296,6 @@ const ReservationList = () => {
             .filter(r => r.bhStatus === 'reserved' && (r.reservationStatusNormalized === 'pending' || r.status === 'pending'))
             .map((reservation) => (
             <div key={reservation.id} className="rsv-card">
-                <div className="rsv-badge">RESERVATION</div>
               <div className="rsv-card-info">
                 <div className="rsv-info-item">
                   <span>{reservation.tenantName || 'N/A'}</span>
@@ -306,13 +315,6 @@ const ReservationList = () => {
                 onClick={() => handleViewDetails(reservation.id)}
               >
                 View details
-              </button>
-              <button
-                className="rsv-flag-btn"
-                onClick={() => handleFlagExcluded(reservation.id)}
-                title="Flag as suspicious and move to excluded list"
-              >
-                Flag
               </button>
             </div>
           ))

@@ -199,27 +199,47 @@
         flex-direction: column;
         height: auto;
         overflow-y: auto;
+        min-width: 0;
     }
-
     .ll-prof-sidebar {
         width: 100%;
-        padding: 20px;
+        padding: 20px 10px;
+        min-width: 0;
+        align-items: flex-start;
     }
-
     .ll-prof-body {
-        padding: 20px;
+        padding: 15px 5px;
     }
-
     .ll-prof-info-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
     }
-
     .ll-prof-image {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
     }
-
     .ll-prof-name {
-        font-size: 16px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ll-prof-sidebar {
+        padding: 10px 2vw;
+        gap: 10px;
+    }
+    .ll-prof-body {
+        padding: 8px 2vw;
+    }
+    .ll-prof-info-label {
+        font-size: 10px;
+    }
+    .ll-prof-info-value {
+        font-size: 12px;
+        padding: 6px 6px;
+    }
+    .ll-prof-section-title {
+        font-size: 13px;
+        padding-bottom: 4px;
     }
 }

@@ -15,7 +15,8 @@ const AddBoardingHouse = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [landlordUid, setLandlordUid] = useState(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [hasPaymentInfo, setHasPaymentInfo] = useState(null); // null = not checked yet
+
   const [formData, setFormData] = useState({
     name: '',
     address: {
@@ -47,6 +48,15 @@ const AddBoardingHouse = () => {
     }
   });
 
+  // Remove image by index
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+  };
+
+
+
+
+  // Set landlordUid on auth
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -55,6 +65,22 @@ const AddBoardingHouse = () => {
     });
     return () => unsub();
   }, []);
+
+  // Check payment info when landlordUid changes
+  useEffect(() => {
+    const checkPayment = async () => {
+      if (landlordUid) {
+        const hasInfo = await checkLandlordPaymentInfo(landlordUid);
+        setHasPaymentInfo(hasInfo);
+        if (!hasInfo) {
+          sessionStorage.setItem('showPaymentInfoModal', 'true');
+          navigate('/llhome');
+        }
+      }
+    };
+    checkPayment();
+  }, [landlordUid, navigate]);
+
 
   const boardingTypes = [
     'Single Room',
@@ -79,31 +105,29 @@ const AddBoardingHouse = () => {
     { key: 'chair', label: 'Chair', icon: Armchair }
   ];
 
+
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     const totalImages = images.length + files.length;
-
     if (totalImages > 7) {
       alert('You can only upload up to 7 images');
       return;
     }
-
     const newImages = files.map(file => ({
       file,
       preview: URL.createObjectURL(file)
     }));
-
     setImages([...images, ...newImages]);
-  };
-
-  const removeImage = (index) => {
-    const newImages = images.filter((_, i) => i !== index);
-    setImages(newImages);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    if (['streetSitio', 'barangay', 'cityMunicipality', 'province'].includes(name)) {
+    if ([
+      'streetSitio',
+      'barangay',
+      'cityMunicipality',
+      'province'
+    ].includes(name)) {
       setFormData({
         ...formData,
         address: {
@@ -145,44 +169,24 @@ const AddBoardingHouse = () => {
     if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+
   const handleSubmit = async () => {
     console.log('Submit button clicked');
+    console.log('[handleSubmit] landlordUid:', landlordUid);
+    console.log('[handleSubmit] formData:', formData);
+    console.log('[handleSubmit] images:', images);
 
-    // Check payment info from localStorage (must match llhome.js logic)
     if (!landlordUid) {
       alert('User not authenticated');
       return;
     }
 
-    // Check both localStorage and Firestore for payment info
-    let hasPaymentInfo = false;
-    // 1. Check localStorage
-    const saved = localStorage.getItem('renteasy_payment_info');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (
-          parsed.gcashName && parsed.gcashName.trim() !== '' &&
-          parsed.gcashNumber && parsed.gcashNumber.trim().length === 11 &&
-          parsed.qrCode && parsed.qrCode.trim() !== ''
-        ) {
-          hasPaymentInfo = true;
-        }
-      } catch {}
-    }
-    // 2. If not found in localStorage, check Firestore
-    if (!hasPaymentInfo && landlordUid) {
-      try {
-        const paySnap = await checkLandlordPaymentInfo(landlordUid);
-        if (paySnap) {
-          hasPaymentInfo = true;
-        }
-      } catch {}
-    }
+    // Check payment info from state (already checked on load)
     if (!hasPaymentInfo) {
-      setShowPaymentModal(true);
+      // (modal now handled in llhome)
       return;
     }
+
 
     // Frontend validation
     if (!formData.name || !formData.address.streetSitio || !formData.address.barangay || !formData.type || !formData.price || !formData.description) {
@@ -249,10 +253,7 @@ const AddBoardingHouse = () => {
     navigate('/llhome');
   };
 
-  const handleGoToProfile = () => {
-    setShowPaymentModal(false);
-    navigate('/llprofile');
-  };
+  // ...existing code...
 
   return (
     <div className="add-boarding-container">
@@ -271,36 +272,11 @@ const AddBoardingHouse = () => {
         </div>
       )}
 
-      {showPaymentModal && (
-        <div className="payment-modal-overlay">
-          <div className="payment-modal">
-            <div className="payment-modal-header">
-              <AlertCircle size={24} color="#ff6b35" />
-              <h3>Payment Information Required</h3>
-            </div>
-            <div className="payment-modal-body">
-              <p>You need to set up your GCash payment information before adding a boarding house.</p>
-              <p>This is required for tenants to make payments for your listings.</p>
-            </div>
-            <div className="payment-modal-actions">
-              <button
-                className="payment-modal-cancel"
-                onClick={() => setShowPaymentModal(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="payment-modal-confirm"
-                onClick={handleGoToProfile}
-              >
-                Go to Profile
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      <div className="add-boarding-form">
+
+      {/* Only show form if payment info is present */}
+      {hasPaymentInfo && (
+        <div className="add-boarding-form">
         <h1 className="add-form-title">Add Boarding House</h1>
 
         <div className="add-steps-indicator">
@@ -550,9 +526,9 @@ const AddBoardingHouse = () => {
             )}
           </div>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 };
-
 export default AddBoardingHouse;

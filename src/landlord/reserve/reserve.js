@@ -309,13 +309,13 @@ const ReservationList = () => {
                 <div className="rsv-info-item">
                   <span>{reservation.tenantPhone || 'N/A'}</span>
                 </div>
+                <button 
+                  className="rsv-view-btn"
+                  onClick={() => handleViewDetails(reservation.id)}
+                >
+                  View details
+                </button>
               </div>
-              <button 
-                className="rsv-view-btn"
-                onClick={() => handleViewDetails(reservation.id)}
-              >
-                View details
-              </button>
             </div>
           ))
         ) : (

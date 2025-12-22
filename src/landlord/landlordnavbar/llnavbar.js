@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import './llnavbar.css';
 import { db, auth } from '../../firebase/config';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { uploadQRCode } from '../../services/cloudinaryService';
 
 const LLNavbar = () => {
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
@@ -155,7 +156,7 @@ const LLNavbar = () => {
       <nav className={`ll-navbar ${isNavigatingToProfile ? 'navigating-to-profile' : ''}`}>
         <div className="ll-navbar-container">
           <div className="ll-navbar-logo">
-            <img src="/logo.png" alt="RentEasy Logo" className="ll-logo-img" />
+            <img src="logo.png" alt="RentEasy Logo" className="ll-logo-img" />
           </div>
 
           <div className="ll-nav-links">
@@ -243,12 +244,19 @@ const LLNavbar = () => {
                     type="file"
                     accept="image/*"
                     style={{ display: 'none' }}
-                    onChange={e => {
+                    onChange={async e => {
                       const file = e.target.files[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onload = ev => setQrCode(ev.target.result);
-                        reader.readAsDataURL(file);
+                        try {
+                          const user = auth.currentUser;
+                          if (!user) throw new Error('Not logged in');
+                          setQrCode('loading');
+                          const url = await uploadQRCode(file, user.uid);
+                          setQrCode(url);
+                        } catch (err) {
+                          alert('Failed to upload QR code.');
+                          setQrCode(null);
+                        }
                       }
                     }}
                     disabled={!isEditingPayment}
@@ -300,11 +308,14 @@ const LLNavbar = () => {
                       alert('You must be logged in to save payment info.');
                       return;
                     }
-                    // Save to Firestore only
+                    if (qrCode === 'loading') {
+                      alert('Please wait for QR code upload to finish.');
+                      return;
+                    }
                     await setDoc(doc(db, 'landlords', user.uid, 'payment', 'info'), {
                       gcashName,
                       gcashNumber,
-                      qrCode
+                      qrCode: qrCode && qrCode !== 'loading' ? qrCode : ''
                     });
                     setIsEditingPayment(false);
                     setShowPaymentModal(false);

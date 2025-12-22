@@ -483,8 +483,11 @@
   padding: 40px;
   text-align: center;
   max-width: 400px;
+  width: 100%;
   animation: scaleIn 0.5s ease;
 }
+
+
 
 .checkmark-circle {
   width: 100px;
@@ -578,60 +581,145 @@
 
 /* Responsive Design */
 @media (max-width: 768px) {
+  .add-boarding-container {
+    padding-top: 60px !important;
+    margin-top: 0 !important;
+    height: auto;
+    min-height: 100vh;
+  }
   .add-boarding-form {
-    padding: 20px;
+    padding: 10px 2vw;
+    min-width: 0;
+    width: 100vw;
+    max-width: 100vw;
+    height: auto;
   }
-
   .add-form-title {
-    font-size: 22px;
+    font-size: 20px;
   }
-
   .add-steps-indicator {
-    padding: 0 10px;
+    padding: 0 2vw;
   }
-
   .add-step-label {
-    font-size: 11px;
+    font-size: 10px;
   }
-
   .add-form-row {
     grid-template-columns: 1fr;
-    gap: 15px;
+    gap: 10px;
   }
-
   .add-amenities-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
-
   .add-amenity-card {
-    padding: 12px;
+    padding: 8px;
   }
-
   .add-map-container {
     height: 350px;
+    min-height: 250px;
+    max-height: 60vh;
   }
-
+  .add-form-actions {
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 10px;
+    border-top: 1px solid #e0e0e0;
+    margin-top: 10px;
+    width: 100%;
+  }
+  .add-nav-buttons {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+  .add-btn-cancel,
+  .add-btn-previous,
+  .add-btn-next,
+  .add-btn-submit {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px 0;
+    border-radius: 8px;
+    margin-bottom: 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .add-btn-cancel {
+    background: #f8f9fa;
+    color: #333;
+    border: 2px solid #e0e0e0;
+  }
+  .add-btn-cancel:hover {
+    background: #e0e0e0;
+    color: #012E6A;
+  }
+  .add-btn-previous {
+    background: #e0e0e0;
+    color: #333;
+    border: 2px solid #d0d0d0;
+  }
+  .add-btn-previous:hover {
+    background: #d0d0d0;
+    color: #012E6A;
+  }
+  .add-btn-next {
+    background: #012E6A;
+    color: #fff;
+    border: none;
+  }
+  .add-btn-next:hover {
+    background: #0147a6;
+    color: #fff;
+  }
+  .add-btn-submit {
+    background: linear-gradient(90deg, #012E6A 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+    font-size: 17px;
+  }
+  .add-btn-submit:hover {
+    background: linear-gradient(90deg, #0147a6 0%, #764ba2 100%);
+    color: #fff;
+  }
   .success-animation {
-    padding: 30px;
-    margin: 1rem;
+    padding: 15px;
+    margin: 0.5rem;
   }
-
   .checkmark-circle {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
   }
-
   .checkmark {
-    width: 80px;
-    height: 80px;
+    width: 60px;
+    height: 60px;
   }
-
   .success-animation h2 {
-    font-size: 24px;
+    font-size: 18px;
   }
-
   .success-animation p {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-boarding-form {
+    padding: 4px 1vw;
+  }
+  .add-form-title {
+    font-size: 16px;
+  }
+  .add-amenities-title {
     font-size: 14px;
+  }
+  .add-amenities-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .add-map-container {
+    height: 300px;
+    min-height: 200px;
+    max-height: 60vh;
   }
 }

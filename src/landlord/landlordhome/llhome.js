@@ -16,6 +16,13 @@ const Landlordhome = () => {
   const [error, setError] = useState(null);
   const [hasPaymentInfo, setHasPaymentInfo] = useState(false);
   const [showPaymentInfoModal, setShowPaymentInfoModal] = useState(false);
+  // Show payment info modal if redirected from addbh
+  useEffect(() => {
+    if (sessionStorage.getItem('showPaymentInfoModal') === 'true') {
+      setShowPaymentInfoModal(true);
+      sessionStorage.removeItem('showPaymentInfoModal');
+    }
+  }, []);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (user) => {
@@ -30,21 +37,8 @@ const Landlordhome = () => {
         const [data] = await Promise.all([
           getBoardingHousesByLandlord(user.uid)
         ]);
-        // Check payment info from localStorage
-        const saved = localStorage.getItem('renteasy_payment_info');
-        let paymentInfo = false;
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            if (
-              parsed.gcashName && parsed.gcashName.trim() !== '' &&
-              parsed.gcashNumber && parsed.gcashNumber.trim().length === 11 &&
-              parsed.qrCode && parsed.qrCode.trim() !== ''
-            ) {
-              paymentInfo = true;
-            }
-          } catch {}
-        }
+        // Always check payment info from Firestore for cross-device consistency
+        const paymentInfo = await checkLandlordPaymentInfo(user.uid);
         setListingsData(data);
         setHasPaymentInfo(paymentInfo);
         setError(null);

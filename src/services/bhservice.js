@@ -15,11 +15,17 @@ import { db } from '../firebase/config';
 // Check if landlord has payment info set up
 export const checkLandlordPaymentInfo = async (landlordUid) => {
   try {
+    console.log('[checkLandlordPaymentInfo] landlordUid:', landlordUid);
     const paySnap = await getDoc(doc(db, 'landlords', landlordUid, 'payment', 'info'));
     if (paySnap.exists()) {
       const data = paySnap.data();
+      console.log('[checkLandlordPaymentInfo] payment data:', data);
       // Check if essential fields are present
-      return !!(data.gcashName && data.gcashNumber);
+      const hasInfo = !!(data.gcashName && data.gcashNumber);
+      console.log('[checkLandlordPaymentInfo] hasInfo:', hasInfo);
+      return hasInfo;
+    } else {
+      console.log('[checkLandlordPaymentInfo] payment info document does not exist');
     }
     return false;
   } catch (error) {

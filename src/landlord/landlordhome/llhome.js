@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Llnavbar from '../landlordnavbar/llnavbar'; // Import the landlord navbar component
 import { getBoardingHousesByLandlord, checkLandlordPaymentInfo } from '../../services/bhservice';
+import { getDoc, doc as firestoreDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase/config';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -16,6 +17,8 @@ const Landlordhome = () => {
   const [error, setError] = useState(null);
   const [hasPaymentInfo, setHasPaymentInfo] = useState(false);
   const [showPaymentInfoModal, setShowPaymentInfoModal] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
   // Show payment info modal if redirected from addbh
   useEffect(() => {
     if (sessionStorage.getItem('showPaymentInfoModal') === 'true') {
@@ -42,10 +45,23 @@ const Landlordhome = () => {
         setListingsData(data);
         setHasPaymentInfo(paymentInfo);
         setError(null);
+
+        // Fetch verification and approval status from landlord profile
+        const landlordDoc = await getDoc(firestoreDoc(db, 'landlords', user.uid));
+        if (landlordDoc.exists()) {
+          const landlordData = landlordDoc.data();
+          setIsVerified(!!landlordData.verified); // expects boolean
+          setIsApproved(!!landlordData.adminApproved); // expects boolean
+        } else {
+          setIsVerified(false);
+          setIsApproved(false);
+        }
       } catch (err) {
         console.error('Error fetching boarding houses:', err);
         setError(err.message);
         setListingsData([]);
+        setIsVerified(false);
+        setIsApproved(false);
       } finally {
         setLoading(false);
       }
@@ -62,8 +78,16 @@ const Landlordhome = () => {
   };
 
   const handleAddBoardingHouse = () => {
+    if (!isVerified) {
+      setShowPaymentInfoModal('notVerified');
+      return;
+    }
+    if (!isApproved) {
+      setShowPaymentInfoModal('notApproved');
+      return;
+    }
     if (!hasPaymentInfo) {
-      setShowPaymentInfoModal(true);
+      setShowPaymentInfoModal('noPayment');
       return;
     }
     navigate('/add-boarding-house');
@@ -306,13 +330,37 @@ const Landlordhome = () => {
         )}
       </div>
     {/* Payment Info Required Modal */}
-    {showPaymentInfoModal && (
+    {showPaymentInfoModal === 'notVerified' && (
+      <>
+        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
+        <div className="ll-payment-modal">
+          <h2>VERIFY YOUR ACCOUNT FIRST</h2>
+          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
+            You must complete the verification process before you can add a boarding house. Go to <b>Settings</b> and click <b>Verify Account</b>.
+          </div>
+          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
+        </div>
+      </>
+    )}
+    {showPaymentInfoModal === 'notApproved' && (
+      <>
+        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
+        <div className="ll-payment-modal">
+          <h2>AWAITING ADMIN APPROVAL</h2>
+          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
+            Your verification is pending admin approval. You will be able to add a boarding house once approved.
+          </div>
+          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
+        </div>
+      </>
+    )}
+    {showPaymentInfoModal === 'noPayment' && (
       <>
         <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
         <div className="ll-payment-modal">
           <h2>ADD YOUR PAYMENT INFORMATION FIRST</h2>
           <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
-            Go to <b>Settings</b>, click <b>Payment Info</b> and add your <b>GCash account name</b>, <b>GCash number</b> and <b>upload your GCash QR code</b>.
+            Go to <b>Settings</b>, click <b>Verify Account</b> and add your <b>GCash account name</b>, <b>GCash number</b> and <b>upload your GCash QR code</b>.
           </div>
           <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
         </div>

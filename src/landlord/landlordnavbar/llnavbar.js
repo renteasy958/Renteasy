@@ -5,13 +5,14 @@ import './llnavbar.css';
 import { db, auth } from '../../firebase/config';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { uploadQRCode } from '../../services/cloudinaryService';
+import VerifyAccount from '../llprofile/verifyAccount';
 
 const LLNavbar = () => {
   const [showSettingsDropdown, setShowSettingsDropdown] = useState(false);
   const [isHomepage, setIsHomepage] = useState(true);
   const [isNavigatingToProfile, setIsNavigatingToProfile] = useState(false);
   const settingsDropdownRef = useRef(null);
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
   const [gcashName, setGcashName] = useState('');
   const [gcashNumber, setGcashNumber] = useState('');
   const [qrCode, setQrCode] = useState(null);
@@ -181,10 +182,10 @@ const LLNavbar = () => {
                       <ProfileIcon />
                       <span>Profile</span>
                     </div>
-                    <div className="ll-settings-option" onClick={() => setShowPaymentModal(true)}>
+                    <div className="ll-settings-option" onClick={() => setShowVerifyModal(true)}>
                       <span style={{ display: 'flex', alignItems: 'center' }}>
                         <CreditCardIcon />
-                        <span style={{ marginLeft: 10 }}>Payment Info</span>
+                        <span style={{ marginLeft: 10 }}>Verify Account</span>
                       </span>
                     </div>
                     <div className="ll-settings-option" onClick={(e) => handleLogout(e)}>
@@ -204,132 +205,8 @@ const LLNavbar = () => {
           </div>
         </div>
       </nav>
-      {showPaymentModal && (
-        <>
-          <div className="ll-blur-overlay" onClick={() => setShowPaymentModal(false)} />
-          <div className="ll-payment-modal">
-            <div className="ll-payment-modal-header-flex">
-              <span
-                className={`ll-payment-modal-edit-label${isEditingPayment ? ' ll-payment-modal-edit-label-disabled' : ''}`}
-                style={{ cursor: isEditingPayment ? 'not-allowed' : 'pointer' }}
-                onClick={() => !isEditingPayment && setIsEditingPayment(true)}
-              >
-                Edit
-              </span>
-              <div className="ll-payment-modal-title-wrapper">
-                <h2 className="ll-payment-modal-title">Payment Info</h2>
-              </div>
-              <button className="ll-payment-modal-x-btn" onClick={() => setShowPaymentModal(false)} title="Close">
-                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" strokeWidth="2"><line x1="6" y1="6" x2="16" y2="16"/><line x1="16" y1="6" x2="6" y2="16"/></svg>
-              </button>
-            </div>
-            <div className="ll-payment-modal-content-flex">
-              <div className="ll-payment-modal-left">
-                <div style={{ marginBottom: 16, fontWeight: 'bold' }}>QR Code:</div>
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  {qrCode ? (
-                    <>
-                      <img src={qrCode} alt="GCash QR Code" className="ll-payment-modal-qr ll-payment-modal-qr-large" />
-                      {isEditingPayment && (
-                        <button className="ll-payment-modal-img-x-btn" onClick={() => setQrCode(null)} title="Remove QR Code">
-                          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="2"><line x1="4" y1="4" x2="14" y2="14"/><line x1="14" y1="4" x2="4" y2="14"/></svg>
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    isEditingPayment && <button onClick={() => fileInputRef.current.click()} className="ll-upload-qr-btn">Upload QR Code</button>
-                  )}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={async e => {
-                      const file = e.target.files[0];
-                      if (file) {
-                        try {
-                          const user = auth.currentUser;
-                          if (!user) throw new Error('Not logged in');
-                          setQrCode('loading');
-                          const url = await uploadQRCode(file, user.uid);
-                          setQrCode(url);
-                        } catch (err) {
-                          alert('Failed to upload QR code.');
-                          setQrCode(null);
-                        }
-                      }
-                    }}
-                    disabled={!isEditingPayment}
-                  />
-                </div>
-              </div>
-              <div className="ll-payment-modal-right" style={{ justifyContent: 'flex-end' }}>
-                <div className="ll-payment-modal-row" style={{ marginTop: 0 }}>
-                  <label>Account Name:</label>
-                  <input
-                    type="text"
-                    value={gcashName}
-                    onChange={e => {
-                      if (isEditingPayment) setGcashName(e.target.value);
-                    }}
-                    placeholder="Enter GCash Account Name"
-                    className="ll-payment-modal-input"
-                    style={{ flex: 1, padding: '6px 10px', borderRadius: 4, border: '1px solid #ccc' }}
-                    disabled={!isEditingPayment}
-                  />
-                </div>
-                <div className="ll-payment-modal-row">
-                  <label>GCash Number:</label>
-                  <input
-                    type="text"
-                    value={gcashNumber}
-                    onChange={e => {
-                      if (isEditingPayment) {
-                        const val = e.target.value.replace(/\D/g, '');
-                        if (val.length <= 11) setGcashNumber(val);
-                      }
-                    }}
-                    placeholder="Enter GCash Number"
-                    className="ll-payment-modal-input"
-                    style={{ flex: 1, padding: '6px 10px', borderRadius: 4, border: '1px solid #ccc' }}
-                    disabled={!isEditingPayment}
-                    maxLength={11}
-                  />
-                </div>
-              </div>
-            </div>
-            {isEditingPayment ? (
-              <button
-                className="ll-modal-save-btn"
-                onClick={async () => {
-                  try {
-                    const user = auth.currentUser;
-                    if (!user) {
-                      alert('You must be logged in to save payment info.');
-                      return;
-                    }
-                    if (qrCode === 'loading') {
-                      alert('Please wait for QR code upload to finish.');
-                      return;
-                    }
-                    await setDoc(doc(db, 'landlords', user.uid, 'payment', 'info'), {
-                      gcashName,
-                      gcashNumber,
-                      qrCode: qrCode && qrCode !== 'loading' ? qrCode : ''
-                    });
-                    setIsEditingPayment(false);
-                    setShowPaymentModal(false);
-                  } catch (err) {
-                    alert('Failed to save payment info.');
-                    console.error('Error saving payment info:', err);
-                  }
-                }}
-              >
-                Save
-              </button>
-            ) : null}
-          </div>
-        </>
+      {showVerifyModal && (
+        <VerifyAccount onClose={() => setShowVerifyModal(false)} />
       )}
     </>
   );

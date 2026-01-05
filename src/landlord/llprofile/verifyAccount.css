@@ -1,0 +1,164 @@
+/* Row for front and back ID upload */
+.id-upload-row {
+  display: flex;
+  gap: 18px;
+  margin-bottom: 18px;
+}
+.id-upload-row .id-upload-section {
+  flex: 1 1 0;
+  min-width: 0;
+}
+/* verifyAccount.css - Styles for the Verify Account modal */
+
+.verify-blur-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(242, 243, 244, 0.28); /* less white, more transparent */
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+}
+
+.verify-modal {
+  position: fixed;
+  top: 38%; /* move modal higher */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 40px 38px 32px 38px;
+  z-index: 1010;
+  min-width: 420px;
+  max-width: 98vw;
+  width: 540px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.modal-close-x {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #888;
+  cursor: pointer;
+  z-index: 1020;
+}
+
+.verify-modal h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+  font-size: 1.3rem;
+  text-align: center;
+}
+
+.id-list-section, .id-upload-section, .payment-section, .reference-section {
+  margin-bottom: 18px;
+}
+
+.id-list-section label, .id-upload-section label, .payment-section label, .reference-section label {
+  font-weight: 500;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.id-list-section select {
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+.id-methods button {
+  margin-right: 8px;
+  padding: 6px 14px;
+  border-radius: 5px;
+  border: 1px solid #bbb;
+  background: #f2f3f4;
+  cursor: pointer;
+  font-size: 0.98rem;
+}
+
+.id-preview {
+  display: block;
+  margin-top: 8px;
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 6px;
+  border: 1px solid #eee;
+}
+
+.submit-btn {
+  width: 100%;
+  padding: 10px 0;
+  background: #2d7ff9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: background 0.18s;
+}
+.submit-btn:disabled {
+  background: #b3c6e0;
+  cursor: not-allowed;
+}
+
+.qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  width: 100%;
+}
+.qr-image {
+  width: 140px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1.5px solid #eee;
+  margin-bottom: 8px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* Add border to reference number input */
+.reference-section input[type="text"] {
+  border: 1.5px solid #bfc7d1;
+  border-radius: 5px;
+  padding: 7px 10px;
+  font-size: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 4px;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.18);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-content {
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  text-align: center;
+}

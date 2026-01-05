@@ -11,9 +11,12 @@ import Liked from './tenant/liked/liked';
 import SearchResults from './tenant/search/SearchResults';
 import AddBoardingHouse from './landlord/addbh/addbh';
 import TenantProfile from './tenant/profile/profile';
-import LLProfile from './landlord/llprofile/llprofile'; // Add this import
+
+import Admin from './admin/Admin';
 
 
+
+import LLProfile from './landlord/llprofile/llprofile';
 
 function App() {
   // Example: This would come from your authentication context or state management
@@ -94,6 +97,8 @@ function App() {
           } />
 
           <Route path="/add-boarding-house" element={<AddBoardingHouse />} />
+          {/* Admin route - full screen, responsive */}
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
     </BrowserRouter>

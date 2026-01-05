@@ -102,6 +102,9 @@ const icons = {
   tenants: (
     <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M6 21v-2a4 4 0 0 1 4-4h0a4 4 0 0 1 4 4v2"/></svg>
   ),
+  boardinghouses: (
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="8" rx="2"/><path d="M4 10l8-6 8 6"/></svg>
+  ),
 };
 
 function AdminSidebar({ currentPage, setCurrentPage }) {
@@ -129,8 +132,14 @@ function AdminSidebar({ currentPage, setCurrentPage }) {
 
 
 function AdminMain({ currentPage }) {
+    const [selectedTenant, setSelectedTenant] = useState(null);
+    const handleTenantClick = (tenant) => {
+      setSelectedTenant(tenant);
+      setModalOpen(true);
+    };
   const [boardingHouses, setBoardingHouses] = useState([]);
   const [landlords, setLandlords] = useState([]);
+  const [tenants, setTenants] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   // Modal state moved outside switch
@@ -170,6 +179,22 @@ function AdminMain({ currentPage }) {
         })
         .catch((err) => {
           setError('Failed to fetch landlords.');
+          setLoading(false);
+        });
+    } else if (currentPage === 'tenants') {
+      setLoading(true);
+      setError(null);
+      getDocs(collection(db, 'tenants'))
+        .then((querySnapshot) => {
+          const allTenants = [];
+          querySnapshot.forEach((doc) => {
+            allTenants.push({ id: doc.id, ...doc.data() });
+          });
+          setTenants(allTenants);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError('Failed to fetch tenants.');
           setLoading(false);
         });
     }
@@ -228,7 +253,6 @@ function AdminMain({ currentPage }) {
     case 'landlords':
       return (
         <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
-          <h2>All Landlords</h2>
           {loading && <div>Loading...</div>}
           {error && <div style={{ color: 'red' }}>{error}</div>}
           {!loading && !error && (
@@ -243,33 +267,32 @@ function AdminMain({ currentPage }) {
                     style={{
                       border: '1px solid #e0e0e0',
                       borderRadius: '8px',
-                      padding: '14px',
+                      padding: '14px 24px',
                       background: '#fff',
                       boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '24px',
                       cursor: 'pointer',
+                      minWidth: 340,
+                      width: '100%',
+                      maxWidth: 1200,
+                      overflow: 'hidden',
                     }}
                     onClick={() => handleLandlordClick(ll)}
                   >
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 17, fontWeight: 600 }}>
-                        {ll.firstName || ''} {ll.middleName || ''} {ll.lastName || ''}
-                      </div>
-                      <div style={{ fontSize: 13, color: '#888' }}>
-                        {ll.verified ? (
-                          <span style={{ color: 'green', fontWeight: 500 }}>Verified</span>
-                        ) : (
-                          <span style={{ color: 'red', fontWeight: 500 }}>Not Verified</span>
-                        )}
-                      </div>
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: 17, fontWeight: 600 }}>{ll.firstName || ''} {ll.middleName || ''} {ll.lastName || ''}</span>
+                      <span style={{ flex: 1 }}></span>
+                      <span style={{ fontSize: 13, color: ll.verified ? 'green' : 'red', fontWeight: 500, textAlign: 'right' }}>
+                        {ll.verified ? 'Verified' : 'Not Verified'}
+                      </span>
                     </div>
                   </div>
                 ))
               )}
             </div>
-          )}
+        )}
 
           {/* Modal for landlord details */}
           {modalOpen && selectedLandlord && (
@@ -367,7 +390,126 @@ function AdminMain({ currentPage }) {
         </div>
       );
     case 'tenants':
-      return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of tenants (click to view details)</div>;
+      return (
+        <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
+          {loading && <div>Loading...</div>}
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          {!loading && !error && (
+            <div className="tenant-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {tenants && tenants.length === 0 ? (
+                <div>No tenants found.</div>
+              ) : (
+                tenants && tenants.map((tenant) => (
+                  <div
+                    key={tenant.id}
+                    className="tenant-list-card"
+                    style={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      padding: '14px 24px',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '24px',
+                      cursor: 'pointer',
+                      minWidth: 340,
+                      width: '100%',
+                      maxWidth: 1200,
+                      overflow: 'hidden',
+                    }}
+                    onClick={() => handleTenantClick(tenant)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: 17, fontWeight: 600 }}>{tenant.firstName || ''} {tenant.middleName || ''} {tenant.lastName || ''}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+          {/* Modal for tenant details */}
+          {modalOpen && selectedTenant && (
+          <div
+            className="tenant-modal-overlay"
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100vw',
+              height: '100vh',
+              background: 'rgba(0,0,0,0.4)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
+          >
+            <div
+              className="tenant-modal-content"
+              style={{
+                background: '#fff',
+                borderRadius: 10,
+                padding: 32,
+                minWidth: 540,
+                maxWidth: 700,
+                boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                position: 'relative',
+              }}
+              onClick={e => e.stopPropagation()}
+            >
+              <button
+                onClick={() => { setModalOpen(false); setSelectedTenant(null); }}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  background: 'none',
+                  border: 'none',
+                  fontSize: 22,
+                  cursor: 'pointer',
+                }}
+                aria-label="Close"
+              >
+                &times;
+              </button>
+              <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0 12px 0', gap: '18px' }}>
+                <h3 style={{ margin: 0 }}>{selectedTenant.firstName || ''} {selectedTenant.middleName || ''} {selectedTenant.lastName || ''}</h3>
+              </div>
+              <div className="tenant-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px', marginBottom: 12 }}>
+                <div><strong>Email:</strong> {selectedTenant.email ? selectedTenant.email : ''}</div>
+                <div><strong>Contact:</strong> {selectedTenant.mobilenumber || selectedTenant.mobile || selectedTenant.contactNumber || selectedTenant.phone || ''}</div>
+                <div><strong>Gender:</strong> {selectedTenant.gender ? selectedTenant.gender : ''}</div>
+                <div><strong>Birthdate:</strong> {selectedTenant.birthdate ? selectedTenant.birthdate : (selectedTenant.dateOfBirth ? selectedTenant.dateOfBirth : '')}</div>
+                <div><strong>Civil Status:</strong> {selectedTenant.civilStatus || selectedTenant.civilstatus || ''}</div>
+              </div>
+              <div style={{ marginBottom: 12, display: 'flex', gap: '32px' }}>
+                <span><strong>Age:</strong> {selectedTenant.age || ''}</span>
+                <span><strong>Registered At:</strong> {selectedTenant.registeredAt || selectedTenant.createdAt || ''}</span>
+              </div>
+              <div style={{ marginBottom: 12 }}><strong>Address:</strong> {selectedTenant.address ? selectedTenant.address : (selectedTenant.permanentAddress ? selectedTenant.permanentAddress : '')}</div>
+              <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
+              {/* Show all other registration details except profile image fields, in two columns */}
+              <div className="tenant-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px', marginBottom: 12 }}>
+                {Object.entries(selectedTenant).filter(([key, value]) => {
+                  const excludeFields = [
+                    'firstName','middleName','lastName','email','contactNumber','phone','gender','birthdate','dateOfBirth','address','permanentAddress','verified','registeredAt','createdAt','id',
+                    'photoURL','profilePic','tenantPhoto','tenantIdPhoto','tenantIdPic','tenantIdImage','tenantIdImageUrl','tenantIdPhotoUrl','tenantIdPicUrl','tenantIdImageURL','tenantIdPhotoURL','tenantIdPicURL',
+                    'profileimage','ProfileImage','PROFILEIMAGE','profileImage','profile_image','profile-img','profileImg','profileimg','profilepicture','profilePicture','profilepic','profilePic','profile_pic','profile-photo','profilePhoto','profilephoto','profile-photo-url','profilePhotoUrl','profilephotoUrl','profile-photo-URL','profilePhotoURL','profilephotoURL',
+                    'role','civilStatus','civilstatus',
+                    'Age','age','mobile','mobilenumber'
+                  ];
+                  return !excludeFields.some(f => f.toLowerCase() === key.toLowerCase()) && value;
+                }).map(([key, value]) => (
+                  <div key={key}><strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {String(value)}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        </div>
+      );
     case 'boardinghouses':
       return (
         <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>

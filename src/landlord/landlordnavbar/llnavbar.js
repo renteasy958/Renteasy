@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './llnavbar.css';
 import { db, auth } from '../../firebase/config';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { uploadQRCode } from '../../services/cloudinaryService';
 import VerifyAccount from '../llprofile/verifyAccount';
 
@@ -17,12 +16,15 @@ const LLNavbar = () => {
   const [gcashNumber, setGcashNumber] = useState('');
   const [qrCode, setQrCode] = useState(null);
   const [isEditingPayment, setIsEditingPayment] = useState(true);
-  // Load payment info from Firestore on mount
+  // Load payment info and balance from Firestore on mount
+  const [balance, setBalance] = useState(0);
   useEffect(() => {
-    const fetchPaymentInfo = async () => {
+    const fetchLandlordInfo = async () => {
       try {
         const user = auth.currentUser;
         if (!user) return;
+        console.log('[LLNavbar] Fetching landlord info for UID:', user.uid);
+        // Fetch payment info
         const paymentDoc = await getDoc(doc(db, 'landlords', user.uid, 'payment', 'info'));
         if (paymentDoc.exists()) {
           const data = paymentDoc.data();
@@ -33,11 +35,20 @@ const LLNavbar = () => {
         } else {
           setIsEditingPayment(true);
         }
+        // Fetch balance
+        const landlordDoc = await getDoc(doc(db, 'landlords', user.uid));
+        if (landlordDoc.exists()) {
+          const landlordData = landlordDoc.data();
+          console.log('[LLNavbar] Landlord doc data:', landlordData);
+          setBalance(landlordData.balance || 0);
+        } else {
+          console.warn('[LLNavbar] No landlord doc found for UID:', user.uid);
+        }
       } catch (err) {
-        console.warn('Failed to fetch payment info from Firestore:', err);
+        console.warn('Failed to fetch landlord info from Firestore:', err);
       }
     };
-    fetchPaymentInfo();
+    fetchLandlordInfo();
   }, []);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
@@ -160,6 +171,12 @@ const LLNavbar = () => {
             <img src="logo.png" alt="RentEasy Logo" className="ll-logo-img" />
           </div>
 
+          {/* Peso Balance Display - label first, then peso sign and number */}
+          <div style={{ marginLeft: 24, fontWeight: 600, fontSize: 18, color: '#fff', display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: 8 }}>Balance:</span>
+            <span style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>₱{balance.toLocaleString()}</span>
+          </div>
+
           <div className="ll-nav-links">
             {navItems.map((item) => (
               <div key={item.id} className="ll-nav-item-container">
@@ -178,9 +195,12 @@ const LLNavbar = () => {
                     ref={settingsDropdownRef}
                     className={`ll-settings-dropdown ${showSettingsDropdown ? 'show' : ''}`}
                   >
+                    {/* Profile shortcut added */}
                     <div className="ll-settings-option" onClick={handleProfileClick}>
-                      <ProfileIcon />
-                      <span>Profile</span>
+                      <span style={{ display: 'flex', alignItems: 'center' }}>
+                        <ProfileIcon />
+                        <span style={{ marginLeft: 10 }}>Profile</span>
+                      </span>
                     </div>
                     <div className="ll-settings-option" onClick={() => setShowVerifyModal(true)}>
                       <span style={{ display: 'flex', alignItems: 'center' }}>
@@ -198,11 +218,7 @@ const LLNavbar = () => {
             ))}
           </div>
 
-          <div className="ll-profile-container">
-            <button className="ll-profile-btn" onClick={handleProfileClick}>
-              <ProfileIcon />
-            </button>
-          </div>
+          {/* Profile icon removed as requested */}
         </div>
       </nav>
       {showVerifyModal && (

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './home.css';
 import Navbar from '../navbar/navbar';
 import BHDetails from '../bhdetails/bhdetails';
@@ -16,51 +17,60 @@ const Home = ({ onLogout }) => {
   const location = useLocation();
 
   // Fetch boarding houses from Firestore
-  useEffect(() => {
-    const fetchHouses = async () => {
-      try {
-        setLoading(true);
-        console.log('=== FETCHING BOARDING HOUSES ===');
-        const data = await getAllBoardingHouses();
-        console.log('Total documents fetched:', data.length);
-        console.log('Fetched boarding houses:', data);
-        
-        if (data && data.length > 0) {
-          console.log('\n=== ANALYZING FIRST DOCUMENT ===');
-          const firstHouse = data[0];
-          console.log('House ID:', firstHouse.id);
-          console.log('House name:', firstHouse.name);
-          console.log('All keys in document:', Object.keys(firstHouse).sort());
-          console.log('Document full data:', JSON.stringify(firstHouse, null, 2));
-          console.log('\n=== IMAGE FIELD ANALYSIS ===');
-          console.log('Has "images" field?', 'images' in firstHouse);
-          console.log('Has "image" field?', 'image' in firstHouse);
-          console.log('typeof images:', typeof firstHouse.images);
-          console.log('Array.isArray(images):', Array.isArray(firstHouse.images));
-          console.log('images value:', firstHouse.images);
-          console.log('images length:', firstHouse.images?.length);
-          if (firstHouse.images && firstHouse.images.length > 0) {
-            console.log('First image URL:', firstHouse.images[0]);
-            console.log('First image type:', typeof firstHouse.images[0]);
-          }
-        } else {
-          console.warn('No documents found in Boardinghouse collection!');
+  const fetchHouses = async () => {
+    try {
+      setLoading(true);
+      console.log('=== FETCHING BOARDING HOUSES ===');
+      const data = await getAllBoardingHouses();
+      console.log('Total documents fetched:', data.length);
+      console.log('Fetched boarding houses:', data);
+      
+      if (data && data.length > 0) {
+        console.log('\n=== ANALYZING FIRST DOCUMENT ===');
+        const firstHouse = data[0];
+        console.log('House ID:', firstHouse.id);
+        console.log('House name:', firstHouse.name);
+        console.log('All keys in document:', Object.keys(firstHouse).sort());
+        console.log('Document full data:', JSON.stringify(firstHouse, null, 2));
+        console.log('\n=== IMAGE FIELD ANALYSIS ===');
+        console.log('Has "images" field?', 'images' in firstHouse);
+        console.log('Has "image" field?', 'image' in firstHouse);
+        console.log('typeof images:', typeof firstHouse.images);
+        console.log('Array.isArray(images):', Array.isArray(firstHouse.images));
+        console.log('images value:', firstHouse.images);
+        console.log('images length:', firstHouse.images?.length);
+        if (firstHouse.images && firstHouse.images.length > 0) {
+          console.log('First image URL:', firstHouse.images[0]);
+          console.log('First image type:', typeof firstHouse.images[0]);
         }
-        
-        setBoardingHouses(data);
-        setFilteredHouses(data);
-        setError(null);
-      } catch (err) {
-        console.error('Error fetching boarding houses:', err);
-        setError(err.message);
-        setBoardingHouses([]);
-      } finally {
-        setLoading(false);
+      } else {
+        console.warn('No documents found in Boardinghouse collection!');
       }
-    };
+      
+      setBoardingHouses(data);
+      setFilteredHouses(data);
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching boarding houses:', err);
+      setError(err.message);
+      setBoardingHouses([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
+    // Expose fetchHouses for refresh
+    window.fetchHouses = fetchHouses;
     fetchHouses();
   }, []);
+
+  useEffect(() => {
+    if (location.state && location.state.refresh) {
+      // Force reload boarding houses when redirected with refresh flag
+      fetchHouses();
+    }
+  }, [location.state]);
 
   // Apply search filtering based on `q` query param
   useEffect(() => {
@@ -119,8 +129,6 @@ const Home = ({ onLogout }) => {
   const BoardingHouseCard = ({ house }) => {
     const hasImages = house.images && Array.isArray(house.images) && house.images.length > 0;
     const thumbnail = hasImages ? house.images[0] : (house.image || '/default.png');
-
-    // Determine status color and text
     const getStatusInfo = (status) => {
       switch (status) {
         case 'reserved':
@@ -131,10 +139,7 @@ const Home = ({ onLogout }) => {
           return { color: '#4caf50', text: '' };
       }
     };
-
     const statusInfo = getStatusInfo(house.status);
-
-    // Format address if it's an object
     let formattedAddress = '';
     if (house.address && typeof house.address === 'object' && house.address !== null) {
       const { streetSitio, barangay, cityMunicipality, province } = house.address;
@@ -142,7 +147,6 @@ const Home = ({ onLogout }) => {
     } else {
       formattedAddress = house.address || house.Address || '';
     }
-
     return (
       <div className="boarding-card" onClick={() => setSelectedHouse(house)}>
         <div className="card-image">
@@ -243,13 +247,17 @@ const Home = ({ onLogout }) => {
         )}
       </main>
 
-      <BHDetails 
-        house={selectedHouse}
-        isOpen={!!selectedHouse}
-        onClose={() => setSelectedHouse(null)}
-        likedHouses={likedHouses}
-        onToggleLike={toggleLike}
-      />
+      {selectedHouse && (
+        <div className="modal-overlay">
+          <BHDetails 
+            house={selectedHouse}
+            isOpen={!!selectedHouse}
+            onClose={() => setSelectedHouse(null)}
+            likedHouses={likedHouses}
+            onToggleLike={toggleLike}
+          />
+        </div>
+      )}
     </div>
   );
 };

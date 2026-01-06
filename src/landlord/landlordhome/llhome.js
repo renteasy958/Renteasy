@@ -21,8 +21,9 @@ const Landlordhome = () => {
   // Removed payment info modal redirect logic
 
   useEffect(() => {
-    let intervalId;
-    const fetchLandlordData = async (user) => {
+    // Only fetch on initial mount (browser refresh)
+    const fetchLandlordData = async () => {
+      const user = auth.currentUser;
       if (!user) {
         setListingsData([]);
         setLoading(false);
@@ -40,7 +41,6 @@ const Landlordhome = () => {
           return dateB - dateA;
         });
         setListingsData(sortedData);
-        // Payment info check removed
         setError(null);
         // Fetch verification and approval status from landlord profile
         const landlordDoc = await getDoc(firestoreDoc(db, 'landlords', user.uid));
@@ -62,18 +62,7 @@ const Landlordhome = () => {
         setLoading(false);
       }
     };
-    const unsub = onAuthStateChanged(auth, (user) => {
-      fetchLandlordData(user);
-      // Auto-refresh every 5 seconds
-      clearInterval(intervalId);
-      if (user) {
-        intervalId = setInterval(() => fetchLandlordData(user), 5000);
-      }
-    });
-    return () => {
-      unsub();
-      clearInterval(intervalId);
-    };
+    fetchLandlordData();
   }, []);
 
   const handleSeeAll = (section) => {

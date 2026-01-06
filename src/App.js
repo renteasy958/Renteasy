@@ -11,6 +11,7 @@ import Liked from './tenant/liked/liked';
 import SearchResults from './tenant/search/SearchResults';
 import AddBoardingHouse from './landlord/addbh/addbh';
 import TenantProfile from './tenant/profile/profile';
+import BHDetails from './tenant/bhdetails/bhdetails';
 
 import Admin from './admin/Admin';
 

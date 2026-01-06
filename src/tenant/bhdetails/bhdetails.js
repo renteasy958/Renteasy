@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './bhdetails.css';
@@ -38,9 +39,11 @@ async function sendEmailToLandlord(landlordEmail, subject, html, reservationDeta
         }
       ],
       paymentReference: reservationDetails.gcashRefNumber,
-      landlordEmail: landlordEmail
+      landlordEmail: landlordEmail,
+      landlordUid: reservationDetails.landlordId || reservationDetails.landlordUid // Always use landlordId for backend balance update
     };
-    const response = await fetch('http://localhost:5000/reserve', {
+    console.log('[BHDetails] Sending reservation to backend:', payload);
+    const response = await fetch('http://localhost:5150/reserve', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -54,6 +57,27 @@ async function sendEmailToLandlord(landlordEmail, subject, html, reservationDeta
 }
 
 const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
+  const navigate = useNavigate();
+  const { id } = useParams();
+  const [fetchedHouse, setFetchedHouse] = useState(null);
+  // If no house prop, fetch from Firestore using id param
+  useEffect(() => {
+    if (!house && id) {
+      (async () => {
+        try {
+          const snap = await getDoc(doc(db, 'Boardinghouse', id));
+          if (snap.exists()) {
+            setFetchedHouse({ id, ...snap.data() });
+          }
+        } catch (err) {
+          console.warn('Could not fetch house by id:', err);
+        }
+      })();
+    }
+  }, [house, id]);
+
+  // Always define displayHouse before any logic that uses it
+  const displayHouse = house || fetchedHouse;
     // Helper to format address object to string
     function formatAddress(address) {
       if (!address) return '';
@@ -79,8 +103,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   // Fetch landlord info and payment info
   useEffect(() => {
     const fetchLandlordInfo = async () => {
-      const landlordUid = house?.landlordId || house?.landlordUid;
-      console.log('[BHDetails] Fetching landlord info for house:', house);
+      const landlordUid = displayHouse?.landlordId || displayHouse?.landlordUid;
+      console.log('[BHDetails] Fetching landlord info for house:', displayHouse);
       console.log('[BHDetails] Using landlordUid:', landlordUid);
       if (landlordUid) {
         try {
@@ -102,16 +126,16 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           console.warn('Could not fetch landlord info:', err);
         }
       } else {
-        console.warn('[BHDetails] No landlordUid found in house:', house);
+        console.warn('[BHDetails] No landlordUid found in house:', displayHouse);
       }
     };
-    if (isOpen && house) fetchLandlordInfo();
-  }, [isOpen, house?.landlordId, house?.landlordUid]);
+    if (displayHouse) fetchLandlordInfo();
+  }, [displayHouse?.landlordId, displayHouse?.landlordUid]);
   
   // Normalize images into an array and reset index when house changes
-  const images = (house && house.images && Array.isArray(house.images))
-    ? house.images
-    : (house && house.images ? [house.images] : []);
+  const images = (displayHouse && displayHouse.images && Array.isArray(displayHouse.images))
+    ? displayHouse.images
+    : (displayHouse && displayHouse.images ? [displayHouse.images] : []);
   
   // Detailed logging to diagnose image issues
   console.log('[BHDetails] Image normalization debug:', {
@@ -149,9 +173,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
   // Get available amenities from house data
   const getAvailableAmenities = () => {
-    if (!house.amenities) return [];
-    
-    return Object.entries(house.amenities)
+    if (!displayHouse.amenities) return [];
+    return Object.entries(displayHouse.amenities)
       .filter(([key, value]) => value === true)
       .map(([key]) => ({
         key,
@@ -162,7 +185,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
   // Initialize map when modal opens
   useEffect(() => {
-    if (isOpen && house.location && mapRef.current && !mapInstanceRef.current) {
+    if (displayHouse && displayHouse.location && mapRef.current && !mapInstanceRef.current) {
       // Fix for default marker icon
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
@@ -173,7 +196,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
       // Initialize map
       const map = L.map(mapRef.current).setView(
-        [house.location.latitude, house.location.longitude],
+        [displayHouse.location.latitude, displayHouse.location.longitude],
         15
       );
 
@@ -184,9 +207,9 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
       }).addTo(map);
 
       // Add marker
-      L.marker([house.location.latitude, house.location.longitude])
+      L.marker([displayHouse.location.latitude, displayHouse.location.longitude])
         .addTo(map)
-        .bindPopup(`<b>${house.name}</b><br>${formatAddress(house.address)}`)
+        .bindPopup(`<b>${displayHouse.name}</b><br>${formatAddress(displayHouse.address)}`)
         .openPopup();
 
       mapInstanceRef.current = map;
@@ -194,22 +217,23 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
     // Cleanup map when modal closes
     return () => {
-      if (!isOpen && mapInstanceRef.current) {
+      if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
         mapInstanceRef.current = null;
       }
     };
-  }, [isOpen, house]);
+  }, [displayHouse]);
 
-  if (!isOpen || !house) return null;
+  // If used as a page, always show if displayHouse is loaded
+  if (!displayHouse) return <div style={{padding:40, textAlign:'center'}}>Loading details...</div>;
 
   console.log('BHDetails - house object:', {
-    id: house.id,
-    name: house.name,
-    imagesType: typeof house.images,
-    imagesLength: house.images?.length,
-    images: house.images,
-    hasImages: house.images && Array.isArray(house.images) && house.images.length > 0
+    id: displayHouse.id,
+    name: displayHouse.name,
+    imagesType: typeof displayHouse.images,
+    imagesLength: displayHouse.images?.length,
+    images: displayHouse.images,
+    hasImages: displayHouse.images && Array.isArray(displayHouse.images) && displayHouse.images.length > 0
   });
 
   const handleOverlayClick = (e) => {
@@ -236,16 +260,16 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
   const handleLikeClick = (e) => {
     e.stopPropagation();
-    onToggleLike(house.id);
+    if (onToggleLike) onToggleLike(displayHouse.id);
   };
 
   const handleReserveClick = () => {
     // Check if house is available
-    if (house.status === 'reserved') {
+    if (displayHouse.status === 'reserved') {
       alert('This boarding house is currently reserved. Please try again later.');
       return;
     }
-    if (house.status === 'occupied') {
+    if (displayHouse.status === 'occupied') {
       alert('This boarding house is currently occupied. Please try again later.');
       return;
     }
@@ -270,10 +294,9 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const handleQrCodeUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    
     try {
       // Upload to Cloudinary using the landlord's UID if available
-      const landlordUid = house?.landlordId || house?.landlordUid || 'tenant-qr';
+      const landlordUid = displayHouse?.landlordId || displayHouse?.landlordUid || 'tenant-qr';
       const qrUrl = await uploadQRCode(file, landlordUid);
       setQrCodeImage(qrUrl);
     } catch (err) {
@@ -341,12 +364,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           tenantAge: tenantAge || '',
           tenantStatus: tenantStatus || '',
           tenantAddress: formatAddress(tenantAddress),
-          boardingHouseId: house.id || null,
-          boardingHouseName: house.name || '',
-          boardingHouseAddress: formatAddress(house.address),
-          landlordUid: house.landlordId || house.landlordUid || null,
-          roomType: house.type || house.roomType || '',
-          price: house.price || '',
+          boardingHouseId: displayHouse.id || null,
+          boardingHouseName: displayHouse.name || '',
+          boardingHouseAddress: formatAddress(displayHouse.address),
+          landlordUid: displayHouse.landlordId || displayHouse.landlordUid || null,
+          roomType: displayHouse.type || displayHouse.roomType || '',
+          price: displayHouse.price || '',
           gcashRefNumber: referenceNumber.trim(),
           qrCodeImage: qrCodeImage || null,
           status: 'pending',
@@ -355,7 +378,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
         try {
           // Update boarding house status to reserved
-          const houseRef = doc(db, 'Boardinghouse', house.id);
+          const houseRef = doc(db, 'Boardinghouse', displayHouse.id);
           await updateDoc(houseRef, { status: 'reserved' });
 
           await addDoc(collection(db, 'reservations'), reservation);
@@ -366,7 +389,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
             const subject = 'New Reservation Notification';
             const html = `
               <p>Hello,</p>
-              <p>A new reservation has been made for your property: <b>${house.name}</b>.</p>
+              <p>A new reservation has been made for your property: <b>${displayHouse.name}</b>.</p>
               <h3>Tenant Details:</h3>
               <ul>
                 <li><b>Name:</b> ${tenantName}</li>
@@ -378,8 +401,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               </ul>
               <h3>Reservation Details:</h3>
               <ul>
-                <li><b>Boarding House:</b> ${house.name}</li>
-                <li><b>Address:</b> ${formatAddress(house.address)}</li>
+                <li><b>Boarding House:</b> ${displayHouse.name}</li>
+                <li><b>Address:</b> ${formatAddress(displayHouse.address)}</li>
                 <li><b>GCash Reference Number:</b> ${referenceNumber.trim()}</li>
               </ul>
               <p>Please check your dashboard for more details.</p>
@@ -392,9 +415,10 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               tenantStatus,
               tenantBirthdate,
               tenantEmail: user?.email || '',
-              boardingHouseName: house.name,
-              boardingHouseAddress: formatAddress(house.address),
+              boardingHouseName: displayHouse.name,
+              boardingHouseAddress: formatAddress(displayHouse.address),
               gcashRefNumber: referenceNumber.trim(),
+              landlordId: displayHouse.landlordId || displayHouse.landlordUid || null, // Always pass landlordId for backend
             });
           }
         } catch (err) {
@@ -403,11 +427,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
         // Show success animation
         setShowSuccessAnimation(true);
-
         setTimeout(() => {
           setShowSuccessAnimation(false);
           setReferenceNumber('');
           setQrCodeImage(null);
+          // Redirect to main tenant home page
+          navigate('/tenant-home');
         }, 3000);
       } catch (err) {
         console.error('Payment submit error:', err);
@@ -419,11 +444,17 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const availableAmenities = getAvailableAmenities();
 
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" style={{position:'static',background:'none',zIndex:1}}>
+      <div className="modal-container">
         <div className="modal-content">
           <div className="modal-left">
-            <button className="back-button" onClick={onClose}>
+            <button className="back-button" onClick={() => {
+              if (onClose) {
+                onClose();
+              } else {
+                navigate('/tenant-home');
+              }
+            }}>
               ←
             </button>
             
@@ -460,7 +491,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                   <span 
                     key={index}
                     className={`dot ${index === currentImageIndex ? 'active' : ''}`}
-                    onClick={() => handleDotClick(index)}
+                    onClick={() => handleDotClick(index)
+                    }
                     title={`Image ${index + 1}: ${imgUrl ? imgUrl.substring(0, 40) : 'empty'}`}
                   />
                 ))}
@@ -469,12 +501,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
             <div className="modal-details">
               <div className="title-section">
-                <h1>{house.name}</h1>
+                <h1>{displayHouse.name}</h1>
                 <button 
-                  className={`like-button-modal ${likedHouses && likedHouses.has(house.id) ? 'liked' : ''}`}
+                  className={`like-button-modal ${likedHouses && likedHouses.has(displayHouse.id) ? 'liked' : ''}`}
                   onClick={handleLikeClick}
                 >
-                  {likedHouses && likedHouses.has(house.id) ? '♥' : '♡'}
+                  {likedHouses && likedHouses.has(displayHouse.id) ? '♥' : '♡'}
                 </button>
               </div>
 
@@ -482,12 +514,12 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                 <svg className="location-pin" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                 </svg>
-                <span>{formatAddress(house.address)}</span>
+                <span>{displayHouse && formatAddress(displayHouse.address)}</span>
               </div>
 
               <div className="room-price-section">
-                <p className="room-type-text">{house.type}</p>
-                <p className="price">₱{parseFloat(house.price).toLocaleString()}/month</p>
+                <p className="room-type-text">{displayHouse.type}</p>
+                <p className="price">₱{parseFloat(displayHouse.price).toLocaleString()}/month</p>
               </div>
 
               {/* Map Container */}
@@ -648,8 +680,8 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
             <div className="success-animation">
               <div className="checkmark-circle">
                 <svg className="checkmark" viewBox="0 0 52 52">
-                  <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none"/>
-                  <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+                  <circle className="checkmark-circle-bg" cx="26" cy="26" r="25"/>
+                  <polyline className="checkmark-check" points="14,27 22,35 38,19"/>
                 </svg>
               </div>
               <h2>Payment Submitted!</h2>

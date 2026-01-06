@@ -126,18 +126,58 @@ app.post('/send-otp', async (req, res) => {
 });
 
 
-// Reservation endpoint: receives tenant and reservation details, sends email to landlord
+// Reservation endpoint: receives tenant and reservation details, sends email to landlord, and updates landlord balance
 app.post('/reserve', async (req, res) => {
+  console.log('[RESERVE] /reserve endpoint called');
+  console.log('[RESERVE][DEBUG] Request body:', JSON.stringify(req.body, null, 2));
+
   try {
     const {
       tenant, // { name, address, contactNumber, age, status, birthdate, email }
       reservedHouses, // array of { name, address, ... }
       paymentReference,
-      landlordEmail
+      landlordEmail,
+      landlordUid // <-- Add landlordUid to payload for balance update
     } = req.body;
 
-    if (!tenant || !reservedHouses || !paymentReference || !landlordEmail) {
-      return res.status(400).json({ error: 'Missing tenant, reservedHouses, paymentReference, or landlordEmail' });
+    console.log('[RESERVE] Incoming reservation:', {
+      tenant,
+      reservedHouses,
+      paymentReference,
+      landlordEmail,
+      landlordUid
+    });
+
+    // If landlordUid is missing, try to fetch it from the reserved boarding house document
+    let effectiveLandlordUid = landlordUid;
+    if (!landlordUid && reservedHouses && reservedHouses.length > 0) {
+      try {
+        const { db: adminDb } = require('./firebase-admin');
+        const houseName = reservedHouses[0].name;
+        // Try to find the boarding house by name (assuming name is unique)
+        const bhSnapshot = await adminDb.collection('Boardinghouse').where('name', '==', houseName).limit(1).get();
+        if (!bhSnapshot.empty) {
+          const bhDoc = bhSnapshot.docs[0];
+          const bhData = bhDoc.data();
+          if (bhData.landlordId) {
+            effectiveLandlordUid = bhData.landlordId;
+            console.log('[RESERVE] Fetched landlordId from boarding house:', effectiveLandlordUid);
+          }
+        }
+      } catch (err) {
+        console.error('[RESERVE] Failed to fetch landlordId from boarding house:', err);
+      }
+    }
+    if (!tenant || !reservedHouses || !paymentReference || !landlordEmail || !effectiveLandlordUid) {
+      console.error('[RESERVE] Missing required fields:', {
+        tenant,
+        reservedHouses,
+        paymentReference,
+        landlordEmail,
+        landlordUid: effectiveLandlordUid
+      });
+      console.error('[RESERVE][DEBUG] Full request body:', JSON.stringify(req.body, null, 2));
+      return res.status(400).json({ error: 'Missing tenant, reservedHouses, paymentReference, landlordEmail, or landlordUid' });
     }
 
     // Format reserved houses list
@@ -173,10 +213,34 @@ app.post('/reserve', async (req, res) => {
     };
 
     await transporter.sendMail(mailOptions);
-    res.json({ message: 'Reservation email sent to landlord.' });
+
+
+    // --- Update landlord balance in Firestore ---
+    const { db: adminDb } = require('./firebase-admin');
+    try {
+      const landlordRef = adminDb.collection('landlords').doc(effectiveLandlordUid);
+      // Clean logic: increment landlord balance by 50 for every reservation
+      await adminDb.runTransaction(async (t) => {
+        const docSnap = await t.get(landlordRef);
+        let prevBalance = 0;
+        if (docSnap.exists) {
+          const data = docSnap.data();
+          prevBalance = typeof data.balance === 'number' ? data.balance : 0;
+        }
+        t.set(landlordRef, { balance: prevBalance + 50, updatedAt: new Date().toISOString() }, { merge: true });
+      });
+      console.log('[RESERVE][DEBUG] Landlord balance incremented by 50 for UID:', effectiveLandlordUid);
+    } catch (err) {
+      console.error('[RESERVE] ERROR updating landlord balance:', err);
+      if (err && err.stack) console.error(err.stack);
+      return res.status(500).json({ error: 'Failed to update landlord balance', details: err.message });
+    }
+    // --- End update ---
+
+    res.json({ message: 'Reservation email sent to landlord and balance updated.' });
   } catch (err) {
-    console.error('Error sending reservation email:', err);
-    res.status(500).json({ error: 'Failed to send reservation email' });
+    console.error('Error sending reservation email or updating balance:', err);
+    res.status(500).json({ error: 'Failed to send reservation email or update balance' });
   }
 });
 

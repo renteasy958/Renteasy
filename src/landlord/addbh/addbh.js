@@ -4,254 +4,159 @@ import { useNavigate } from 'react-router-dom';
 import { X, Upload, Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair, AlertCircle } from 'lucide-react';
 import MapSelector from '../../maps/MapSelector';
 import './addbh.css';
-import { addBoardingHouseWithImages, checkLandlordPaymentInfo } from '../../services/bhservice';
+import { addBoardingHouseWithImages } from '../../services/bhservice';
 import { auth } from '../../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const AddBoardingHouse = () => {
-  const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [images, setImages] = useState([]);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [landlordUid, setLandlordUid] = useState(null);
-  const [hasPaymentInfo, setHasPaymentInfo] = useState(null); // null = not checked yet
+      const navigate = useNavigate();
+    // Boarding house types
+    const boardingTypes = [
+      'Single Room',
+      'Bed Spacer',
+      'Apartment Type',
+      'Shared Room (2-4 pax)',
+      'Shared Room (5-8 pax)',
+      'Family'
+    ];
 
-  const [formData, setFormData] = useState({
-    name: '',
-    address: {
-      streetSitio: '',
-      barangay: '',
-      cityMunicipality: 'Isabela',
-      province: 'Negros Occidental'
-    },
-    type: '',
-    price: '',
-    description: '',
-    amenities: {
-      wifi: false,
-      comfortRoom: false,
-      kitchen: false,
-      ac: false,
-      laundry: false,
-      security: false,
-      water: false,
-      electricity: false,
-      bed: false,
-      table: false,
-      chair: false
-    },
-    location: {
-      latitude: null,
-      longitude: null,
-      markerPlaced: false
-    }
-  });
-
-  // Remove image by index
-  const removeImage = (index) => {
-    setImages(images.filter((_, i) => i !== index));
-  };
+    // Amenities list
+    const amenitiesList = [
+      { key: 'wifi', label: 'WiFi', icon: Wifi },
+      { key: 'aircon', label: 'Aircon', icon: Wind },
+      { key: 'comfortroom', label: 'Comfort Room', icon: Home },
+      { key: 'kitchen', label: 'Kitchen', icon: UtensilsCrossed },
+      { key: 'laundry', label: 'Laundry', icon: Shirt },
+      { key: 'security', label: 'Security', icon: Shield },
+      { key: 'water', label: 'Water', icon: Droplet },
+      { key: 'electricity', label: 'Electricity', icon: Zap },
+      { key: 'bed', label: 'Bed', icon: BedDouble },
+      { key: 'table', label: 'Table', icon: Table2 },
+      { key: 'chair', label: 'Chair', icon: Armchair },
+    ];
 
 
 
-
-  // Set landlordUid on auth
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setLandlordUid(user.uid);
-      }
+    // State
+    const [currentStep, setCurrentStep] = useState(1);
+    const [images, setImages] = useState([]);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [landlordUid, setLandlordUid] = useState(null);
+    const [formData, setFormData] = useState({
+      name: '',
+      address: {
+        streetSitio: '',
+        barangay: '',
+        cityMunicipality: 'Isabela',
+        province: 'Negros Occidental'
+      },
+      type: '',
+      price: '',
+      description: '',
+      amenities: {}, // Always present from the start
+      location: null
     });
-    return () => unsub();
-  }, []);
 
-  // Check payment info when landlordUid changes
-  useEffect(() => {
-    const checkPayment = async () => {
-      if (landlordUid) {
-        const hasInfo = await checkLandlordPaymentInfo(landlordUid);
-        setHasPaymentInfo(hasInfo);
-        if (!hasInfo) {
-          sessionStorage.setItem('showPaymentInfoModal', 'true');
-          navigate('/llhome');
-        }
+    // Handlers
+    const handleImageUpload = (e) => {
+      const files = Array.from(e.target.files || []);
+      if (files.length + images.length > 7) {
+        alert('You can upload up to 7 images.');
+        return;
+      }
+      setImages(prev => [...prev, ...files]);
+    };
+
+    const handleInputChange = (e) => {
+      const { name, value } = e.target;
+      if (name in formData.address) {
+        setFormData(f => ({ ...f, address: { ...f.address, [name]: value } }));
+      } else {
+        setFormData(f => ({ ...f, [name]: value }));
       }
     };
-    checkPayment();
-  }, [landlordUid, navigate]);
 
+    const handleAmenityToggle = (key) => {
+      setFormData(f => ({
+        ...f,
+        amenities: { ...f.amenities, [key]: !f.amenities?.[key] }
+      }));
+    };
 
-  const boardingTypes = [
-    'Single Room',
-    'Bed Spacer',
-    'Apartment Type',
-    'Shared Room (2-4 pax)',
-    'Shared Room (5-8 pax)',
-    'Family'
-  ];
+    const handleLocationSelect = (location) => {
+      setFormData(f => ({ ...f, location: { ...location, markerPlaced: true } }));
+    };
 
-  const amenitiesList = [
-    { key: 'wifi', label: 'WiFi', icon: Wifi },
-    { key: 'comfortRoom', label: 'Comfort Room', icon: Home },
-    { key: 'kitchen', label: 'Kitchen', icon: UtensilsCrossed },
-    { key: 'ac', label: 'AC', icon: Wind },
-    { key: 'laundry', label: 'Laundry', icon: Shirt },
-    { key: 'security', label: 'Security', icon: Shield },
-    { key: 'water', label: 'Water', icon: Droplet },
-    { key: 'electricity', label: 'Electricity', icon: Zap },
-    { key: 'bed', label: 'Bed', icon: BedDouble },
-    { key: 'table', label: 'Table', icon: Table2 },
-    { key: 'chair', label: 'Chair', icon: Armchair }
-  ];
-
-
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    const totalImages = images.length + files.length;
-    if (totalImages > 7) {
-      alert('You can only upload up to 7 images');
-      return;
-    }
-    const newImages = files.map(file => ({
-      file,
-      preview: URL.createObjectURL(file)
-    }));
-    setImages([...images, ...newImages]);
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if ([
-      'streetSitio',
-      'barangay',
-      'cityMunicipality',
-      'province'
-    ].includes(name)) {
-      setFormData({
-        ...formData,
-        address: {
-          ...formData.address,
-          [name]: value
+    const handlePrev = () => {
+      console.log('Back button clicked, currentStep:', currentStep);
+      if (currentStep === 1) {
+        try {
+          navigate('/llhome');
+        } catch (e) {
+          window.location.href = '/llhome';
         }
-      });
-    } else {
-      setFormData({ ...formData, [name]: value });
-    }
-  };
-
-  const handleAmenityToggle = (key) => {
-    setFormData({
-      ...formData,
-      amenities: {
-        ...formData.amenities,
-        [key]: !formData.amenities[key]
+      } else {
+        setCurrentStep(currentStep - 1);
       }
-    });
-  };
+    };
 
-  const handleLocationSelect = (location) => {
-    setFormData({
-      ...formData,
-      location: {
-        latitude: location.latitude,
-        longitude: location.longitude,
-        markerPlaced: true
+    const handleNext = () => {
+      setCurrentStep(s => Math.min(3, s + 1));
+    };
+
+    const handleSubmit = async () => {
+      console.log('Submit button clicked, isSubmitting:', isSubmitting);
+      setIsSubmitting(true);
+      try {
+        // Validate required fields
+        if (!formData.name || !formData.address.streetSitio || !formData.address.barangay || !formData.type || !formData.price || !formData.description || !formData.location) {
+          alert('Please fill in all required fields and select a location.');
+          setIsSubmitting(false);
+          return;
+        }
+        // Get landlord UID if not already set
+        let uid = landlordUid;
+        if (!uid) {
+          const user = auth.currentUser;
+          if (user) uid = user.uid;
+        }
+        if (!uid) {
+          alert('Landlord not authenticated.');
+          setIsSubmitting(false);
+          return;
+        }
+        // Prepare data
+        const dataToSave = {
+          name: formData.name,
+          address: formData.address,
+          type: formData.type,
+          price: formData.price,
+          description: formData.description,
+          amenities: formData.amenities,
+          location: formData.location,
+          landlordId: uid,
+          status: 'pending',
+        };
+        await addBoardingHouseWithImages(dataToSave, images);
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          try {
+            navigate('/llhome');
+          } catch (e) {
+            window.location.href = '/llhome';
+          }
+        }, 1500);
+      } catch (err) {
+        alert('Failed to submit.');
+        setIsSubmitting(false);
+      } finally {
+        // Always reset isSubmitting in finally, unless already reset in catch
+        if (isSubmitting) setIsSubmitting(false);
       }
-    });
-  };
+    };
 
-  const handleNext = () => {
-    if (currentStep < 3) setCurrentStep(currentStep + 1);
-  };
-
-  const handlePrevious = () => {
-    if (currentStep > 1) setCurrentStep(currentStep - 1);
-  };
-
-
-  const handleSubmit = async () => {
-    console.log('Submit button clicked');
-    console.log('[handleSubmit] landlordUid:', landlordUid);
-    console.log('[handleSubmit] formData:', formData);
-    console.log('[handleSubmit] images:', images);
-
-    if (!landlordUid) {
-      alert('User not authenticated');
-      return;
-    }
-
-    // Check payment info from state (already checked on load)
-    if (!hasPaymentInfo) {
-      // (modal now handled in llhome)
-      return;
-    }
-
-
-    // Frontend validation
-    if (!formData.name || !formData.address.streetSitio || !formData.address.barangay || !formData.type || !formData.price || !formData.description) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    if (images.length < 3) {
-      alert('Please upload at least 3 images');
-      return;
-    }
-
-    if (!formData.location.markerPlaced) {
-      alert('Please mark your boarding house location on the map');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Prepare payload: remove preview objects from images and convert to File[]
-      const imageFiles = images.map(img => img.file ? img.file : img);
-      console.log('Images state before submission:', {
-        imagesArrayLength: images.length,
-        imagesArray: images,
-        extractedFilesLength: imageFiles.length,
-        extractedFiles: imageFiles
-      });
-
-      // Combine address parts into full address string
-      const fullAddress = `${formData.address.streetSitio}, ${formData.address.barangay}, ${formData.address.cityMunicipality}, ${formData.address.province}`;
-
-      const payload = {
-        name: formData.name,
-        address: fullAddress,
-        type: formData.type,
-        price: formData.price,
-        description: formData.description,
-        amenities: formData.amenities,
-        location: formData.location,
-        landlordId: landlordUid,
-        landlordUid: landlordUid
-      };
-
-      console.log('Starting boarding house submission...');
-      // Upload images and save document in Firestore
-      const newId = await addBoardingHouseWithImages(payload, imageFiles);
-
-      console.log('Boarding house created with id:', newId);
-      setShowSuccess(true);
-      setTimeout(() => {
-        setShowSuccess(false);
-        navigate('/llhome');
-      }, 2000);
-    } catch (error) {
-      console.error('Error submitting form:', error);
-      alert('Error submitting form: ' + (error.message || error));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleCancel = () => {
-    navigate('/llhome');
-  };
 
   // ...existing code...
 
@@ -271,14 +176,7 @@ const AddBoardingHouse = () => {
           </div>
         </div>
       )}
-
-
-
-      {/* Only show form if payment info is present */}
-      {hasPaymentInfo && (
-        <div className="add-boarding-form">
-        <h1 className="add-form-title">Add Boarding House</h1>
-
+      <div className="add-boarding-form">
         <div className="add-steps-indicator">
           <div className={`add-step ${currentStep >= 1 ? 'add-active' : ''}`}>
             <div className="add-step-number">1</div>
@@ -296,35 +194,39 @@ const AddBoardingHouse = () => {
           </div>
         </div>
 
+        {/* Main form content by step */}
         {currentStep === 1 && (
-          <div className="add-step-content">
-            <div className="add-form-row">
-              <div className="add-form-group-half">
-                <label className="add-label">Upload Images (3-7 images) *</label>
+          <div className="add-step-content add-step-content-split">
+            {/* Left: Image upload */}
+            <div className="add-step-content-left">
+              <div className="add-image-upload-box">
+                <div className="add-image-upload-title">Upload Images</div>
                 <div className="add-image-upload-section">
                   <div className="add-image-previews">
-                    {images.map((img, index) => (
-                      <div key={index} className="add-image-preview">
-                        <img src={img.preview} alt={`Preview ${index + 1}`} />
-                        <button
-                          type="button"
-                          className="add-remove-image"
-                          onClick={() => removeImage(index)}
-                        >
-                          <X size={14} />
-                        </button>
+                    {images.map((img, idx) => (
+                      <div key={idx} className="add-image-square-wrapper">
+                        <div className="add-image-preview">
+                          <img src={URL.createObjectURL(img)} alt={`Preview ${idx + 1}`} />
+                          <button
+                            type="button"
+                            className="add-remove-image"
+                            onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                            title="Remove image"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
                       </div>
                     ))}
                     {images.length < 7 && (
-                      <label className="add-upload-box">
-                        <Upload size={20} />
-                        <span>Upload</span>
+                      <label className="add-plus-standalone" title="Upload Images">
+                        <span className="add-plus-big">+</span>
                         <input
                           type="file"
                           accept="image/*"
                           multiple
                           onChange={handleImageUpload}
-                          style={{ display: 'none' }}
+                          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
                         />
                       </label>
                     )}
@@ -332,126 +234,126 @@ const AddBoardingHouse = () => {
                   <p className="add-image-count">{images.length}/7 images</p>
                 </div>
               </div>
-
-              <div className="add-form-group-half">
-                <div className="add-form-group">
-                  <label className="add-label">Boarding House Name *</label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter boarding house name"
-                    className="add-input"
-                    style={{ height: '40px' }}
-                  />
-                </div>
-
-                <div className="add-form-group">
-                  <label className="add-label">Address</label>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="text"
-                          name="streetSitio"
-                          value={formData.address.streetSitio}
-                          onChange={handleInputChange}
-                          placeholder="Street/Sitio *"
-                          className="add-input"
-                          style={{ width: '100%', height: '40px' }}
-                        />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <select
-                          name="barangay"
-                          value={formData.address.barangay}
-                          onChange={handleInputChange}
-                          className="add-select"
-                          style={{ width: '100%', height: '40px' }}
-                        >
-                          <option value="">Barangay *</option>
-                          {Array.from({ length: 9 }, (_, i) => (
-                            <option key={i + 1} value={`Barangay ${i + 1}`}>Barangay {i + 1}</option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="text"
-                          name="cityMunicipality"
-                          value={formData.address.cityMunicipality}
-                          onChange={handleInputChange}
-                          placeholder="City/Municipality"
-                          className="add-input"
-                          style={{ width: '100%', height: '40px' }}
-                          readOnly
-                        />
-                      </div>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="text"
-                          name="province"
-                          value={formData.address.province}
-                          onChange={handleInputChange}
-                          placeholder="Province"
-                          className="add-input"
-                          style={{ width: '100%', height: '40px' }}
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="add-form-group">
+            </div>
+            {/* Right: Form fields */}
+            <div className="add-step-content-right">
+              <div className="add-form-group">
+                <label className="add-label">Boarding House Name *</label>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter boarding house name"
+                  className="add-input"
+                  style={{ height: '40px' }}
+                />
+              </div>
+              <div className="add-form-group">
+                <label className="add-label">Address</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   <div style={{ display: 'flex', gap: '10px' }}>
                     <div style={{ flex: 1 }}>
-                      <label className="add-label">Type of Boarding House *</label>
+                      <input
+                        type="text"
+                        name="streetSitio"
+                        value={formData.address.streetSitio}
+                        onChange={handleInputChange}
+                        placeholder="Street/Sitio *"
+                        className="add-input"
+                        style={{ width: '100%', height: '40px' }}
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
                       <select
-                        name="type"
-                        value={formData.type}
+                        name="barangay"
+                        value={formData.address.barangay}
                         onChange={handleInputChange}
                         className="add-select"
                         style={{ width: '100%', height: '40px' }}
                       >
-                        <option value="">Select type</option>
-                        {boardingTypes.map(type => (
-                          <option key={type} value={type}>{type}</option>
+                        <option value="">Barangay *</option>
+                        {Array.from({ length: 9 }, (_, i) => (
+                          <option key={i + 1} value={`Barangay ${i + 1}`}>Barangay {i + 1}</option>
                         ))}
                       </select>
                     </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
                     <div style={{ flex: 1 }}>
-                      <label className="add-label">Price per Month *</label>
                       <input
                         type="text"
-                        name="price"
-                        value={formData.price}
+                        name="cityMunicipality"
+                        value={formData.address.cityMunicipality}
                         onChange={handleInputChange}
-                        placeholder="₱0.00"
+                        placeholder="City/Municipality"
                         className="add-input"
                         style={{ width: '100%', height: '40px' }}
+                        readOnly
+                      />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <input
+                        type="text"
+                        name="province"
+                        value={formData.address.province}
+                        onChange={handleInputChange}
+                        placeholder="Province"
+                        className="add-input"
+                        style={{ width: '100%', height: '40px' }}
+                        readOnly
                       />
                     </div>
                   </div>
                 </div>
               </div>
+              <div className="add-form-group">
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <div style={{ flex: 1 }}>
+                    <label className="add-label">Type of Boarding House *</label>
+                    <select
+                      name="type"
+                      value={formData.type}
+                      onChange={handleInputChange}
+                      className="add-select"
+                      style={{ width: '100%', height: '40px' }}
+                    >
+                      <option value="">Select type</option>
+                      {boardingTypes.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <label className="add-label">Price per Month *</label>
+                    <input
+                      type="text"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      placeholder="₱0.00"
+                      className="add-input"
+                      style={{ width: '100%', height: '40px' }}
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
-
-            <div className="add-form-group">
-              <label className="add-label">Description *</label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleInputChange}
-                placeholder="Describe your boarding house..."
-                rows="2"
-                className="add-textarea"
-                style={{ height: '40px', fontSize: '14px' }}
-              />
-            </div>
+          </div>
+        )}
+        {/* Description always below both halves */}
+        {currentStep === 1 && (
+          <div className="add-form-group add-description-below">
+            <label className="add-label">Description *</label>
+            <textarea
+              name="description"
+              value={formData.description}
+              onChange={handleInputChange}
+              placeholder="Describe your boarding house..."
+              rows="2"
+              className="add-textarea"
+              style={{ height: '40px', fontSize: '14px' }}
+            />
           </div>
         )}
 
@@ -485,26 +387,19 @@ const AddBoardingHouse = () => {
           </div>
         )}
 
+        {/* Form actions */}
         <div className="add-form-actions">
-          <button
-            type="button"
-            className="add-btn-cancel"
-            onClick={handleCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </button>
-          <div className="add-nav-buttons">
-            {currentStep > 1 && (
-              <button
-                type="button"
-                className="add-btn-previous"
-                onClick={handlePrevious}
-                disabled={isSubmitting}
-              >
-                Previous
-              </button>
-            )}
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start' }}>
+            <button
+              type="button"
+              className="add-btn-prev"
+              onClick={handlePrev}
+              disabled={isSubmitting}
+            >
+              Back
+            </button>
+          </div>
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-end' }}>
             {currentStep < 3 ? (
               <button
                 type="button"
@@ -526,8 +421,7 @@ const AddBoardingHouse = () => {
             )}
           </div>
         </div>
-        </div>
-      )}
+      </div>
     </div>
   );
 };

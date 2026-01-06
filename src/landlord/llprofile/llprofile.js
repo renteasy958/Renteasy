@@ -14,7 +14,7 @@ const LandlordProfile = () => {
     const [uploading, setUploading] = useState(false);
     const [qrUploading, setQrUploading] = useState(false);
     const [showPaymentForm, setShowPaymentForm] = useState(false);
-    const [paymentForm, setPaymentForm] = useState({ gcashName: '', gcashNumber: '', qrCode: '' });
+    const [paymentForm, setPaymentForm] = useState({ gcashName: '', gcashNumber: '', gcashRef: '', qrCode: '' });
     const fileInputRef = useRef(null);
     const qrInputRef = useRef(null);
 
@@ -155,6 +155,18 @@ const LandlordProfile = () => {
                         <div className="ll-prof-info-item ll-prof-address-value"><div className="ll-prof-info-label">Boarding House Address</div><div className="ll-prof-info-value">{llData.boardingHouseAddress || 'N/A'}</div></div>
                     </div>
                 </div>
+                {/* GCash Payment Section */}
+                <div className="ll-prof-section-title" style={{ marginTop: 32 }}>GCash Payment Information</div>
+                <div className="ll-prof-info-grid">
+                    <div className="ll-prof-info-item"><div className="ll-prof-info-label">GCash Name</div><input type="text" name="gcashName" value={paymentForm.gcashName} onChange={handlePaymentFormChange} className="ll-prof-info-value" /></div>
+                    <div className="ll-prof-info-item"><div className="ll-prof-info-label">GCash Number</div><input type="text" name="gcashNumber" value={paymentForm.gcashNumber} onChange={handlePaymentFormChange} className="ll-prof-info-value" /></div>
+                    <div className="ll-prof-info-item"><div className="ll-prof-info-label">GCash Reference Number</div><input type="text" name="gcashRef" value={paymentForm.gcashRef} onChange={handlePaymentFormChange} className="ll-prof-info-value" /></div>
+                    <div className="ll-prof-info-item"><div className="ll-prof-info-label">GCash QR Code</div>
+                        <input ref={qrInputRef} type="file" accept="image/*" style={{ display: 'block' }} onChange={handleQRCodeUpload} disabled={qrUploading} />
+                        {paymentForm.qrCode && <img src={paymentForm.qrCode} alt="GCash QR" style={{ maxWidth: 120, marginTop: 8 }} />}
+                    </div>
+                </div>
+                <button style={{ marginTop: 16, padding: '8px 18px', background: '#174ea6', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: 'pointer', fontSize: 15 }} onClick={handleSavePaymentInfo}>Save Payment Info</button>
             </div>
         </div>
     );

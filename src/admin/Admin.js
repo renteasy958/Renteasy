@@ -549,7 +549,7 @@ function AdminMain({ currentPage }) {
                         <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center' }}>
                           {bh.name || 'No Name'}
                         </div>
-                        <div style={{ color: '#888', fontSize: 13, textAlign: 'center', margin: '4px 0' }}>{bh.address || 'No Address'}</div>
+                        <div style={{ color: '#888', fontSize: 13, textAlign: 'center', margin: '4px 0' }}>{typeof bh.address === 'object' && bh.address !== null ? Object.values(bh.address).filter(Boolean).join(', ') : (bh.address || 'No Address')}</div>
                       </div>
                     ))}
                     {/* Fill empty boxes if row < 5 */}
@@ -612,7 +612,7 @@ function AdminMain({ currentPage }) {
                   <img src={selectedBH.images[0]} alt="Boarding House" style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }} />
                 )}
                 <h3 style={{ margin: '8px 0 4px 0' }}>{selectedBH.name || 'No Name'}</h3>
-                <div style={{ color: '#888', marginBottom: 8 }}>{selectedBH.address || 'No Address'}</div>
+                <div style={{ color: '#888', marginBottom: 8 }}>{typeof selectedBH.address === 'object' && selectedBH.address !== null ? Object.values(selectedBH.address).filter(Boolean).join(', ') : (selectedBH.address || 'No Address')}</div>
                 <div><strong>Owner:</strong> {landlordInfo ? ((landlordInfo.firstName || '') + (landlordInfo.lastName ? ' ' + landlordInfo.lastName : '') || 'Unknown') : 'Loading...'}</div>
                 <div><strong>Contact:</strong> {landlordInfo ? (landlordInfo.contactNumber || landlordInfo.phone || landlordInfo.mobile || 'N/A') : 'Loading...'}</div>
                 <div><strong>Price:</strong> {selectedBH.price ? `₱${selectedBH.price}` : 'N/A'}</div>

@@ -15,37 +15,33 @@ const Landlordhome = () => {
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [hasPaymentInfo, setHasPaymentInfo] = useState(false);
-  const [showPaymentInfoModal, setShowPaymentInfoModal] = useState(false);
+  // Removed hasPaymentInfo and showPaymentInfoModal as payment info is no longer required
   const [isVerified, setIsVerified] = useState(false);
   const [isApproved, setIsApproved] = useState(false);
-  // Show payment info modal if redirected from addbh
-  useEffect(() => {
-    if (sessionStorage.getItem('showPaymentInfoModal') === 'true') {
-      setShowPaymentInfoModal(true);
-      sessionStorage.removeItem('showPaymentInfoModal');
-    }
-  }, []);
+  // Removed payment info modal redirect logic
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, async (user) => {
+    let intervalId;
+    const fetchLandlordData = async (user) => {
       if (!user) {
         setListingsData([]);
         setLoading(false);
         return;
       }
-
       try {
         setLoading(true);
         const [data] = await Promise.all([
           getBoardingHousesByLandlord(user.uid)
         ]);
-        // Always check payment info from Firestore for cross-device consistency
-        const paymentInfo = await checkLandlordPaymentInfo(user.uid);
-        setListingsData(data);
-        setHasPaymentInfo(paymentInfo);
+        // Sort listings by createdAt (newest first)
+        const sortedData = data.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+        setListingsData(sortedData);
+        // Payment info check removed
         setError(null);
-
         // Fetch verification and approval status from landlord profile
         const landlordDoc = await getDoc(firestoreDoc(db, 'landlords', user.uid));
         if (landlordDoc.exists()) {
@@ -65,9 +61,19 @@ const Landlordhome = () => {
       } finally {
         setLoading(false);
       }
+    };
+    const unsub = onAuthStateChanged(auth, (user) => {
+      fetchLandlordData(user);
+      // Auto-refresh every 5 seconds
+      clearInterval(intervalId);
+      if (user) {
+        intervalId = setInterval(() => fetchLandlordData(user), 5000);
+      }
     });
-
-    return () => unsub();
+    return () => {
+      unsub();
+      clearInterval(intervalId);
+    };
   }, []);
 
   const handleSeeAll = (section) => {
@@ -79,15 +85,11 @@ const Landlordhome = () => {
 
   const handleAddBoardingHouse = () => {
     if (!isVerified) {
-      setShowPaymentInfoModal('notVerified');
+      alert('You must complete the verification process before you can add a boarding house. Go to Settings and click Verify Account.');
       return;
     }
     if (!isApproved) {
-      setShowPaymentInfoModal('notApproved');
-      return;
-    }
-    if (!hasPaymentInfo) {
-      setShowPaymentInfoModal('noPayment');
+      alert('Your verification is pending admin approval. You will be able to add a boarding house once approved.');
       return;
     }
     navigate('/add-boarding-house');
@@ -136,6 +138,17 @@ const Landlordhome = () => {
     const thumbnail = (property.images && Array.isArray(property.images) && property.images.length > 0)
       ? property.images[0]
       : '/default.png';
+
+    // Format address if it's an object
+    let formattedAddress = '';
+    if (property.address && typeof property.address === 'object' && property.address !== null) {
+      const { streetSitio, barangay, cityMunicipality, province } = property.address;
+      formattedAddress = [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+    } else if (typeof property.address === 'string') {
+      formattedAddress = property.address;
+    } else {
+      formattedAddress = '';
+    }
 
     const [showMenu, setShowMenu] = useState(false);
 
@@ -245,7 +258,7 @@ const Landlordhome = () => {
         <div className="property-details">
           <div className="property-info">
             <h3 className="property-name">{property.name}</h3>
-            <p className="property-address">{property.address}</p>
+            <p className="property-address">{formattedAddress}</p>
             <p className="room-type">{property.type}</p>
           </div>
           <div className="property-footer">
@@ -261,6 +274,7 @@ const Landlordhome = () => {
   return (
     <div className="app-container">
       <Llnavbar />
+      {/* Debug status panel removed as requested */}
       <div className="dashboard-container">
         {loading && (
           <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
@@ -279,12 +293,11 @@ const Landlordhome = () => {
         {/* Listings Section: always render header */}
         <section className="section">
           <div className="section-header">
-            <h2>Listings ({listingsData.filter(h => h.status !== 'occupied').length})</h2>
+            <h2>Listings ({listingsData.filter(h => h.status !== 'occupied' && h.status !== 'pending').length})</h2>
             <div className="header-actions">
               <button
                 className={`add-boarding-btn`}
                 onClick={handleAddBoardingHouse}
-                title={!hasPaymentInfo ? 'Please set up your GCash payment information first' : ''}
               >
                 Add Boarding House
               </button>
@@ -294,9 +307,9 @@ const Landlordhome = () => {
             </div>
           </div>
 
-          {listingsData.filter(h => h.status !== 'occupied').length > 0 ? (
+          {listingsData.filter(h => h.status !== 'occupied' && h.status !== 'pending').length > 0 ? (
             <div className={`cards-container ${expandedSections.listings ? 'expanded' : ''}`}>
-              {listingsData.filter(h => h.status !== 'occupied').map(property => (
+              {listingsData.filter(h => h.status !== 'occupied' && h.status !== 'pending').map(property => (
                 <PropertyCard key={property.id} property={property} editMode={editMode} isOccupied={false} />
               ))}
             </div>
@@ -306,6 +319,26 @@ const Landlordhome = () => {
             </div>
           )}
         </section>
+
+        {/* Pending Section */}
+        {listingsData.filter(h => h.status === 'pending').length > 0 && (
+          <section className="section">
+            <div className="section-header">
+              <h2>Pending ({listingsData.filter(h => h.status === 'pending').length})</h2>
+              <div className="header-actions">
+                <button className="see-all-btn" onClick={() => handleSeeAll('pending')}>
+                  See all
+                </button>
+              </div>
+            </div>
+
+            <div className={`cards-container ${expandedSections.pending ? 'expanded' : ''}`}>
+              {listingsData.filter(h => h.status === 'pending').map(property => (
+                <PropertyCard key={property.id} property={property} editMode={false} isOccupied={false} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Occupied Section */}
         {listingsData.filter(h => h.status === 'occupied').length > 0 && (
@@ -329,43 +362,7 @@ const Landlordhome = () => {
           </>
         )}
       </div>
-    {/* Payment Info Required Modal */}
-    {showPaymentInfoModal === 'notVerified' && (
-      <>
-        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
-        <div className="ll-payment-modal">
-          <h2>VERIFY YOUR ACCOUNT FIRST</h2>
-          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
-            You must complete the verification process before you can add a boarding house. Go to <b>Settings</b> and click <b>Verify Account</b>.
-          </div>
-          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
-        </div>
-      </>
-    )}
-    {showPaymentInfoModal === 'notApproved' && (
-      <>
-        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
-        <div className="ll-payment-modal">
-          <h2>AWAITING ADMIN APPROVAL</h2>
-          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
-            Your verification is pending admin approval. You will be able to add a boarding house once approved.
-          </div>
-          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
-        </div>
-      </>
-    )}
-    {showPaymentInfoModal === 'noPayment' && (
-      <>
-        <div className="ll-blur-overlay" onClick={() => setShowPaymentInfoModal(false)} />
-        <div className="ll-payment-modal">
-          <h2>ADD YOUR PAYMENT INFORMATION FIRST</h2>
-          <div style={{ margin: '18px 0', textAlign: 'left', maxWidth: 340 }}>
-            Go to <b>Settings</b>, click <b>Verify Account</b> and add your <b>GCash account name</b>, <b>GCash number</b> and <b>upload your GCash QR code</b>.
-          </div>
-          <button className="ll-modal-close-btn" onClick={() => setShowPaymentInfoModal(false)}>Close</button>
-        </div>
-      </>
-    )}
+    {/* Payment info modal and related logic removed */}
   </div>
   );
 };

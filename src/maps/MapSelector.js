@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { MapPin } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { isabelaBoundary, isWithinBoundary, initializeLeafletIcons } from './MapUtils';
+import { isabelaBoundary, isWithinBoundary, initializeLeafletIcons, createCustomIcon } from './MapUtils';
 
 const MapSelector = ({ onLocationSelect, initialLocation }) => {
   const mapRef = useRef(null);
@@ -58,48 +58,41 @@ const MapSelector = ({ onLocationSelect, initialLocation }) => {
 
       map.on('click', (e) => {
         const { lat, lng } = e.latlng;
-        
         if (!isWithinBoundary(lat, lng)) {
           alert('Please place the marker within Isabela Barangays 1-9 area (highlighted on the map).');
           return;
         }
-        
         if (markerRef.current) {
           map.removeLayer(markerRef.current);
         }
-        
         const marker = L.marker([lat, lng], {
-          draggable: true
+          draggable: true,
+          icon: createCustomIcon('red')
         }).addTo(map);
-        
         marker.bindPopup(
           `<b>Boarding House Location</b><br>Lat: ${lat.toFixed(6)}<br>Lng: ${lng.toFixed(6)}<br><small>Isabela, Negros Occidental</small>`
         ).openPopup();
-        
         marker.on('dragend', (event) => {
           const position = event.target.getLatLng();
-          
           if (!isWithinBoundary(position.lat, position.lng)) {
             alert('Marker must stay within Isabela Barangays 1-9 area. Reverting to previous position.');
             marker.setLatLng([lat, lng]);
             return;
           }
-          
           onLocationSelect({
             latitude: position.lat,
-            longitude: position.lng
+            longitude: position.lng,
+            markerPlaced: true
           });
-          
           marker.setPopupContent(
             `<b>Boarding House Location</b><br>Lat: ${position.lat.toFixed(6)}<br>Lng: ${position.lng.toFixed(6)}<br><small>Isabela, Negros Occidental</small>`
           );
         });
-        
         markerRef.current = marker;
-        
         onLocationSelect({
           latitude: lat,
-          longitude: lng
+          longitude: lng,
+          markerPlaced: true
         });
       });
 

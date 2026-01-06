@@ -8,10 +8,10 @@ export const isabelaBoundary = [
 ];
 
 export const BOUNDARY_LIMITS = {
-  latMin: 10.1850,
-  latMax: 10.2150,
-  lngMin: 122.9800,
-  lngMax: 123.0200
+  latMin: 10.1800,
+  latMax: 10.2200,
+  lngMin: 122.9750,
+  lngMax: 123.0250
 };
 
 export const isWithinBoundary = (lat, lng) => {

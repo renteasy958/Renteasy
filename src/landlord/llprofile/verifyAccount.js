@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './verifyAccount.css';
 
 const VALID_PH_IDS = [
@@ -21,15 +21,27 @@ const VALID_PH_IDS = [
 ];
 
 const VerifyAccount = ({ onSubmit, onClose }) => {
-  const [showModal, setShowModal] = useState(false);
-  const [step, setStep] = useState(1);
-  const [selectedId, setSelectedId] = useState('');
-  const [frontImage, setFrontImage] = useState(null);
-  const [backImage, setBackImage] = useState(null);
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [idMethod, setIdMethod] = useState('upload');
-  const frontInputRef = useRef();
-  const backInputRef = useRef();
+
+    const [showModal, setShowModal] = useState(false);
+    const [step, setStep] = useState(1);
+    const [selectedId, setSelectedId] = useState('');
+    const [frontImage, setFrontImage] = useState(null);
+    const [backImage, setBackImage] = useState(null);
+    const [referenceNumber, setReferenceNumber] = useState('');
+    const [idMethod, setIdMethod] = useState('upload');
+    const frontInputRef = useRef();
+    const backInputRef = useRef();
+
+  // Modal auto-close and redirect logic (must be inside component, after useState)
+  useEffect(() => {
+    if (showModal) {
+      const timer = setTimeout(() => {
+        setShowModal(false);
+        window.location.href = '/llhome';
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [showModal]);
 
   const handleFrontImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -134,16 +146,21 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
         </div>
       )}
       {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Verification Submitted</h3>
-            <p>Please wait 24 hours for verification.</p>
-            <button onClick={() => setShowModal(false)}>Close</button>
+        <div className="success-overlay">
+          <div className="success-animation" style={{ padding: 24, maxWidth: 320 }}>
+            <div className="checkmark-circle" style={{ width: 60, height: 60, margin: '0 auto 10px' }}>
+              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" style={{ width: 60, height: 60 }}>
+                <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none" />
+                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+            </div>
+            <div style={{ fontSize: 16, color: '#333', margin: '8px 0 0 0', fontWeight: 500 }}>Verification Submitted</div>
+            <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>Please wait 24 hours for verification.</div>
           </div>
         </div>
       )}
     </>
+
   );
 }
-
 export default VerifyAccount;

@@ -179,6 +179,7 @@ export const addBoardingHouseWithImages = async (boardingHouseData, images = [])
     const dataToSave = {
       ...boardingHouseData,
       images: imageUrls,
+      status: 'pending',
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };

@@ -358,7 +358,16 @@ const ReservationList = () => {
                   </div>
                   <div className="rsv-detail-row">
                     <span className="rsv-detail-label">Address:</span>
-                    <span className="rsv-detail-value">{selectedReservation.tenantAddress || 'N/A'}</span>
+                    <span className="rsv-detail-value">
+                      {typeof selectedReservation.tenantAddress === 'object' && selectedReservation.tenantAddress !== null
+                        ? [
+                            selectedReservation.tenantAddress.streetSitio,
+                            selectedReservation.tenantAddress.barangay,
+                            selectedReservation.tenantAddress.cityMunicipality,
+                            selectedReservation.tenantAddress.province
+                          ].filter(Boolean).join(', ')
+                        : selectedReservation.tenantAddress || 'N/A'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -369,7 +378,16 @@ const ReservationList = () => {
                 <div>
                   <h3 className="rsv-reserved-title">RESERVED</h3>
                   <h4 className="rsv-bh-name">{selectedReservation.boardingHouseName || 'N/A'}</h4>
-                  <p className="rsv-bh-location">{selectedReservation.boardingHouseAddress || 'N/A'}</p>
+                  <p className="rsv-bh-location">
+                    {typeof selectedReservation.boardingHouseAddress === 'object' && selectedReservation.boardingHouseAddress !== null
+                      ? [
+                          selectedReservation.boardingHouseAddress.streetSitio,
+                          selectedReservation.boardingHouseAddress.barangay,
+                          selectedReservation.boardingHouseAddress.cityMunicipality,
+                          selectedReservation.boardingHouseAddress.province
+                        ].filter(Boolean).join(', ')
+                      : selectedReservation.boardingHouseAddress || 'N/A'}
+                  </p>
                   <p className="rsv-room-type">{selectedReservation.roomType || 'N/A'}</p>
                   <p className="rsv-price">
                     <span className="rsv-price-amount">{selectedReservation.price || 'N/A'}</span>

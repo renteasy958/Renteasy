@@ -1,3 +1,18 @@
+/* Arrange QR code and GCash details side by side */
+.qr-gcash-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 32px;
+  justify-content: center;
+}
+.gcash-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-width: 220px;
+  max-width: 260px;
+}
 /* Modal Styles - Full Screen */
 /* Map Controls */
 .map-controls {
@@ -607,7 +622,7 @@
 
 .qr-upload-container img {
   width: 100%;
-  height: 350px;
+  height: 260px;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #e0e0e;
@@ -616,9 +631,8 @@
 }
 
 .qr-code-image {
-  /* Reduced portrait-oriented QR image */
   width: 260px;
-  height: 350px;
+  height: 260px;
   object-fit: cover;
   border-radius: 8px;
   border: 2px solid #e0e0e;

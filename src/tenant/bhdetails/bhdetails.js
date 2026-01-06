@@ -11,10 +11,20 @@ import { uploadQRCode } from '../../services/cloudinaryService';
 async function sendEmailToLandlord(landlordEmail, subject, html, reservationDetails) {
   try {
     // Compose payload for /reserve endpoint
+    // Use formatAddress to ensure no object is sent
+    function formatAddress(address) {
+      if (!address) return '';
+      if (typeof address === 'string') return address;
+      if (typeof address === 'object') {
+        const { streetSitio, barangay, cityMunicipality, province } = address;
+        return [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+      }
+      return '';
+    }
     const payload = {
       tenant: {
         name: reservationDetails.tenantName,
-        address: reservationDetails.tenantAddress,
+        address: formatAddress(reservationDetails.tenantAddress),
         contactNumber: reservationDetails.tenantPhone,
         age: reservationDetails.tenantAge,
         status: reservationDetails.tenantStatus,
@@ -24,7 +34,7 @@ async function sendEmailToLandlord(landlordEmail, subject, html, reservationDeta
       reservedHouses: [
         {
           name: reservationDetails.boardingHouseName,
-          address: reservationDetails.boardingHouseAddress,
+          address: formatAddress(reservationDetails.boardingHouseAddress),
         }
       ],
       paymentReference: reservationDetails.gcashRefNumber,
@@ -176,7 +186,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
       // Add marker
       L.marker([house.location.latitude, house.location.longitude])
         .addTo(map)
-        .bindPopup(`<b>${house.name}</b><br>${house.address}`)
+        .bindPopup(`<b>${house.name}</b><br>${formatAddress(house.address)}`)
         .openPopup();
 
       mapInstanceRef.current = map;
@@ -330,10 +340,10 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           tenantBirthdate: tenantBirthdate || '',
           tenantAge: tenantAge || '',
           tenantStatus: tenantStatus || '',
-          tenantAddress: tenantAddress || '',
+          tenantAddress: formatAddress(tenantAddress),
           boardingHouseId: house.id || null,
           boardingHouseName: house.name || '',
-          boardingHouseAddress: house.address || '',
+          boardingHouseAddress: formatAddress(house.address),
           landlordUid: house.landlordId || house.landlordUid || null,
           roomType: house.type || house.roomType || '',
           price: house.price || '',
@@ -361,7 +371,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               <ul>
                 <li><b>Name:</b> ${tenantName}</li>
                 <li><b>Contact Number:</b> ${tenantPhone}</li>
-                <li><b>Address:</b> ${tenantAddress}</li>
+                <li><b>Address:</b> ${formatAddress(tenantAddress)}</li>
                 <li><b>Email:</b> ${user?.email || ''}</li>
                 <li><b>Age:</b> ${tenantAge}</li>
                 <li><b>Date of Birth:</b> ${tenantBirthdate}</li>
@@ -369,21 +379,21 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               <h3>Reservation Details:</h3>
               <ul>
                 <li><b>Boarding House:</b> ${house.name}</li>
-                <li><b>Address:</b> ${house.address}</li>
+                <li><b>Address:</b> ${formatAddress(house.address)}</li>
                 <li><b>GCash Reference Number:</b> ${referenceNumber.trim()}</li>
               </ul>
               <p>Please check your dashboard for more details.</p>
             `;
             sendEmailToLandlord(landlordInfo.email, subject, html, {
               tenantName,
-              tenantAddress,
+              tenantAddress: formatAddress(tenantAddress),
               tenantPhone,
               tenantAge,
               tenantStatus,
               tenantBirthdate,
               tenantEmail: user?.email || '',
               boardingHouseName: house.name,
-              boardingHouseAddress: house.address,
+              boardingHouseAddress: formatAddress(house.address),
               gcashRefNumber: referenceNumber.trim(),
             });
           }
@@ -513,7 +523,14 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                       <svg className="contact-icon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                       </svg>
-                      {formatAddress(landlordInfo?.boardingHouseAddress || house.address)}
+                      {(() => {
+                        const addr = landlordInfo?.boardingHouseAddress ? landlordInfo.boardingHouseAddress : house.address;
+                        console.log('[BHDetails] Rendering address in contact section:', addr, 'Type:', typeof addr);
+                        if (typeof addr === 'object' || typeof addr === 'string') {
+                          return formatAddress(addr);
+                        }
+                        return '';
+                      })()}
                     </p>
                   </div>
                 </div>
@@ -528,7 +545,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               
               {/* Available Amenities */}
               {availableAmenities.length > 0 && (
-                <>
+                <React.Fragment>
                   <h3 style={{ marginTop: '24px', marginBottom: '12px' }}>Available Amenities</h3>
                   <div className="amenities-grid">
                     {availableAmenities.map(({ key, label, Icon }) => (
@@ -538,7 +555,7 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                       </div>
                     ))}
                   </div>
-                </>
+                </React.Fragment>
               )}
             </div>
             
@@ -583,46 +600,22 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
               </button>
               <h2>Payment Details</h2>
               <div className="payment-content">
-                <div className="qr-section">
+                <div className="qr-gcash-row">
                   <div className="qr-upload-container">
-                    {paymentInfo?.qrCode ? (
-                      <img src={paymentInfo.qrCode} alt="QR Code" className="qr-code-image" />
-                    ) : qrCodeImage ? (
-                      <img src={qrCodeImage} alt="QR Code" className="qr-code-image" />
-                    ) : (
-                      <label htmlFor="qr-upload" className="qr-upload-label">
-                        <div className="qr-placeholder">
-                          <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <rect x="3" y="3" width="7" height="7"/>
-                            <rect x="14" y="3" width="7" height="7"/>
-                            <rect x="14" y="14" width="7" height="7"/>
-                            <rect x="3" y="14" width="7" height="7"/>
-                          </svg>
-                          <p>Click to upload QR Code</p>
-                        </div>
-                        <input
-                          id="qr-upload"
-                          type="file"
-                          accept="image/*"
-                          onChange={handleQrCodeUpload}
-                          style={{ display: 'none' }}
-                        />
-                      </label>
-                    )}
+                    <img src="/50.jpg" alt="QR Code" className="qr-code-image" />
                   </div>
                   <div className="gcash-details">
-                    <div className="payment-method" style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
+                    <div className="payment-method">
                       <img src="/GCash.png" alt="GCash Logo" style={{ height: 56, marginRight: 12 }} />
                     </div>
                     <div style={{ marginBottom: 4 }}>
                       <label style={{ fontWeight: 'bold', fontSize: 13 }}>Account Name</label>
-                      <p className="account-name" style={{ margin: 0 }}>{paymentInfo?.gcashName || 'Not provided'}</p>
+                      <p className="account-name" style={{ margin: 0 }}>RENT EASY</p>
                     </div>
                     <div style={{ marginBottom: 8 }}>
                       <label style={{ fontWeight: 'bold', fontSize: 13 }}>Gcash Number</label>
-                      <p className="mobile-number" style={{ margin: 0 }}>{paymentInfo?.gcashNumber || 'Not provided'}</p>
+                      <p className="mobile-number" style={{ margin: 0 }}>09158706048</p>
                     </div>
-                    {/* Reference number moved under mobile number for clearer layout */}
                     <div className="reference-section reference-under-mobile">
                       <label htmlFor="reference-number">Reference Number</label>
                       <input
@@ -634,13 +627,11 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
                         maxLength={15}
                         style={{ border: 'none', borderBottom: '1px solid #ccc', outline: 'none', background: 'transparent', fontSize: 16, width: '100%', boxShadow: 'none' }}
                         onChange={(e) => {
-                          // Only allow digits, max 15
                           const val = e.target.value.replace(/\D/g, '').slice(0, 15);
                           setReferenceNumber(val);
                         }}
                       />
                     </div>
-                    {/* Moved submit button here to provide more space for QR image */}
                     <button className="submit-button" onClick={handleSubmitPayment}>
                       Submit
                     </button>

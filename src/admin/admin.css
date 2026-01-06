@@ -1,3 +1,106 @@
+.transaction-card-inline {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 24px;
+  justify-content: flex-start;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+.transaction-card-inline .transaction-label {
+  margin-right: 4px;
+  color: #888;
+  font-weight: 500;
+}
+.transaction-card-inline .transaction-value {
+  margin-right: 18px;
+  color: #222;
+  font-weight: 500;
+}
+.transaction-history-cards {
+  position: absolute;
+  left: 240px;
+  right: 0;
+  top: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 18px;
+  padding: 120px 0 0 0;
+  box-sizing: border-box;
+}
+.transaction-card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  padding: 8px 24px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-left: none;
+  box-sizing: border-box;
+}
+.transaction-card-row {
+  width: calc(100vw - 240px); /* 240px sidebar width */
+  max-width: calc(100vw - 240px);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  padding: 32px 0 0 0;
+  margin-left: 240px;
+  box-sizing: border-box;
+  font-weight: 500;
+}
+.transaction-value {
+  margin-right: 18px;
+  color: #222;
+  font-weight: 500;
+}
+/* Transaction History Professional Styles */
+.transaction-history-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 32px 24px 24px 24px;
+  margin: 32px auto;
+  max-width: 700px;
+}
+.transaction-history-header {
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 18px;
+  padding-bottom: 8px;
+}
+.transaction-history-header h2 {
+  margin: 0 0 4px 0;
+  font-size: 2rem;
+  color: #174ea6;
+}
+.transaction-history-desc {
+  color: #666;
+  font-size: 1rem;
+  margin: 0 0 8px 0;
+}
+.transaction-table-wrapper {
+  overflow-x: auto;
+}
+.transaction-table.professional {
+  background: #fafbfc;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  font-size: 1.08rem;
+}
+.transaction-table.professional th {
+  color: #174ea6;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border-bottom: 2px solid #eaeaea;
+}
+.transaction-table.professional td {
+  font-size: 1.01rem;
+  vertical-align: middle;
+}
 .admin-root {
   display: flex;
   min-height: 100vh;
@@ -38,6 +141,29 @@
   width: 100%;
   background: none;
   border: none;
+}
+
+/* Transaction History Table Styles */
+.transaction-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+.transaction-table th, .transaction-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.transaction-table th {
+  background-color: #f2f2f2;
+}
+.transaction-table tr:nth-child(even) {
+  background-color: #fafafa;
+}
+.transaction-table tr:hover {
+  background-color: #e6f7ff;
+}
+.admin-nav-link {
   padding: 16px 0 16px 32px;
   text-align: left;
   font-size: 1.08rem;

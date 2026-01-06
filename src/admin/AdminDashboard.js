@@ -1,5 +1,6 @@
 import React from 'react';
 import './admin.css';
+import TransactionHistory from './TransactionHistory';
 
 const AdminDashboard = () => {
   return (
@@ -14,6 +15,10 @@ const AdminDashboard = () => {
           <div className="admin-placeholder">No pending verifications yet.</div>
         </section>
         <section className="admin-section">
+          <h2>Transaction History</h2>
+          <TransactionHistory />
+        </section>
+        <section className="admin-section">
           <h2>All Landlords</h2>
           {/* Add logic to list all landlords here */}
           <div className="admin-placeholder">No landlords found.</div>
@@ -22,5 +27,6 @@ const AdminDashboard = () => {
     </div>
   );
 };
+  );
+const [showTransactions, setShowTransactions] = React.useState(false);
 
-export default AdminDashboard;

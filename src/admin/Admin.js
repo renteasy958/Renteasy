@@ -4,6 +4,8 @@ import { db } from '../firebase/config';
 import './admin.css';
 import { getAllBoardingHouses } from '../services/bhservice';
 
+import TransactionHistory from './TransactionHistory';
+
 // SeeIdButton component for viewing uploaded ID
 function SeeIdButton({ landlord }) {
   const [showId, setShowId] = useState(false);
@@ -83,6 +85,7 @@ function SeeIdButton({ landlord }) {
 const pages = [
   { key: 'verifications', label: 'Verifications' },
   { key: 'pending', label: 'Pending Approval' },
+  { key: 'transactions', label: 'Transaction History' },
   { key: 'landlords', label: 'Landlords' },
   { key: 'tenants', label: 'Tenants' },
   { key: 'boardinghouses', label: 'Boarding Houses' },
@@ -90,6 +93,9 @@ const pages = [
 
 // Simple SVG icons for sidebar
 const icons = {
+    transactions: (
+      <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+    ),
   verifications: (
     <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
   ),
@@ -249,6 +255,13 @@ function AdminMain({ currentPage, setCurrentPage }) {
   switch (currentPage) {
     case 'verifications':
       return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of landlords requesting verification (click to view details and IDs)</div>;
+    case 'transactions':
+      return (
+        <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
+          <h2>Transaction History</h2>
+          <TransactionHistory />
+        </div>
+      );
     case 'pending':
       return (
         <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>

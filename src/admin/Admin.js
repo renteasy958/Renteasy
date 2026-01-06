@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
+import { doc, getDoc, getDocs, collection, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import './admin.css';
 import { getAllBoardingHouses } from '../services/bhservice';
@@ -131,7 +131,8 @@ function AdminSidebar({ currentPage, setCurrentPage }) {
 
 
 
-function AdminMain({ currentPage }) {
+function AdminMain({ currentPage, setCurrentPage }) {
+      const [actionLoading, setActionLoading] = useState(false);
     const [selectedTenant, setSelectedTenant] = useState(null);
     const handleTenantClick = (tenant) => {
       setSelectedTenant(tenant);
@@ -153,7 +154,7 @@ function AdminMain({ currentPage }) {
   const [selectedLandlord, setSelectedLandlord] = useState(null);
 
   useEffect(() => {
-    if (currentPage === 'boardinghouses') {
+    if (currentPage === 'boardinghouses' || currentPage === 'pending') {
       setLoading(true);
       setError(null);
       getAllBoardingHouses()
@@ -249,7 +250,177 @@ function AdminMain({ currentPage }) {
     case 'verifications':
       return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of landlords requesting verification (click to view details and IDs)</div>;
     case 'pending':
-      return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of boarding houses pending approval (approve/reject)</div>;
+      return (
+        <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
+          <h2>Pending Boarding Houses</h2>
+          {loading && <div>Loading...</div>}
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          {!loading && !error && (
+            <div className="bh-list-grid" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {boardingHouses.filter(bh => bh.status === 'pending').length === 0 ? (
+                <div>No pending boarding houses.</div>
+              ) : (
+                chunkArray(boardingHouses.filter(bh => bh.status === 'pending'), 5).map((row, rowIdx) => (
+                  <div key={rowIdx} style={{ display: 'flex', gap: '20px' }}>
+                    {row.map((bh) => (
+                      <div
+                        key={bh.id}
+                        className="bh-list-card"
+                        style={{
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '8px',
+                          padding: '14px',
+                          background: '#fff',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                          width: '200px',
+                          minHeight: '180px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          transition: 'box-shadow 0.2s',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => {
+                          setSelectedBH(bh);
+                          setModalOpen(true);
+                        }}
+                      >
+                        {bh.images && bh.images.length > 0 && (
+                          <img src={bh.images[0]} alt="Boarding House" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6, marginBottom: 8 }} />
+                        )}
+                        <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center' }}>
+                          {bh.name || 'No Name'}
+                        </div>
+                        <div style={{ color: '#888', fontSize: 13, textAlign: 'center', margin: '4px 0' }}>{typeof bh.address === 'object' && bh.address !== null ? Object.values(bh.address).filter(Boolean).join(', ') : (bh.address || 'No Address')}</div>
+                        <div style={{ fontSize: 13 }}>Status: {bh.status}</div>
+                      </div>
+                    ))}
+                    {/* Fill empty boxes if row < 5 */}
+                    {row.length < 5 && Array.from({ length: 5 - row.length }).map((_, i) => (
+                      <div key={i} style={{ width: '200px', minHeight: '180px', background: 'transparent' }} />
+                    ))}
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+          {/* Modal for pending details */}
+          {modalOpen && selectedBH && (
+            <div
+              className="bh-modal-overlay"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+              }}
+              onClick={() => { setModalOpen(false); setSelectedBH(null); }}
+            >
+              <div
+                className="bh-modal-content"
+                style={{
+                  background: '#fff',
+                  borderRadius: 10,
+                  padding: 32,
+                  minWidth: 340,
+                  maxWidth: 420,
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                  position: 'relative',
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={() => { setModalOpen(false); setSelectedBH(null); }}
+                  style={{
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    background: 'none',
+                    border: 'none',
+                    fontSize: 22,
+                    cursor: 'pointer',
+                  }}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                {selectedBH.images && selectedBH.images.length > 0 && (
+                  <img src={selectedBH.images[0]} alt="Boarding House" style={{ width: '100%', height: 160, objectFit: 'cover', borderRadius: 8, marginBottom: 16 }} />
+                )}
+                <h3 style={{ margin: '8px 0 4px 0' }}>{selectedBH.name || 'No Name'}</h3>
+                <div style={{ color: '#888', marginBottom: 8 }}>{typeof selectedBH.address === 'object' && selectedBH.address !== null ? Object.values(selectedBH.address).filter(Boolean).join(', ') : (selectedBH.address || 'No Address')}</div>
+                <div><strong>Type:</strong> {selectedBH.type || 'N/A'}</div>
+                <div><strong>Price:</strong> {selectedBH.price ? `₱${selectedBH.price}` : 'N/A'}</div>
+                <div><strong>Description:</strong> {selectedBH.description || 'N/A'}</div>
+                <div><strong>Status:</strong> {selectedBH.status}</div>
+                <div style={{ marginTop: 16, display: 'flex', gap: 16, justifyContent: 'flex-end' }}>
+                  <button
+                    style={{ padding: '8px 18px', background: '#388e3c', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: 15, opacity: actionLoading ? 0.7 : 1 }}
+                    disabled={actionLoading}
+                    onClick={async () => {
+                      setActionLoading(true);
+                      try {
+                        if (selectedBH && selectedBH.id) {
+                          const bhDocRef = doc(db, 'Boardinghouse', selectedBH.id);
+                          const bhSnap = await getDoc(bhDocRef);
+                          if (!bhSnap.exists()) {
+                            // Refresh list if doc is missing
+                            const data = await getAllBoardingHouses();
+                            setBoardingHouses(data);
+                          } else {
+                            await updateDoc(bhDocRef, { status: 'approved' });
+                            // Refresh list after approval
+                            const data = await getAllBoardingHouses();
+                            setBoardingHouses(data);
+                            // Stay on the pending approval page after approving
+                          }
+                        }
+                      } catch (err) {
+                        alert('Failed to approve: ' + err.message);
+                      }
+                      setActionLoading(false);
+                      setModalOpen(false);
+                      setSelectedBH(null);
+                    }}
+                  >{actionLoading ? 'Approving...' : 'Approve'}</button>
+                  <button
+                    style={{ padding: '8px 18px', background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: 15, opacity: actionLoading ? 0.7 : 1 }}
+                    disabled={actionLoading}
+                    onClick={async () => {
+                      setActionLoading(true);
+                      try {
+                        if (selectedBH && selectedBH.id) {
+                          const bhDocRef = doc(db, 'Boardinghouse', selectedBH.id);
+                          const bhSnap = await getDoc(bhDocRef);
+                          if (!bhSnap.exists()) {
+                            alert('This boarding house no longer exists.');
+                          } else {
+                            await deleteDoc(bhDocRef);
+                            // Refresh list
+                            const data = await getAllBoardingHouses();
+                            setBoardingHouses(data);
+                          }
+                        }
+                      } catch (err) {
+                        alert('Failed to reject: ' + err.message);
+                      }
+                      setActionLoading(false);
+                      setModalOpen(false);
+                      setSelectedBH(null);
+                    }}
+                  >{actionLoading ? 'Rejecting...' : 'Reject'}</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
     case 'landlords':
       return (
         <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
@@ -518,10 +689,10 @@ function AdminMain({ currentPage }) {
           {error && <div style={{ color: 'red' }}>{error}</div>}
           {!loading && !error && (
             <div className="bh-list-grid" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {boardingHouses.length === 0 ? (
+              {boardingHouses.filter(bh => bh.status === 'approved').length === 0 ? (
                 <div>No boarding houses found.</div>
               ) : (
-                chunkArray(boardingHouses, 5).map((row, rowIdx) => (
+                chunkArray(boardingHouses.filter(bh => bh.status === 'approved'), 5).map((row, rowIdx) => (
                   <div key={rowIdx} style={{ display: 'flex', gap: '20px' }}>
                     {row.map((bh) => (
                       <div

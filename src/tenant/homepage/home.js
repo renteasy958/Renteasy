@@ -134,6 +134,15 @@ const Home = ({ onLogout }) => {
 
     const statusInfo = getStatusInfo(house.status);
 
+    // Format address if it's an object
+    let formattedAddress = '';
+    if (house.address && typeof house.address === 'object' && house.address !== null) {
+      const { streetSitio, barangay, cityMunicipality, province } = house.address;
+      formattedAddress = [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+    } else {
+      formattedAddress = house.address || house.Address || '';
+    }
+
     return (
       <div className="boarding-card" onClick={() => setSelectedHouse(house)}>
         <div className="card-image">
@@ -173,7 +182,7 @@ const Home = ({ onLogout }) => {
         </div>
         <div className="card-content">
           <h3>{house.name || house['Boarding House Name'] || 'Untitled'}</h3>
-          <p className="address">{house.address || house.Address || ''}</p>
+          <p className="address">{formattedAddress}</p>
         </div>
       </div>
     );

@@ -192,9 +192,10 @@
 
 .title-section {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: row;
+  align-items: center;
   margin-bottom: 1rem;
+  text-align: left;
 }
 
 .title-section h1 {
@@ -203,6 +204,8 @@
   font-size: 2.5rem;
   font-weight: bold;
   flex: 1;
+  text-align: left;
+  display: inline-block;
 }
 
 .rating-section {
@@ -225,6 +228,7 @@
 
 .room-price-section {
   margin-bottom: 2rem;
+  text-align: left;
 }
 
 .room-price-section p {
@@ -250,12 +254,14 @@
   font-size: 1.3rem;
   font-weight: 600;
   color: #333;
+  text-align: left;
 }
 
 .price {
   font-size: 2.5rem !important;
   font-weight: bold;
   color: #000000;
+  text-align: left;
 }
 
 .map-coming-soon {

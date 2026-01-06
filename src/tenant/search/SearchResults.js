@@ -121,12 +121,20 @@ const SearchResults = () => {
 
   const Card = ({ h }) => {
     const thumbnail = (h.images && Array.isArray(h.images) && h.images[0]) || h.image || '/default.png';
+    // Format address if it's an object
+    let formattedAddress = '';
+    if (h.address && typeof h.address === 'object' && h.address !== null) {
+      const { streetSitio, barangay, cityMunicipality, province } = h.address;
+      formattedAddress = [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+    } else {
+      formattedAddress = h.address || h.Address || '';
+    }
     return (
       <div className="search-card" onClick={() => setSelectedHouse(h)}>
         <div className="search-card-image" style={{ backgroundImage: `url(${thumbnail})` }} />
         <div className="search-card-body">
           <h3>{h.name || h['Boarding House Name'] || 'Untitled'}</h3>
-          <p className="address">{h.address || h.Address || ''}</p>
+          <p className="address">{formattedAddress}</p>
         </div>
       </div>
     );

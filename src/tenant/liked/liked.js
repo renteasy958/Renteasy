@@ -67,7 +67,14 @@ const Liked = () => {
   // Boarding house card component
   const BoardingHouseCard = ({ house }) => {
     const thumbnail = (house.images && Array.isArray(house.images) && house.images.length > 0) ? house.images[0] : (house.image || '/default.png');
-    
+    // Format address if it's an object
+    let formattedAddress = '';
+    if (house.address && typeof house.address === 'object' && house.address !== null) {
+      const { streetSitio, barangay, cityMunicipality, province } = house.address;
+      formattedAddress = [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+    } else {
+      formattedAddress = house.address || house.Address || '';
+    }
     return (
       <div 
         className="like-boarding-house-card"
@@ -95,7 +102,7 @@ const Liked = () => {
         <div className="like-card-content">
           <h3 className="like-card-title">{house.name || house['Boarding House Name'] || 'Untitled'}</h3>
           <p className="like-card-address">
-            {house.address || house.Address || ''}
+            {formattedAddress}
           </p>
         </div>
       </div>
@@ -169,7 +176,14 @@ const Liked = () => {
             <div className="like-modal-body">
               <h2 className="like-modal-title">{selectedHouse.name || selectedHouse['Boarding House Name'] || 'Untitled'}</h2>
               <p className="like-modal-address">
-                {selectedHouse.address || selectedHouse.Address || ''}
+                {(() => {
+                  if (selectedHouse.address && typeof selectedHouse.address === 'object' && selectedHouse.address !== null) {
+                    const { streetSitio, barangay, cityMunicipality, province } = selectedHouse.address;
+                    return [streetSitio, barangay, cityMunicipality, province].filter(Boolean).join(', ');
+                  } else {
+                    return selectedHouse.address || selectedHouse.Address || '';
+                  }
+                })()}
               </p>
               <button
                 className={`like-modal-action-button ${likedHouses.has(selectedHouse.id) ? 'like-unliked' : 'like-liked'}`}

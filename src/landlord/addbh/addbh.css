@@ -933,10 +933,4 @@
     min-height: 200px;
     max-height: 60vh;
   }
-  z-index: 999999 !important;
-  border: 2px solid blue !important;
-  position: relative;
-  z-index: 999999 !important;
-  border: 2px solid blue !important;
-  position: relative;
 }

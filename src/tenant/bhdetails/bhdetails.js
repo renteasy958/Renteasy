@@ -1,3 +1,4 @@
+// (removed stray useEffect, will add inside component below)
 import React, { useState, useEffect, useRef } from 'react';
 import { Wifi, Home, UtensilsCrossed, Wind, Shirt, Shield, Droplet, Zap, BedDouble, Table2, Armchair } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -60,6 +61,34 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [fetchedHouse, setFetchedHouse] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [showReservationNotice, setShowReservationNotice] = useState(false); // Only declare once
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
+    const [showApprovalNote, setShowApprovalNote] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [qrCodeImage, setQrCodeImage] = useState(null);
+  const [landlordInfo, setLandlordInfo] = useState(null);
+  const [paymentInfo, setPaymentInfo] = useState(null);
+  const mapRef = useRef(null);
+  const mapInstanceRef = useRef(null);
+
+  // Redirect to home after success animation
+  useEffect(() => {
+    if (showSuccessAnimation) {
+      const timer = setTimeout(() => {
+        if (onClose) {
+          onClose();
+        } else {
+          navigate('/tenant-home');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
+        }
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessAnimation, onClose, navigate]);
   // If no house prop, fetch from Firestore using id param
   useEffect(() => {
     if (!house && id) {
@@ -89,16 +118,9 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
       }
       return '';
     }
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showReservationNotice, setShowReservationNotice] = useState(false);
-  const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [showSuccessAnimation, setShowSuccessAnimation] = useState(false);
-  const [referenceNumber, setReferenceNumber] = useState('');
-  const [qrCodeImage, setQrCodeImage] = useState(null);
-  const [landlordInfo, setLandlordInfo] = useState(null);
-  const [paymentInfo, setPaymentInfo] = useState(null);
-  const mapRef = useRef(null);
-  const mapInstanceRef = useRef(null);
+  // (removed duplicate declaration)
+  // (removed duplicate declaration)
+    // (removed duplicate declaration)
 
   // Fetch landlord info and payment info
   useEffect(() => {
@@ -314,11 +336,9 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
     (async () => {
       try {
         setShowPaymentForm(false);
-
         // Build reservation payload
         const user = auth.currentUser;
         const tenantUid = user ? user.uid : null;
-
         // Try to get tenant details to denormalize name/phone and other info
         let tenantName = user?.displayName || '';
         let tenantPhone = '';
@@ -425,14 +445,18 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           console.error('Failed to save reservation:', err);
         }
 
-        // Show success animation
+        // Show check animation and approval note for 3 seconds, then redirect
         setShowSuccessAnimation(true);
+        setShowApprovalNote(true);
         setTimeout(() => {
           setShowSuccessAnimation(false);
+          setShowApprovalNote(false);
           setReferenceNumber('');
           setQrCodeImage(null);
-          // Redirect to main tenant home page
           navigate('/tenant-home');
+          setTimeout(() => {
+            window.location.reload();
+          }, 100);
         }, 3000);
       } catch (err) {
         console.error('Payment submit error:', err);
@@ -445,6 +469,22 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
 
   return (
     <div className="modal-overlay" style={{position:'static',background:'none',zIndex:1}}>
+      {/* Success Animation and Approval Note Overlay */}
+      {showSuccessAnimation && (
+        <div className="success-animation-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(255,255,255,0.8)',zIndex:9999,display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+          <div className="checkmark-animation" style={{marginBottom:24}}>
+            <svg width="80" height="80" viewBox="0 0 80 80">
+              <circle cx="40" cy="40" r="36" stroke="#4BB543" strokeWidth="6" fill="none" />
+              <path d="M24 42 L36 54 L56 32" stroke="#4BB543" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          {showApprovalNote && (
+            <div className="approval-note" style={{fontSize:20,color:'#333',background:'#fff',padding:'16px 32px',borderRadius:12,boxShadow:'0 2px 8px rgba(0,0,0,0.08)',marginTop:8}}>
+              Please wait for landlord approval.<br />Redirecting to home...
+            </div>
+          )}
+        </div>
+      )}
       <div className="modal-container">
         <div className="modal-content">
           <div className="modal-left">
@@ -571,29 +611,32 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           </div>
 
           <div className="modal-right">
-            <div className="description-section">
-              <h2>Description</h2>
-              <p>{house.description}</p>
-              
-              {/* Available Amenities */}
-              {availableAmenities.length > 0 && (
-                <React.Fragment>
-                  <h3 style={{ marginTop: '24px', marginBottom: '12px' }}>Available Amenities</h3>
-                  <div className="amenities-grid">
-                    {availableAmenities.map(({ key, label, Icon }) => (
-                      <div key={key} className="amenity-item">
-                        <Icon size={20} />
-                        <span>{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </React.Fragment>
-              )}
+            <div className="description-reserve-fixed">
+              <div className="description-section">
+                <h2>Description</h2>
+                <p>{house.description}</p>
+                {/* Available Amenities */}
+                {availableAmenities.length > 0 && (
+                  <React.Fragment>
+                    <h3 style={{ marginTop: '24px', marginBottom: '12px' }}>Available Amenities</h3>
+                    <div className="amenities-grid">
+                      {availableAmenities.map(({ key, label, Icon }) => (
+                        <div key={key} className="amenity-item">
+                          <Icon size={20} />
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </React.Fragment>
+                )}
+              </div>
+              <button className="reserve-button" onClick={handleReserveClick}>
+                Reserve now
+              </button>
             </div>
-            
-            <button className="reserve-button" onClick={handleReserveClick}>
-              Reserve now
-            </button>
+            <div className="modal-right-scrollable">
+              {/* Add any additional scrollable content here if needed in the future */}
+            </div>
           </div>
         </div>
 
@@ -674,21 +717,6 @@ const BHDetails = ({ house, isOpen, onClose, likedHouses, onToggleLike }) => {
           </div>
         )}
 
-        {/* Success Animation */}
-        {showSuccessAnimation && (
-          <div className="success-overlay">
-            <div className="success-animation">
-              <div className="checkmark-circle">
-                <svg className="checkmark" viewBox="0 0 52 52">
-                  <circle className="checkmark-circle-bg" cx="26" cy="26" r="25"/>
-                  <polyline className="checkmark-check" points="14,27 22,35 38,19"/>
-                </svg>
-              </div>
-              <h2>Payment Submitted!</h2>
-              <p>Your reservation is being processed.</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

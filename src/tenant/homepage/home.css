@@ -1,21 +1,44 @@
+.scroll-test {
+  height: 2000px;
+  background: repeating-linear-gradient(180deg, #f1f1f1, #f1f1f1 100px, #e0e0e0 100px, #e0e0e0 200px);
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #012E6A #f1f1f1;
+}
+
+/* For Webkit browsers */
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+  width: 10px;
+}
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb {
+  background: #012E6A;
+  border-radius: 8px;
+}
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 8px;
+}
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.45);
-  z-index: 2000;
-  display: flex;
-  align-items: stretch;
-  justify-content: stretch;
-  margin: 0;
-  padding: 0;
-}
-
-.modal-overlay > * {
-  width: 100vw !important;
-  height: 100vh !important;
+  min-height: 100vh; /* Ensure full height */
+  width: 100vw; /* Ensure full width */
+  background-image: url('home.png '); /* Background image */
+  background-size: cover; /* Cover the entire area */
+  background-position: center 45px; /* Positioning of the background */
+  background-repeat: no-repeat; /* No repeat of the background */
+  background-attachment: scroll; /* Allow scrolling with content */
+  margin: 0; /* Reset margin */
+  padding: 0; /* Reset padding */
+  overflow: visible; /* Allow overflow */
+  /* Removed height, position: fixed/absolute, and overflow restrictions */
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box;
@@ -53,29 +76,23 @@ body {
   padding: 0;
 }
 
-/* Homepage Styles */
+
+
 .homepage {
   min-height: 100vh;
-  position: relative;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
   background-image: url('home.png ');
   background-size: cover;
   background-position: center 45px; /* Moved up from 60px to 45px */
   background-repeat: no-repeat;
   background-attachment: scroll;
-  width: 100vw;
-  margin: 0;
-  padding: 0;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
 
-.homepage {
-  min-height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-}
+/* Homepage Styles */
+
 
 /* Background applied directly to homepage container */
 
@@ -107,7 +124,7 @@ body {
   margin: 0 auto;
   position: relative;
   z-index: 1;
-  min-height: 100vh;
+
 }
 
 /* Section Titles */

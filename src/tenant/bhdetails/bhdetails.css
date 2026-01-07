@@ -57,7 +57,23 @@
   border-radius: 8px;
 }
 html, body {
-  overflow: hidden !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.bhdetails-fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .back-button {

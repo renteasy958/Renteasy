@@ -92,8 +92,10 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
       const docRef = await addDoc(collection(db, 'landlordVerifications'), data);
       console.log('[Verification Submission] Document written with ID:', docRef.id);
       setShowModal(true);
+      alert('Verification request submitted successfully!');
     } catch (err) {
       setError('Failed to submit: ' + (err.message || err));
+      alert('Failed to submit verification request: ' + (err.message || err));
       console.error('[Verification Submission] Error:', err);
     } finally {
       setSubmitting(false);

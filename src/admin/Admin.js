@@ -1,88 +1,17 @@
 import React, { useState, useEffect } from 'react';
+
 import TransactionHistory from './TransactionHistory';
 import { doc, getDoc, getDocs, collection } from 'firebase/firestore';
 import { db } from '../firebase/config';
 import './admin.css';
+import VerifyAccount from './VerifyAccount';
 import { getAllBoardingHouses } from '../services/bhservice';
 
-// SeeIdButton component for viewing uploaded ID
-function SeeIdButton({ landlord }) {
-  const [showId, setShowId] = useState(false);
-  // Try all possible ID field names
-  const idUrl = landlord.idUrl || landlord.IDUrl || landlord.landlordIdUrl || landlord.landlordIdImageUrl || landlord.landlordIdPhotoUrl || landlord.landlordIdPicUrl || landlord.landlordIdFileUrl || landlord.landlordIdUploadUrl || landlord.landlordIdProofUrl || landlord.landlordIdDocumentUrl || landlord.landlordIdCardUrl || landlord.landlordIdAttachmentUrl;
-  if (!idUrl) return null;
-  return (
-    <div style={{ marginTop: 16 }}>
-      <button
-        style={{
-          padding: '8px 18px',
-          background: '#174ea6',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 6,
-          fontWeight: 500,
-          cursor: 'pointer',
-          fontSize: 15,
-        }}
-        onClick={() => setShowId(true)}
-      >
-        See ID
-      </button>
-      {showId && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            width: '100vw',
-            height: '100vh',
-            background: 'rgba(0,0,0,0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 2000,
-          }}
-          onClick={() => setShowId(false)}
-        >
-          <div
-            style={{
-              background: '#fff',
-              borderRadius: 10,
-              padding: 24,
-              minWidth: 260,
-              maxWidth: 420,
-              boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
-              position: 'relative',
-            }}
-            onClick={e => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setShowId(false)}
-              style={{
-                position: 'absolute',
-                top: 12,
-                right: 12,
-                background: 'none',
-                border: 'none',
-                fontSize: 22,
-                cursor: 'pointer',
-              }}
-              aria-label="Close"
-            >
-              &times;
-            </button>
-            <h4 style={{ marginBottom: 12 }}>Uploaded ID</h4>
-            <img src={idUrl} alt="Landlord ID" style={{ maxWidth: '100%', maxHeight: 320, borderRadius: 8, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }} />
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+// ...ID-related code removed as requested
 // Use public folder reference for logo
 
 const pages = [
-  { key: 'verifications', label: 'Verifications' },
+  { key: 'verifyaccount', label: 'Verify Account' },
   { key: 'pending', label: 'Pending Approval' },
   { key: 'landlords', label: 'Landlords' },
   { key: 'tenants', label: 'Tenants' },
@@ -92,6 +21,9 @@ const pages = [
 
 // Simple SVG icons for sidebar
 const icons = {
+  verifyaccount: (
+    <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+  ),
   verifications: (
     <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
   ),
@@ -150,10 +82,7 @@ function AdminMain({ currentPage }) {
   // Modal state moved outside switch
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBH, setSelectedBH] = useState(null);
-    const [showIdModal, setShowIdModal] = useState(false);
-                 {showIdModal && (
-                   <SeeIdButton landlord={selectedLandlord} onClose={() => setShowIdModal(false)} />
-                 )}
+    // Removed SeeIdButton and showIdModal state as requested
   const [landlordInfo, setLandlordInfo] = useState(null);
   const [selectedLandlord, setSelectedLandlord] = useState(null);
 
@@ -251,8 +180,8 @@ function AdminMain({ currentPage }) {
   };
 
   switch (currentPage) {
-    case 'verifications':
-      return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of landlords requesting verification (click to view details and IDs)</div>;
+    case 'verifyaccount':
+      return <VerifyAccount />;
     case 'pending':
       return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of boarding houses pending approval (approve/reject)</div>;
     case 'landlords':
@@ -395,10 +324,7 @@ function AdminMain({ currentPage }) {
                     <div key={key}><strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {String(value)}</div>
                   ))}
                 </div>
-                {/* See ID button and modal - always show if any ID field exists */}
-                {(selectedLandlord.idUrl || selectedLandlord.IDUrl || selectedLandlord.landlordIdUrl || selectedLandlord.landlordIdImageUrl) && (
-                  <span style={{ display: 'none' }}><SeeIdButton landlord={selectedLandlord} id="see-id-btn" /></span>
-                )}
+                {/* SeeIdButton removed as requested */}
               </div>
             </div>
           )}

@@ -1,0 +1,39 @@
+.verifications-container {
+  padding: 24px;
+}
+
+.verifications-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 16px;
+}
+
+.verifications-table th,
+.verifications-table td {
+  border: 1px solid #e0e0e0;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+.verifications-table th {
+  background: #f5f5f5;
+}
+
+.verifications-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.verifications-table button {
+  margin-right: 8px;
+  padding: 6px 14px;
+  background: #174ea6;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.verifications-table button:last-child {
+  background: #e53935;
+}

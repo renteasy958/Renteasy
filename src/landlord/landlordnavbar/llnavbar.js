@@ -18,12 +18,12 @@ const LLNavbar = () => {
   const [isEditingPayment, setIsEditingPayment] = useState(true);
   // Load payment info and balance from Firestore on mount
   const [balance, setBalance] = useState(0);
+  const [isVerified, setIsVerified] = useState(false);
   useEffect(() => {
     const fetchLandlordInfo = async () => {
       try {
         const user = auth.currentUser;
         if (!user) return;
-        console.log('[LLNavbar] Fetching landlord info for UID:', user.uid);
         // Fetch payment info
         const paymentDoc = await getDoc(doc(db, 'landlords', user.uid, 'payment', 'info'));
         if (paymentDoc.exists()) {
@@ -35,17 +35,17 @@ const LLNavbar = () => {
         } else {
           setIsEditingPayment(true);
         }
-        // Fetch balance
+        // Fetch balance and verification status
         const landlordDoc = await getDoc(doc(db, 'landlords', user.uid));
         if (landlordDoc.exists()) {
           const landlordData = landlordDoc.data();
-          console.log('[LLNavbar] Landlord doc data:', landlordData);
           setBalance(landlordData.balance || 0);
+          setIsVerified(!!landlordData.verified);
         } else {
-          console.warn('[LLNavbar] No landlord doc found for UID:', user.uid);
+          setIsVerified(false);
         }
       } catch (err) {
-        console.warn('Failed to fetch landlord info from Firestore:', err);
+        setIsVerified(false);
       }
     };
     fetchLandlordInfo();
@@ -175,6 +175,18 @@ const LLNavbar = () => {
           <div style={{ marginLeft: 24, fontWeight: 600, fontSize: 18, color: '#fff', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: 8 }}>Balance:</span>
             <span style={{ fontSize: 20, fontWeight: 700, color: '#fff' }}>₱{balance.toLocaleString()}</span>
+            <span style={{
+              marginLeft: 18,
+              padding: '2px 10px',
+              borderRadius: 8,
+              background: isVerified ? '#4caf50' : '#f44336',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: 15,
+              letterSpacing: 1
+            }}>
+              {isVerified ? 'Verified' : 'Not Verified'}
+            </span>
           </div>
 
           <div className="ll-nav-links">
@@ -202,12 +214,14 @@ const LLNavbar = () => {
                         <span style={{ marginLeft: 10 }}>Profile</span>
                       </span>
                     </div>
-                    <div className="ll-settings-option" onClick={() => setShowVerifyModal(true)}>
-                      <span style={{ display: 'flex', alignItems: 'center' }}>
-                        <CreditCardIcon />
-                        <span style={{ marginLeft: 10 }}>Verify Account</span>
-                      </span>
-                    </div>
+                    {!isVerified && (
+                      <div className="ll-settings-option" onClick={() => setShowVerifyModal(true)}>
+                        <span style={{ display: 'flex', alignItems: 'center' }}>
+                          <CreditCardIcon />
+                          <span style={{ marginLeft: 10 }}>Verify Account</span>
+                        </span>
+                      </div>
+                    )}
                     <div className="ll-settings-option" onClick={(e) => handleLogout(e)}>
                       <LogoutIcon />
                       <span>Logout</span>
@@ -227,8 +241,6 @@ const LLNavbar = () => {
           onSubmit={async ({ selectedId, frontImage, backImage, referenceNumber, frontFile, backFile }) => {
             try {
               const user = auth.currentUser;
-              console.log('[DEBUG] Verification submit called. user:', user ? user.uid : null);
-              console.log('[DEBUG] Input values:', { selectedId, frontImage, backImage, referenceNumber, frontFile, backFile });
               if (!user) throw new Error('Not logged in');
               if (!frontFile || !backFile) {
                 alert('Please upload both front and back images of your ID.');
@@ -238,50 +250,41 @@ const LLNavbar = () => {
               let backUrl = null;
               try {
                 frontUrl = await import('../../services/cloudinaryService').then(mod => mod.uploadToCloudinary(frontFile, `renteasy/ids/${user.uid}`));
-                console.log('[DEBUG] Cloudinary front upload result:', frontUrl);
               } catch (err) {
                 alert('Failed to upload front of ID: ' + (err.message || err));
-                console.error('Cloudinary front upload error:', err);
                 return;
               }
               try {
                 backUrl = await import('../../services/cloudinaryService').then(mod => mod.uploadToCloudinary(backFile, `renteasy/ids/${user.uid}`));
-                console.log('[DEBUG] Cloudinary back upload result:', backUrl);
               } catch (err) {
                 alert('Failed to upload back of ID: ' + (err.message || err));
-                console.error('Cloudinary back upload error:', err);
                 return;
               }
               if (!frontUrl || !backUrl) {
                 alert('Image upload failed. Please try again.');
-                console.log('[DEBUG] Image upload failed. frontUrl:', frontUrl, 'backUrl:', backUrl);
                 return;
               }
-              // Debug log before Firestore update
+              // Add verified: false on submit (pending admin approval)
               const verificationData = {
                 idType: selectedId,
                 idFrontUrl: frontUrl,
                 idBackUrl: backUrl,
                 verificationReference: referenceNumber,
                 verificationSubmittedAt: new Date().toISOString(),
+                verified: false // Set to false until admin verifies
               };
-              console.log('[DEBUG] Firestore update data:', verificationData);
               try {
                 await import('firebase/firestore').then(async firestore => {
                   const { doc, setDoc } = firestore;
-                  console.log('[DEBUG] Firestore path:', 'landlords', user.uid);
                   await setDoc(doc(db, 'landlords', user.uid), verificationData, { merge: true });
-                  console.log('[DEBUG] Firestore setDoc (merge) success');
                 });
               } catch (err) {
                 alert('Failed to update Firestore: ' + (err.message || err));
-                console.error('Firestore write error:', err);
                 return;
               }
               alert('Verification submitted successfully!');
             } catch (err) {
               alert('Verification failed: ' + (err.message || err));
-              console.error('Verification failed:', err);
             }
           }}
         />

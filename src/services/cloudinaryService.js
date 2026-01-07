@@ -1,6 +1,6 @@
 // Cloudinary upload service for profile pictures and QR codes
 
-export const uploadToCloudinary = async (file, folder = 'renteasy') => {
+export const uploadToCloudinary = async (file, folder = '') => {
   try {
     const cloudName = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME;
     const uploadPreset = process.env.REACT_APP_CLOUDINARY_UPLOAD_PRESET;
@@ -13,21 +13,30 @@ export const uploadToCloudinary = async (file, folder = 'renteasy') => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', uploadPreset);
-    formData.append('folder', folder);
+    if (folder) formData.append('folder', folder);
 
-    const response = await fetch(url, {
-      method: 'POST',
-      body: formData
-    });
-
-    const data = await response.json();
+    let response, data;
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        body: formData
+      });
+      data = await response.json();
+    } catch (networkError) {
+      throw new Error('Network or CORS error: ' + networkError.message);
+    }
 
     if (!response.ok) {
-      throw new Error(data.error?.message || `Upload failed with status ${response.status}`);
+      throw new Error((data && data.error && data.error.message) ? data.error.message : `Upload failed with status ${response.status}`);
+    }
+
+    if (!data.secure_url && !data.url) {
+      throw new Error('Upload succeeded but no URL returned. Full response: ' + JSON.stringify(data));
     }
 
     return data.secure_url || data.url;
   } catch (error) {
+    alert('Cloudinary upload error: ' + (error.message || error));
     console.error('Error uploading to Cloudinary:', error);
     throw error;
   }

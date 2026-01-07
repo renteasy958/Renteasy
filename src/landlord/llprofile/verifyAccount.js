@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './verifyAccount.css';
-
+import { db, auth } from '../../firebase/config';
+import { doc, getDoc, collection, addDoc } from 'firebase/firestore';
 const VALID_PH_IDS = [
   'Philippine Passport',
   'Driver’s License',
@@ -20,21 +21,40 @@ const VALID_PH_IDS = [
   'Barangay Certification',
 ];
 
+
 const VerifyAccount = ({ onSubmit, onClose }) => {
+  const [showModal, setShowModal] = useState(false);
+  const [referenceNumber, setReferenceNumber] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
-    const [showModal, setShowModal] = useState(false);
-    const [step, setStep] = useState(1);
-    const [selectedId, setSelectedId] = useState('');
-    const [frontImage, setFrontImage] = useState(null); // preview URL
-    const [frontFile, setFrontFile] = useState(null); // actual File
-    const [backImage, setBackImage] = useState(null); // preview URL
-    const [backFile, setBackFile] = useState(null); // actual File
-    const [referenceNumber, setReferenceNumber] = useState('');
-    const [idMethod, setIdMethod] = useState('upload');
-    const frontInputRef = useRef();
-    const backInputRef = useRef();
+  // Store landlord and bh info
+  const [profile, setProfile] = useState(null);
+  const [bhInfo, setBhInfo] = useState(null);
 
-  // Modal auto-close and redirect logic (must be inside component, after useState)
+  // Fetch landlord profile and boarding house info
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+      try {
+        const snap = await getDoc(doc(db, 'landlords', user.uid));
+        if (snap.exists()) {
+          setProfile({ uid: user.uid, email: user.email, ...snap.data() });
+        }
+        // Optionally fetch first boarding house for this landlord
+        const bhSnap = await getDoc(doc(db, 'boardinghouse', user.uid));
+        if (bhSnap.exists()) {
+          setBhInfo(bhSnap.data());
+        }
+      } catch (err) {
+        setError('Failed to load profile info');
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  // Modal auto-close and redirect logic
   useEffect(() => {
     if (showModal) {
       const timer = setTimeout(() => {
@@ -45,115 +65,75 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
     }
   }, [showModal]);
 
-  const handleFrontImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setFrontFile(e.target.files[0]);
-      setFrontImage(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-  const handleBackImageChange = (e) => {
-    if (e.target.files && e.target.files[0]) {
-      setBackFile(e.target.files[0]);
-      setBackImage(URL.createObjectURL(e.target.files[0]));
-    }
-  };
-  const handleSubmitId = (e) => {
+  const handleSubmitPayment = async (e) => {
     e.preventDefault();
-    if (!selectedId || !frontImage || !backImage) return;
-    setStep(2);
-  };
-  const handleSubmitPayment = (e) => {
-    e.preventDefault();
-    setShowModal(true);
-    if (onSubmit) onSubmit({ selectedId, frontImage, backImage, referenceNumber, frontFile, backFile });
+    setSubmitting(true);
+    setError('');
+    try {
+      const user = auth.currentUser;
+      if (!user) throw new Error('Not logged in');
+      // Compose verification data
+      const data = {
+        landlordUid: user.uid,
+        landlordName: profile ? `${profile.firstName || ''} ${profile.lastName || ''}`.trim() : '',
+        landlordEmail: profile?.email || '',
+        contactNumber: profile?.contactNumber || '',
+        dateOfBirth: profile?.dateOfBirth || '',
+        civilStatus: profile?.civilStatus || '',
+        gender: profile?.gender || '',
+        permanentAddress: profile?.permanentAddress || '',
+        boardingHouseName: bhInfo?.name || profile?.boardingHouseName || '',
+        boardingHouseAddress: bhInfo?.address || profile?.boardingHouseAddress || '',
+        referenceNumber,
+        status: 'pending',
+        submittedAt: new Date().toISOString(),
+      };
+      console.log('[Verification Submission] Data to submit:', data);
+      const docRef = await addDoc(collection(db, 'landlordVerifications'), data);
+      console.log('[Verification Submission] Document written with ID:', docRef.id);
+      setShowModal(true);
+    } catch (err) {
+      setError('Failed to submit: ' + (err.message || err));
+      console.error('[Verification Submission] Error:', err);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <>
+    <div>
       <div className="verify-blur-bg" />
-      {step === 1 && (
-        <div className="verify-modal" style={{marginTop: '80px'}}>
-          <button className="modal-close-x" type="button" onClick={onClose}>&#10005;</button>
-          <h2>Verify Account</h2>
-          <form onSubmit={handleSubmitId}>
-            <div className="id-list-section">
-              <label htmlFor="valid-id">Select Valid ID:</label>
-              <select
-                id="valid-id"
-                value={selectedId}
-                onChange={e => setSelectedId(e.target.value)}
-                required
-              >
-                <option value="">-- Choose ID --</option>
-                {VALID_PH_IDS.map(id => (
-                  <option key={id} value={id}>{id}</option>
-                ))}
-              </select>
+      <div className="verify-modal" style={{marginTop: '80px'}}>
+        <button className="modal-close-x" type="button" onClick={onClose}>&#10005;</button>
+        <h2>Pay Subscription Fee</h2>
+        <form onSubmit={handleSubmitPayment}>
+          <div className="payment-modal-flex">
+            <div className="qr-section payment-modal-qr">
+              <img src="/300.jpg" alt="QR Code for ₱300" className="qr-image qr-image-large" />
             </div>
-            <div className="id-upload-row">
-              <div className="id-upload-section">
-                <label>Upload Front of ID:</label>
-                <div className="id-methods">
-                  <button type="button" onClick={() => frontInputRef.current.click()}>Upload Photo</button>
-                </div>
+            <div className="payment-modal-details">
+              <label className="payment-label">Pay Yearly Subscription Fee: <b>₱300</b></label>
+              <div className="gcash-section">
+                <p>GCash Number:</p>
+                <div className="gcash-number"><b>09158706048</b></div>
+              </div>
+              <div className="reference-section">
+                <label>Reference Number:</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  ref={frontInputRef}
-                  onChange={handleFrontImageChange}
+                  type="text"
+                  value={referenceNumber}
+                  onChange={e => setReferenceNumber(e.target.value)}
+                  required
+                  disabled={submitting}
                 />
-                {frontImage && <img src={frontImage} alt="Front ID Preview" className="id-preview" />}
               </div>
-              <div className="id-upload-section">
-                <label>Upload Back of ID:</label>
-                <div className="id-methods">
-                  <button type="button" onClick={() => backInputRef.current.click()}>Upload Photo</button>
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                  ref={backInputRef}
-                  onChange={handleBackImageChange}
-                />
-                {backImage && <img src={backImage} alt="Back ID Preview" className="id-preview" />}
-              </div>
+              {error && <div style={{ color: 'red', margin: '8px 0', fontWeight: 600 }}>{error}</div>}
+              {!error && submitting && <div style={{ color: '#174ea6', margin: '8px 0', fontWeight: 600 }}>Submitting, please wait...</div>}
+              <button type="submit" className="submit-btn" disabled={!referenceNumber || submitting}>{submitting ? 'Submitting...' : 'Submit'}</button>
             </div>
-            <button type="submit" className="submit-btn" disabled={!selectedId || !frontImage || !backImage}>Next</button>
-          </form>
-        </div>
-      )}
-      {step === 2 && (
-        <div className="verify-modal" style={{marginTop: '80px'}}>
-          <button className="modal-close-x" type="button" onClick={onClose}>&#10005;</button>
-          <h2>Pay Subscription Fee</h2>
-          <form onSubmit={handleSubmitPayment}>
-            <div className="payment-modal-flex">
-              <div className="qr-section payment-modal-qr">
-                <img src="/300.jpg" alt="QR Code for ₱300" className="qr-image qr-image-large" />
-              </div>
-              <div className="payment-modal-details">
-                <label className="payment-label">Pay Yearly Subscription Fee: <b>₱300</b></label>
-                <div className="gcash-section">
-                  <p>GCash Number:</p>
-                  <div className="gcash-number"><b>09158706048</b></div>
-                </div>
-                <div className="reference-section">
-                  <label>Reference Number:</label>
-                  <input
-                    type="text"
-                    value={referenceNumber}
-                    onChange={e => setReferenceNumber(e.target.value)}
-                    required
-                  />
-                </div>
-                <button type="submit" className="submit-btn" disabled={!referenceNumber}>Submit</button>
-              </div>
-            </div>
-          </form>
-        </div>
-      )}
+          </div>
+        </form>
+      </div>
       {showModal && (
         <div className="success-overlay">
           <div className="success-animation">
@@ -161,13 +141,12 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
               <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
               <path className="checkmark-check" fill="none" d="M14 27l7 7 16-16" />
             </svg>
-            <div className="success-message">Verification Submitted</div>
-            <div className="success-subtext">Please wait 24 hours for verification.</div>
+            <div className="success-message">Payment Submitted</div>
+            <div className="success-subtext">Please wait 3 days for site visitation.</div>
           </div>
         </div>
       )}
-    </>
-
+    </div>
   );
-}
+};
 export default VerifyAccount;

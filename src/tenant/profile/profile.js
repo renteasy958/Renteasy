@@ -139,7 +139,11 @@ const TenantProfile = () => {
                     </div>
                     <div className="prof-info-item prof-address-value">
                         <div className="prof-info-label">Permanent Address</div>
-                        <div className="prof-info-value">{userData.permanentAddress || 'N/A'}</div>
+                                                <div className="prof-info-value">{
+                                                    userData.permanentAddress && typeof userData.permanentAddress === 'object' ?
+                                                        [userData.permanentAddress.streetSitio, userData.permanentAddress.barangay, userData.permanentAddress.cityMunicipality, userData.permanentAddress.province].filter(Boolean).join(', ') :
+                                                    userData.permanentAddress || 'N/A'
+                                                }</div>
                     </div>
                 </div>
             </div>

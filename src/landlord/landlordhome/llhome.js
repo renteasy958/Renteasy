@@ -17,7 +17,6 @@ const Landlordhome = () => {
   const [error, setError] = useState(null);
   // Removed hasPaymentInfo and showPaymentInfoModal as payment info is no longer required
   const [isVerified, setIsVerified] = useState(false);
-  const [isApproved, setIsApproved] = useState(false);
   // Removed payment info modal redirect logic
 
   useEffect(() => {
@@ -46,18 +45,17 @@ const Landlordhome = () => {
         const landlordDoc = await getDoc(firestoreDoc(db, 'landlords', user.uid));
         if (landlordDoc.exists()) {
           const landlordData = landlordDoc.data();
+          console.log('[LLHome] Landlord Firestore data:', landlordData);
           setIsVerified(!!landlordData.verified); // expects boolean
-          setIsApproved(!!landlordData.adminApproved); // expects boolean
+          console.log('[LLHome] isVerified:', !!landlordData.verified);
         } else {
           setIsVerified(false);
-          setIsApproved(false);
         }
       } catch (err) {
         console.error('Error fetching boarding houses:', err);
         setError(err.message);
         setListingsData([]);
-        setIsVerified(false);
-        setIsApproved(false);
+          setIsVerified(false);
       } finally {
         setLoading(false);
       }
@@ -75,10 +73,6 @@ const Landlordhome = () => {
   const handleAddBoardingHouse = () => {
     if (!isVerified) {
       alert('You must complete the verification process before you can add a boarding house. Go to Settings and click Verify Account.');
-      return;
-    }
-    if (!isApproved) {
-      alert('Your verification is pending admin approval. You will be able to add a boarding house once approved.');
       return;
     }
     navigate('/add-boarding-house');
@@ -287,9 +281,16 @@ const Landlordhome = () => {
               <button
                 className={`add-boarding-btn`}
                 onClick={handleAddBoardingHouse}
+                disabled={!isVerified}
+                style={!isVerified ? { opacity: 0.5, cursor: 'not-allowed' } : {}}
               >
                 Add Boarding House
               </button>
+              {!isVerified && (
+                <div style={{ color: '#d32f2f', fontSize: '14px', marginTop: '8px', maxWidth: '250px' }}>
+                  You must complete verification before you can add a boarding house. Go to Settings and click Verify Account.
+                </div>
+              )}
               <button className="see-all-btn" onClick={() => handleSeeAll('listings')}>
                 See all
               </button>

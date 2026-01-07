@@ -8,8 +8,11 @@ import { addBoardingHouseWithImages } from '../../services/bhservice';
 import { auth } from '../../firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 const AddBoardingHouse = () => {
-      const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [isVerified, setIsVerified] = useState(null); // null = loading, false = not verified, true = verified
     // Boarding house types
     const boardingTypes = [
       'Single Room',
@@ -38,6 +41,27 @@ const AddBoardingHouse = () => {
 
 
     // State
+        // Check verification status on mount
+        useEffect(() => {
+          const checkVerification = async () => {
+            const user = auth.currentUser;
+            if (!user) {
+              setIsVerified(false);
+              return;
+            }
+            try {
+              const docSnap = await getDoc(doc(db, 'landlords', user.uid));
+              if (docSnap.exists()) {
+                setIsVerified(!!docSnap.data().verified);
+              } else {
+                setIsVerified(false);
+              }
+            } catch (err) {
+              setIsVerified(false);
+            }
+          };
+          checkVerification();
+        }, []);
     const [currentStep, setCurrentStep] = useState(1);
     const [images, setImages] = useState([]);
     const [showSuccess, setShowSuccess] = useState(false);
@@ -160,6 +184,20 @@ const AddBoardingHouse = () => {
 
   // ...existing code...
 
+  if (isVerified === null) {
+    return <div className="add-boarding-container"><div>Loading...</div></div>;
+  }
+  if (!isVerified) {
+    return (
+      <div className="add-boarding-container">
+        <div className="not-verified-message" style={{margin:40, padding:32, background:'#fff3f3', border:'1px solid #f44336', borderRadius:12, color:'#f44336', fontWeight:600, fontSize:20, textAlign:'center'}}>
+          <AlertCircle style={{marginBottom:-4, marginRight:8}} size={28} />
+          You must be <span style={{color:'#d32f2f'}}>verified</span> to add a boarding house.<br/>
+          Please submit your verification application in Settings and wait for admin approval.
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="add-boarding-container">
       {showSuccess && (

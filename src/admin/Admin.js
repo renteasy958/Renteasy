@@ -153,9 +153,6 @@ function AdminMain({ currentPage, setCurrentPage }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedBH, setSelectedBH] = useState(null);
     const [showIdModal, setShowIdModal] = useState(false);
-                 {showIdModal && (
-                   <SeeIdButton landlord={selectedLandlord} onClose={() => setShowIdModal(false)} />
-                 )}
   const [landlordInfo, setLandlordInfo] = useState(null);
   const [selectedLandlord, setSelectedLandlord] = useState(null);
 
@@ -254,7 +251,212 @@ function AdminMain({ currentPage, setCurrentPage }) {
 
   switch (currentPage) {
     case 'verifications':
-      return <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>List of landlords requesting verification (click to view details and IDs)</div>;
+      return (
+        <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
+          <h2>Landlord Verifications</h2>
+          {loading && <div>Loading...</div>}
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          {!loading && !error && (
+            <div className="landlord-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {landlords.filter(ll => ll.idFrontUrl || ll.idBackUrl || ll.verificationReference).length === 0 ? (
+                <div>No landlords have submitted verification.</div>
+              ) : (
+                landlords.filter(ll => ll.idFrontUrl || ll.idBackUrl || ll.verificationReference).map((ll) => (
+                  <div
+                    key={ll.id}
+                    className="landlord-list-card"
+                    style={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      padding: '14px 24px',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '24px',
+                      cursor: 'pointer',
+                      minWidth: 340,
+                      width: '100%',
+                      maxWidth: 1200,
+                      overflow: 'hidden',
+                    }}
+                    onClick={() => handleLandlordClick(ll)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: 17, fontWeight: 600 }}>{ll.firstName || ''} {ll.middleName || ''} {ll.lastName || ''}</span>
+                      <span style={{ flex: 1 }}></span>
+                      <span style={{ fontSize: 13, color: ll.verified ? 'green' : 'red', fontWeight: 500, textAlign: 'right' }}>
+                        {ll.verified ? 'Verified' : 'Not Verified'}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Modal for landlord details */}
+          {modalOpen && selectedLandlord && (
+            <div
+              className="landlord-modal-overlay"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                background: 'rgba(0,0,0,0.4)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                zIndex: 1000,
+              }}
+              onClick={closeLandlordModal}
+            >
+              <div
+                className="landlord-modal-content"
+                style={{
+                  background: '#fff',
+                  borderRadius: 10,
+                  padding: 32,
+                  minWidth: 540,
+                  maxWidth: 700,
+                  boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
+                  position: 'relative',
+                }}
+                onClick={e => e.stopPropagation()}
+              >
+                <button
+                  onClick={closeLandlordModal}
+                  style={{
+                    position: 'absolute',
+                    top: 12,
+                    right: 12,
+                    background: 'none',
+                    border: 'none',
+                    fontSize: 22,
+                    cursor: 'pointer',
+                  }}
+                  aria-label="Close"
+                >
+                  &times;
+                </button>
+                <div style={{ display: 'flex', alignItems: 'center', margin: '8px 0 12px 0', gap: '18px' }}>
+                  <h3 style={{ margin: 0 }}>{selectedLandlord.firstName || ''} {selectedLandlord.middleName || ''} {selectedLandlord.lastName || ''}</h3>
+                  {(selectedLandlord.idUrl || selectedLandlord.IDUrl || selectedLandlord.landlordIdUrl || selectedLandlord.landlordIdImageUrl) && (
+                    <span style={{ color: '#888', textDecoration: 'underline', cursor: 'pointer', fontSize: 16 }} onClick={e => { e.stopPropagation(); document.getElementById('see-id-btn').click(); }}>See ID</span>
+                  )}
+                </div>
+                <div className="landlord-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px', marginBottom: 12 }}>
+                  <div><strong>Email:</strong> {selectedLandlord.email ? selectedLandlord.email : ''}</div>
+                  <div><strong>Contact:</strong> {selectedLandlord.contactNumber || selectedLandlord.phone || selectedLandlord.mobile || ''}</div>
+                  <div><strong>Gender:</strong> {selectedLandlord.gender ? selectedLandlord.gender : ''}</div>
+                  <div><strong>Birthdate:</strong> {selectedLandlord.birthdate ? selectedLandlord.birthdate : (selectedLandlord.dateOfBirth ? selectedLandlord.dateOfBirth : '')}</div>
+                  <div><strong>Verified:</strong> {selectedLandlord.verified ? 'Yes' : 'No'}</div>
+                  <div><strong>Civil Status:</strong> {selectedLandlord.civilStatus || selectedLandlord.civilstatus || ''}</div>
+                </div>
+                <div style={{ marginBottom: 12, display: 'flex', gap: '32px' }}>
+                  <span><strong>Age:</strong> {selectedLandlord.age || ''}</span>
+                  <span><strong>Registered At:</strong> {selectedLandlord.registeredAt || selectedLandlord.createdAt || ''}</span>
+                </div>
+                <div style={{ marginBottom: 12 }}><strong>Address:</strong> {selectedLandlord.address ? selectedLandlord.address : (selectedLandlord.permanentAddress ? selectedLandlord.permanentAddress : '')}</div>
+                <hr style={{ margin: '16px 0', border: 'none', borderTop: '1px solid #e0e0e0' }} />
+                <div style={{ marginBottom: 8 }}><strong>Boarding House Name:</strong> {selectedLandlord.boardingHouseName || selectedLandlord.boardinghouseName || selectedLandlord.bhName || selectedLandlord.bhname || ''}</div>
+                <div style={{ marginBottom: 12 }}><strong>Boarding House Address:</strong> {selectedLandlord.boardingHouseAddress || selectedLandlord.boardinghouseAddress || selectedLandlord.bhAddress || selectedLandlord.bhaddress || ''}</div>
+                {/* Show all other registration details except profile image fields, in two columns */}
+                <div className="landlord-details-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px 24px', marginBottom: 12 }}>
+                  {Object.entries(selectedLandlord).filter(([key, value]) => {
+                    const excludeFields = [
+                      'firstName','middleName','lastName','email','contactNumber','phone','mobile','gender','birthdate','dateOfBirth','address','permanentAddress','verified','registeredAt','createdAt','id','idUrl','IDUrl','ID','idFrontUrl','idBackUrl',
+                      'photoURL','profilePic','landlordPhoto','landlordIdPhoto','landlordIdPic','landlordIdImage','landlordIdImageUrl','landlordIdPhotoUrl','landlordIdPicUrl','landlordIdImageURL','landlordIdPhotoURL','landlordIdPicURL',
+                      'profileimage','ProfileImage','PROFILEIMAGE','profileImage','profile_image','profile-img','profileImg','profileimg','profilepicture','profilePicture','profilepic','profilePic','profile_pic','profile-photo','profilePhoto','profilephoto','profile-photo-url','profilePhotoUrl','profilephotoUrl','profile-photo-URL','profilePhotoURL','profilephotoURL',
+                      'role','civilStatus','civilstatus',
+                      'BoardingHouseAddress','boardingHouseAddress','boardinghouseAddress','bhAddress','bhaddress',
+                      'BoardingHouseName','boardingHouseName','boardinghouseName','bhName','bhname',
+                      'Age','age'
+                    ];
+                    return !excludeFields.some(f => f.toLowerCase() === key.toLowerCase()) && value;
+                  }).map(([key, value]) => (
+                    <div key={key}><strong>{key.charAt(0).toUpperCase() + key.slice(1)}:</strong> {String(value)}</div>
+                  ))}
+                </div>
+                {(selectedLandlord.idFrontUrl || selectedLandlord.idBackUrl) && (
+                  <button
+                    style={{ marginBottom: 12, padding: '8px 18px', background: '#174ea6', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: 'pointer', fontSize: 15 }}
+                    onClick={() => setShowIdModal(true)}
+                  >See ID</button>
+                )}
+                {showIdModal && (
+                  <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000 }} onClick={() => setShowIdModal(false)}>
+                    <div style={{ background: '#fff', borderRadius: 10, padding: 24, minWidth: 260, maxWidth: 420, boxShadow: '0 4px 24px rgba(0,0,0,0.18)', position: 'relative' }} onClick={e => e.stopPropagation()}>
+                      <button onClick={() => setShowIdModal(false)} style={{ position: 'absolute', top: 12, right: 12, background: 'none', border: 'none', fontSize: 22, cursor: 'pointer' }} aria-label="Close">&times;</button>
+                      <h4 style={{ marginBottom: 12 }}>Uploaded ID</h4>
+                      {selectedLandlord.idFrontUrl && <img src={selectedLandlord.idFrontUrl} alt="Front ID" style={{ maxWidth: '100%', maxHeight: 220, borderRadius: 8, boxShadow: '0 2px 12px rgba(0,0,0,0.08)', marginBottom: 12 }} />}
+                      {selectedLandlord.idBackUrl && <img src={selectedLandlord.idBackUrl} alt="Back ID" style={{ maxWidth: '100%', maxHeight: 220, borderRadius: 8, boxShadow: '0 2px 12px rgba(0,0,0,0.08)' }} />}
+                    </div>
+                  </div>
+                )}
+                {/* See ID button and modal - always show if any ID field exists */}
+                  {(selectedLandlord.idUrl || selectedLandlord.IDUrl || selectedLandlord.landlordIdUrl || selectedLandlord.landlordIdImageUrl) && (
+                    <SeeIdButton landlord={selectedLandlord} />
+                  )}
+                  <div style={{ marginTop: 24, display: 'flex', gap: 16, justifyContent: 'flex-end' }}>
+                    <button
+                      style={{ padding: '8px 18px', background: '#388e3c', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: 15, opacity: actionLoading ? 0.7 : 1 }}
+                      disabled={actionLoading}
+                      onClick={async () => {
+                        setActionLoading(true);
+                        try {
+                          if (selectedLandlord && selectedLandlord.id) {
+                            const landlordDocRef = doc(db, 'landlords', selectedLandlord.id);
+                            await updateDoc(landlordDocRef, { verified: true });
+                            // Refresh list after approval
+                            const querySnapshot = await getDocs(collection(db, 'landlords'));
+                            const allLandlords = [];
+                            querySnapshot.forEach((docu) => {
+                              allLandlords.push({ id: docu.id, ...docu.data() });
+                            });
+                            setLandlords(allLandlords);
+                          }
+                        } catch (err) {
+                          alert('Failed to approve: ' + err.message);
+                        }
+                        setActionLoading(false);
+                        setModalOpen(false);
+                        setSelectedLandlord(null);
+                      }}
+                    >{actionLoading ? 'Approving...' : 'Approve'}</button>
+                    <button
+                      style={{ padding: '8px 18px', background: '#d32f2f', color: '#fff', border: 'none', borderRadius: 6, fontWeight: 500, cursor: actionLoading ? 'not-allowed' : 'pointer', fontSize: 15, opacity: actionLoading ? 0.7 : 1 }}
+                      disabled={actionLoading}
+                      onClick={async () => {
+                        setActionLoading(true);
+                        try {
+                          if (selectedLandlord && selectedLandlord.id) {
+                            const landlordDocRef = doc(db, 'landlords', selectedLandlord.id);
+                            await updateDoc(landlordDocRef, { verified: false });
+                            // Optionally, you could delete or mark as rejected
+                            const querySnapshot = await getDocs(collection(db, 'landlords'));
+                            const allLandlords = [];
+                            querySnapshot.forEach((docu) => {
+                              allLandlords.push({ id: docu.id, ...docu.data() });
+                            });
+                            setLandlords(allLandlords);
+                          }
+                        } catch (err) {
+                          alert('Failed to reject: ' + err.message);
+                        }
+                        setActionLoading(false);
+                        setModalOpen(false);
+                        setSelectedLandlord(null);
+                      }}
+                    >{actionLoading ? 'Rejecting...' : 'Reject'}</button>
+                  </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
     case 'transactions':
       return (
         <div className="admin-content" style={{ minHeight: '100vh', width: '100vw', maxWidth: '100vw', margin: 0, padding: 0 }}>
@@ -269,49 +471,38 @@ function AdminMain({ currentPage, setCurrentPage }) {
           {loading && <div>Loading...</div>}
           {error && <div style={{ color: 'red' }}>{error}</div>}
           {!loading && !error && (
-            <div className="bh-list-grid" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-              {boardingHouses.filter(bh => bh.status === 'pending').length === 0 ? (
-                <div>No pending boarding houses.</div>
+            <div className="landlord-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {landlords.filter(ll => (ll.idFrontUrl || ll.idBackUrl || ll.verificationReference) && !ll.verified).length === 0 ? (
+                <div>No landlords have submitted verification.</div>
               ) : (
-                chunkArray(boardingHouses.filter(bh => bh.status === 'pending'), 5).map((row, rowIdx) => (
-                  <div key={rowIdx} style={{ display: 'flex', gap: '20px' }}>
-                    {row.map((bh) => (
-                      <div
-                        key={bh.id}
-                        className="bh-list-card"
-                        style={{
-                          border: '1px solid #e0e0e0',
-                          borderRadius: '8px',
-                          padding: '14px',
-                          background: '#fff',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                          width: '200px',
-                          minHeight: '180px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          transition: 'box-shadow 0.2s',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => {
-                          setSelectedBH(bh);
-                          setModalOpen(true);
-                        }}
-                      >
-                        {bh.images && bh.images.length > 0 && (
-                          <img src={bh.images[0]} alt="Boarding House" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: 6, marginBottom: 8 }} />
-                        )}
-                        <div style={{ fontSize: 16, fontWeight: 600, textAlign: 'center' }}>
-                          {bh.name || 'No Name'}
-                        </div>
-                        <div style={{ color: '#888', fontSize: 13, textAlign: 'center', margin: '4px 0' }}>{typeof bh.address === 'object' && bh.address !== null ? Object.values(bh.address).filter(Boolean).join(', ') : (bh.address || 'No Address')}</div>
-                        <div style={{ fontSize: 13 }}>Status: {bh.status}</div>
-                      </div>
-                    ))}
-                    {/* Fill empty boxes if row < 5 */}
-                    {row.length < 5 && Array.from({ length: 5 - row.length }).map((_, i) => (
-                      <div key={i} style={{ width: '200px', minHeight: '180px', background: 'transparent' }} />
-                    ))}
+                landlords.filter(ll => (ll.idFrontUrl || ll.idBackUrl || ll.verificationReference) && !ll.verified).map((ll) => (
+                  <div
+                    key={ll.id}
+                    className="landlord-list-card"
+                    style={{
+                      border: '1px solid #e0e0e0',
+                      borderRadius: '8px',
+                      padding: '14px 24px',
+                      background: '#fff',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '24px',
+                      cursor: 'pointer',
+                      minWidth: 340,
+                      width: '100%',
+                      maxWidth: 1200,
+                      overflow: 'hidden',
+                    }}
+                    onClick={() => handleLandlordClick(ll)}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                      <span style={{ fontSize: 17, fontWeight: 600 }}>{ll.firstName || ''} {ll.middleName || ''} {ll.lastName || ''}</span>
+                      <span style={{ flex: 1 }}></span>
+                      <span style={{ fontSize: 13, color: 'orange', fontWeight: 500, textAlign: 'right' }}>
+                        Pending
+                      </span>
+                    </div>
                   </div>
                 ))
               )}

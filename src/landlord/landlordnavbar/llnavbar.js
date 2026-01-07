@@ -222,7 +222,69 @@ const LLNavbar = () => {
         </div>
       </nav>
       {showVerifyModal && (
-        <VerifyAccount onClose={() => setShowVerifyModal(false)} />
+        <VerifyAccount 
+          onClose={() => setShowVerifyModal(false)}
+          onSubmit={async ({ selectedId, frontImage, backImage, referenceNumber, frontFile, backFile }) => {
+            try {
+              const user = auth.currentUser;
+              console.log('[DEBUG] Verification submit called. user:', user ? user.uid : null);
+              console.log('[DEBUG] Input values:', { selectedId, frontImage, backImage, referenceNumber, frontFile, backFile });
+              if (!user) throw new Error('Not logged in');
+              if (!frontFile || !backFile) {
+                alert('Please upload both front and back images of your ID.');
+                return;
+              }
+              let frontUrl = null;
+              let backUrl = null;
+              try {
+                frontUrl = await import('../../services/cloudinaryService').then(mod => mod.uploadToCloudinary(frontFile, `renteasy/ids/${user.uid}`));
+                console.log('[DEBUG] Cloudinary front upload result:', frontUrl);
+              } catch (err) {
+                alert('Failed to upload front of ID: ' + (err.message || err));
+                console.error('Cloudinary front upload error:', err);
+                return;
+              }
+              try {
+                backUrl = await import('../../services/cloudinaryService').then(mod => mod.uploadToCloudinary(backFile, `renteasy/ids/${user.uid}`));
+                console.log('[DEBUG] Cloudinary back upload result:', backUrl);
+              } catch (err) {
+                alert('Failed to upload back of ID: ' + (err.message || err));
+                console.error('Cloudinary back upload error:', err);
+                return;
+              }
+              if (!frontUrl || !backUrl) {
+                alert('Image upload failed. Please try again.');
+                console.log('[DEBUG] Image upload failed. frontUrl:', frontUrl, 'backUrl:', backUrl);
+                return;
+              }
+              // Debug log before Firestore update
+              const verificationData = {
+                idType: selectedId,
+                idFrontUrl: frontUrl,
+                idBackUrl: backUrl,
+                verificationReference: referenceNumber,
+                verificationSubmittedAt: new Date().toISOString(),
+              };
+              console.log('[DEBUG] Firestore update data:', verificationData);
+              try {
+                await import('firebase/firestore').then(async firestore => {
+                  const { doc, setDoc } = firestore;
+                  console.log('[DEBUG] Firestore path:', 'landlords', user.uid);
+                  await setDoc(doc(db, 'landlords', user.uid), verificationData, { merge: true });
+                  console.log('[DEBUG] Firestore setDoc (merge) success');
+                });
+              } catch (err) {
+                alert('Failed to update Firestore: ' + (err.message || err));
+                console.error('Firestore write error:', err);
+                return;
+              }
+              alert('Verification submitted successfully!');
+            } catch (err) {
+              alert('Verification failed: ' + (err.message || err));
+              console.error('Verification failed:', err);
+            }
+          }}
+        />
       )}
     </>
   );

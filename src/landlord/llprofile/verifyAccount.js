@@ -25,8 +25,10 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
     const [showModal, setShowModal] = useState(false);
     const [step, setStep] = useState(1);
     const [selectedId, setSelectedId] = useState('');
-    const [frontImage, setFrontImage] = useState(null);
-    const [backImage, setBackImage] = useState(null);
+    const [frontImage, setFrontImage] = useState(null); // preview URL
+    const [frontFile, setFrontFile] = useState(null); // actual File
+    const [backImage, setBackImage] = useState(null); // preview URL
+    const [backFile, setBackFile] = useState(null); // actual File
     const [referenceNumber, setReferenceNumber] = useState('');
     const [idMethod, setIdMethod] = useState('upload');
     const frontInputRef = useRef();
@@ -45,11 +47,13 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
 
   const handleFrontImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
+      setFrontFile(e.target.files[0]);
       setFrontImage(URL.createObjectURL(e.target.files[0]));
     }
   };
   const handleBackImageChange = (e) => {
     if (e.target.files && e.target.files[0]) {
+      setBackFile(e.target.files[0]);
       setBackImage(URL.createObjectURL(e.target.files[0]));
     }
   };
@@ -61,7 +65,7 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
   const handleSubmitPayment = (e) => {
     e.preventDefault();
     setShowModal(true);
-    if (onSubmit) onSubmit({ selectedId, frontImage, backImage, referenceNumber });
+    if (onSubmit) onSubmit({ selectedId, frontImage, backImage, referenceNumber, frontFile, backFile });
   };
 
   return (
@@ -125,37 +129,40 @@ const VerifyAccount = ({ onSubmit, onClose }) => {
           <button className="modal-close-x" type="button" onClick={onClose}>&#10005;</button>
           <h2>Pay Subscription Fee</h2>
           <form onSubmit={handleSubmitPayment}>
-            <div className="payment-section">
-              <label>Pay Subscription Fee: <b>₱100</b></label>
-              <div className="qr-section">
-                <img src="/images/qr-placeholder.png" alt="QR Code" className="qr-image" />
-                <p>Or copy number: <b>09123456789</b></p>
+            <div className="payment-modal-flex">
+              <div className="qr-section payment-modal-qr">
+                <img src="/300.jpg" alt="QR Code for ₱300" className="qr-image qr-image-large" />
+              </div>
+              <div className="payment-modal-details">
+                <label className="payment-label">Pay Yearly Subscription Fee: <b>₱300</b></label>
+                <div className="gcash-section">
+                  <p>GCash Number:</p>
+                  <div className="gcash-number"><b>09158706048</b></div>
+                </div>
+                <div className="reference-section">
+                  <label>Reference Number:</label>
+                  <input
+                    type="text"
+                    value={referenceNumber}
+                    onChange={e => setReferenceNumber(e.target.value)}
+                    required
+                  />
+                </div>
+                <button type="submit" className="submit-btn" disabled={!referenceNumber}>Submit</button>
               </div>
             </div>
-            <div className="reference-section">
-              <label>Reference Number:</label>
-              <input
-                type="text"
-                value={referenceNumber}
-                onChange={e => setReferenceNumber(e.target.value)}
-                required
-              />
-            </div>
-            <button type="submit" className="submit-btn" disabled={!referenceNumber}>Submit</button>
           </form>
         </div>
       )}
       {showModal && (
         <div className="success-overlay">
-          <div className="success-animation" style={{ padding: 24, maxWidth: 320 }}>
-            <div className="checkmark-circle" style={{ width: 60, height: 60, margin: '0 auto 10px' }}>
-              <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52" style={{ width: 60, height: 60 }}>
-                <circle className="checkmark-circle-bg" cx="26" cy="26" r="25" fill="none" />
-                <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
-            </div>
-            <div style={{ fontSize: 16, color: '#333', margin: '8px 0 0 0', fontWeight: 500 }}>Verification Submitted</div>
-            <div style={{ fontSize: 13, color: '#666', marginTop: 2 }}>Please wait 24 hours for verification.</div>
+          <div className="success-animation">
+            <svg className="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none" />
+              <path className="checkmark-check" fill="none" d="M14 27l7 7 16-16" />
+            </svg>
+            <div className="success-message">Verification Submitted</div>
+            <div className="success-subtext">Please wait 24 hours for verification.</div>
           </div>
         </div>
       )}

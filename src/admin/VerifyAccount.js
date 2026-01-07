@@ -9,19 +9,39 @@ const verifyAccountIcon = (
   <svg width="28" height="28" fill="none" stroke="#174ea6" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
 );
 
+
 const VerifyAccount = () => {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      setLoading(true);
+      try {
+        // Fetch unverified landlords from Firestore
+        const snap = await getDocs(collection(db, 'landlords'));
+        const unverified = snap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .filter(l => l.verified !== true);
+        setAccounts(unverified);
+        setLoading(false);
+      } catch (e) {
+        setLoading(false);
+      }
+    };
+    fetchAccounts();
+  }, []);
+
 
 
   return (
     <div className="admin-content">
       <h2 style={{ marginLeft: 0, marginTop: 0 }}>Verify Account</h2>
       {loading && <div>Loading...</div>}
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      {!loading && !error && accounts.length === 0 && <div>No unverified accounts found.</div>}
-      {!loading && !error && (
+      {/* Error message removed as security is disabled */}
+      {!loading && accounts.length === 0 && <div>No unverified accounts found.</div>}
+      {!loading && accounts.length > 0 && (
         <div className="tenant-list" style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
           {accounts.map((l) => (
             <div

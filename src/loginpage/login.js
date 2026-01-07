@@ -240,6 +240,12 @@ const Homepage = () => {
                 const cred = await signInWithEmailAndPassword(auth, email, password);
                 const uid = cred.user.uid;
 
+                // If admin email, redirect to admin dashboard
+                if (email === 'renteasy@gmail.com') {
+                    navigate('/admin'); // Change '/admin' to your actual admin dashboard route
+                    return;
+                }
+
                 // Check if landlord document exists
                 try {
                     const llSnap = await getDoc(doc(db, 'landlords', uid));
